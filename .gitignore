@@ -1,0 +1,7 @@
+/Api/appsettings.json
+/Api/appsettings.Development.json
+/*/bin
+/*/obj
+/Tests/bin
+/Tests/obj
+.vscode

@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  webapi:
+    build:
+      context: .
+      dockerfile: Api/Dockerfile
+    ports:
+      - 7219:7219

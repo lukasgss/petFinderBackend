@@ -17,6 +17,7 @@ public static class PetMappings
         {
             Id = pet.Id,
             Name = pet.Name,
+            Observations = pet.Observations,
             Owner = owner,
             Breed = breed,
             Colors = colors

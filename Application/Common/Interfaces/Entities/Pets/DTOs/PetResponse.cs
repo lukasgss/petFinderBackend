@@ -8,6 +8,7 @@ public class PetResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;
+    public string? Observations { get; set; }
     public OwnerResponse? Owner { get; set; }
     public IEnumerable<ColorResponse> Colors { get; set; } = null!;
     public BreedResponse Breed { get; set; } = null!;

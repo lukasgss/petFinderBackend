@@ -49,6 +49,7 @@ public class PetService : IPetService
         {
             Id = _guidProvider.NewGuid(),
             Name = createPetRequest.Name,
+            Observations = createPetRequest.Observations,
             Owner = null,
             Breed = breed,
             Species = species,
@@ -77,6 +78,7 @@ public class PetService : IPetService
         {
             Id = searchedPet.Id,
             Name = searchedPet.Name,
+            Observations = searchedPet.Observations,
             Owner = searchedPet.Owner?.ConvertToOwnerResponse(),
             Breed = searchedPet.Breed.ConvertToBreedResponse(),
             Colors = searchedPet.Colors.ConvertToListOfColorResponse()

@@ -10,6 +10,9 @@ public class Pet
     [Required, MaxLength(255)]
     public string Name { get; set; } = null!;
 
+    [MaxLength(500)]
+    public string? Observations { get; set; }
+
     [ForeignKey("UserId")]
     public virtual User? Owner { get; set; }
     public Guid OwnerId { get; set; }

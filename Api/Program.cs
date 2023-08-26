@@ -1,5 +1,6 @@
 using Api.Extensions;
 using Application;
+using Application.Middlewares;
 using Infrastructure;
 using Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,8 @@ builder.Services.AddApplication()
     .AddInfrastructure();
 
 var app = builder.Build();
+
+app.UseMiddleware<ErrorHandlerMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

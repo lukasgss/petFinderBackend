@@ -1,3 +1,4 @@
+using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
@@ -32,14 +33,22 @@ public class PetService : IPetService
 
     public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest)
     {
-        Breed breed = await _breedRepository.GetBreedByIdAsync(createPetRequest.BreedId) ?? throw new Exception();
+        Breed? breed = await _breedRepository.GetBreedByIdAsync(createPetRequest.BreedId);
+        if (breed is null)
+        {
+            throw new NotFoundException("Raça especificada não existe.");
+        }
 
-        Species species = await _speciesRepository.GetSpeciesByIdAsync(createPetRequest.SpeciesId) ?? throw new Exception();
+        Species? species = await _speciesRepository.GetSpeciesByIdAsync(createPetRequest.SpeciesId);
+        if (species is null)
+        {
+            throw new NotFoundException("Espécie especificada não existe.");
+        }
 
         List<Color> colors = await _colorRepository.GetMultipleColorsByIdsAsync(createPetRequest.ColorIds);
         if (colors.Count != createPetRequest.ColorIds.Count || colors.Count == 0)
         {
-            throw new Exception();
+            throw new NotFoundException("Alguma das cores especificadas não existe.");
         }
 
         // TODO: Once registration is made, check if user is logged in.
@@ -55,7 +64,7 @@ public class PetService : IPetService
             Species = species,
             Colors = colors
         };
-        
+
         _petRepository.Add(petToBeCreated);
         await _petRepository.CommitAsync();
 
@@ -70,8 +79,7 @@ public class PetService : IPetService
         Pet? searchedPet = await _petRepository.GetPetByIdAsync(petId);
         if (searchedPet is null)
         {
-            // TODO: add global error handling middleware and custom exceptions
-            throw new Exception();
+            throw new NotFoundException("Animal com o id especificado não existe.");
         }
 
         return new PetResponse()

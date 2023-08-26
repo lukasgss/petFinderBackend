@@ -4,20 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+public abstract class GenericRepository<T> : IGenericRepository<T> where T : class
 {
     private readonly AppDbContext _dbContext;
     private readonly DbSet<T> _entity;
 
-    public GenericRepository(AppDbContext dbContext)
+    protected GenericRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;
         _entity = dbContext.Set<T>();
-    }
-
-    public async Task<T?> GetByIdAsync(object id)
-    {
-        return await _entity.FindAsync(id);
     }
 
     public void Add(T entity)

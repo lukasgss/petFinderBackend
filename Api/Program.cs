@@ -1,4 +1,6 @@
 using Api.Extensions;
+using Application;
+using Infrastructure;
 using Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +17,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.ConfigureIdentity();
+
+builder.Services.AddApplication()
+    .AddInfrastructure();
 
 var app = builder.Build();
 

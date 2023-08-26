@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230825194406_PetExtraColumns")]
+    partial class PetExtraColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,7 +36,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("PetsId");
 
-                    b.ToTable("ColorPet", (string)null);
+                    b.ToTable("ColorPet");
                 });
 
             modelBuilder.Entity("Domain.Entities.Breed", b =>
@@ -57,45 +59,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SpeciesId");
 
-                    b.ToTable("Breeds", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Border Collie",
-                            SpeciesId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Pastor Alemão",
-                            SpeciesId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Pug",
-                            SpeciesId = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Dachshund",
-                            SpeciesId = 1
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Golden",
-                            SpeciesId = 1
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "Siamês",
-                            SpeciesId = 2
-                        });
+                    b.ToTable("Breeds");
                 });
 
             modelBuilder.Entity("Domain.Entities.Color", b =>
@@ -118,27 +82,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Colors", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            HexCode = "#FFFFFF",
-                            Name = "Branco"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            HexCode = "#181818",
-                            Name = "Preto"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            HexCode = "#35281E",
-                            Name = "Marrom"
-                        });
+                    b.ToTable("Colors");
                 });
 
             modelBuilder.Entity("Domain.Entities.Pet", b =>
@@ -172,7 +116,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Pets", (string)null);
+                    b.ToTable("Pets");
                 });
 
             modelBuilder.Entity("Domain.Entities.Species", b =>
@@ -190,19 +134,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Species", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Cachorro"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Gato"
-                        });
+                    b.ToTable("Species");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>

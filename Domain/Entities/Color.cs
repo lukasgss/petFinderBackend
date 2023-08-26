@@ -11,5 +11,6 @@ public class Color
 
     [Required, MaxLength(255)]
     public string HexCode { get; set; } = null!;
+    
     public virtual ICollection<Pet> Pets { get; set; } = null!;
 }

@@ -4,6 +4,20 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
+
+
+  <ItemGroup>
+    <Compile Remove="Common\Extensions\Mappings\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="Common\Extensions\Mappings\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Common\Extensions\Mappings\**" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

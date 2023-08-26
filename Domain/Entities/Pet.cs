@@ -11,12 +11,16 @@ public class Pet
     public string Name { get; set; } = null!;
 
     [ForeignKey("UserId")]
-    public virtual User User { get; set; } = null!;
-    public Guid UserId { get; set; }
+    public virtual User? Owner { get; set; }
+    public Guid OwnerId { get; set; }
 
     [ForeignKey("BreedId")]
     public Breed Breed { get; set; } = null!;
     public int BreedId { get; set; }
+
+    [ForeignKey("SpeciesId")]
+    public virtual Species Species { get; set; } = null!;
+    public int SpeciesId { get; set; }
 
     public virtual ICollection<Color> Colors { get; set; } = null!;
 }

@@ -45,6 +45,14 @@ public class ErrorHandlerMiddleware
                 statusCode = HttpStatusCode.Conflict;
                 message = exception.Message;
                 break;
+            case LockedException:
+                statusCode = HttpStatusCode.Locked;
+                message = exception.Message;
+                break;
+            case UnauthorizedException:
+                statusCode = HttpStatusCode.Unauthorized;
+                message = exception.Message;
+                break;
             default:
                 statusCode = HttpStatusCode.InternalServerError;
                 message = "Erro interno no sistema, tente novamente mais tarde.";

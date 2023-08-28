@@ -16,7 +16,16 @@
 
   <ItemGroup>
     <None Remove="Common\Extensions\Mappings\**" />
+
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.32.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.2" />
+
+
+  </ItemGroup>
+
 
 
 

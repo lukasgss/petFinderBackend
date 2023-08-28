@@ -19,7 +19,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.ConfigureIdentity();
 
-builder.Services.AddApplication()
+builder.Services.AddApplication(builder.Configuration)
     .AddInfrastructure();
 
 var app = builder.Build();

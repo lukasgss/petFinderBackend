@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Entities.Breeds.DTOs;
 using Application.Common.Interfaces.Entities.Colors.DTOs;
-using Application.Common.Interfaces.Entities.User.DTOs;
+using Application.Common.Interfaces.Entities.Users.DTOs;
 
 namespace Application.Common.Interfaces.Entities.Pets.DTOs;
 

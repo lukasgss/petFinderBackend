@@ -119,7 +119,7 @@ public class UserServiceTests
         User user = GenerateUser();
         _userRepositoryMock.GetUserByEmailAsync(loginUserRequest.Email).Returns(user);
         FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: false, isLockedOut: true);
-        _userRepositoryMock.CheckCredentials(loginUserRequest.Email, loginUserRequest.Password)
+        _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
             .Returns(fakeSignInResult);
 
         async Task Result() => await _sut.LoginAsync(loginUserRequest);
@@ -135,7 +135,7 @@ public class UserServiceTests
         User user = GenerateUser();
         _userRepositoryMock.GetUserByEmailAsync(loginUserRequest.Email).Returns(user);
         FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: false, isLockedOut: false);
-        _userRepositoryMock.CheckCredentials(loginUserRequest.Email, loginUserRequest.Password)
+        _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
             .Returns(fakeSignInResult);
 
         async Task Result() => await _sut.LoginAsync(loginUserRequest);
@@ -151,7 +151,7 @@ public class UserServiceTests
         User user = GenerateUser();
         _userRepositoryMock.GetUserByEmailAsync(loginUserRequest.Email).Returns(user);
         FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: true, isLockedOut: false);
-        _userRepositoryMock.CheckCredentials(loginUserRequest.Email, loginUserRequest.Password)
+        _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
             .Returns(fakeSignInResult);
         _jwtTokenGeneratorMock.GenerateToken(_userId, _fullName).Returns(_jwtToken);
         UserResponse expectedUserResponse = GenerateUser().ConvertToUserResponse(_jwtToken);

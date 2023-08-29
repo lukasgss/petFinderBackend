@@ -7,7 +7,7 @@ public class ValidationError
 
     public ValidationError(string field, string message)
     {
-        Field = field;
-        Message = message;
+        Field = field ?? throw new ArgumentNullException(nameof(field));
+        Message = message ?? throw new ArgumentNullException(nameof(message));
     }
 }

@@ -17,8 +17,9 @@ public class PetController : ControllerBase
 
     public PetController(IPetService petService, IUserAuthorizationService userAuthorizationService)
     {
-        _petService = petService;
-        _userAuthorizationService = userAuthorizationService;
+        _petService = petService ?? throw new ArgumentNullException(nameof(petService));
+        _userAuthorizationService = userAuthorizationService ??
+                                    throw new ArgumentNullException(nameof(userAuthorizationService));
     }
 
     [HttpGet("{petId:guid}", Name = "GetPetById")]
@@ -40,7 +41,7 @@ public class PetController : ControllerBase
         }
 
         Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
-        
+
         PetResponse createdPet = await _petService.CreatePetAsync(createPetRequest, userId);
 
         return new CreatedAtRouteResult(nameof(GetPetById), new { petId = createdPet.Id }, createdPet);

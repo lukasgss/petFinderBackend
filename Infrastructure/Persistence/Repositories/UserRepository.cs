@@ -17,9 +17,9 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         UserManager<User> userManager,
         SignInManager<User> signInManager) : base(dbContext)
     {
-        _dbContext = dbContext;
-        _userManager = userManager;
-        _signInManager = signInManager;
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
     }
 
     public async Task<SignInResult> CheckCredentials(User user, string password)

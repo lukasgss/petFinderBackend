@@ -11,7 +11,7 @@ public class SpeciesRepository : GenericRepository<Species>, ISpeciesRepository
     
     public SpeciesRepository(AppDbContext dbContext) : base(dbContext)
     {
-        _dbContext = dbContext;
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
 
     public async Task<Species?> GetSpeciesByIdAsync(int speciesId)

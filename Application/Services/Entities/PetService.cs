@@ -27,12 +27,12 @@ public class PetService : IPetService
         IGuidProvider guidProvider,
         IUserRepository userRepository)
     {
-        _petRepository = petRepository;
-        _breedRepository = breedRepository;
-        _speciesRepository = speciesRepository;
-        _colorRepository = colorRepository;
-        _guidProvider = guidProvider;
-        _userRepository = userRepository;
+        _petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
+        _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
+        _speciesRepository = speciesRepository ?? throw new ArgumentNullException(nameof(speciesRepository));
+        _colorRepository = colorRepository ?? throw new ArgumentNullException(nameof(colorRepository));
+        _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
     }
 
     public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest, Guid? userId)

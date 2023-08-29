@@ -20,9 +20,9 @@ public class UserService : IUserService
         IGuidProvider guidProvider,
         IJwtTokenGenerator jwtTokenGenerator)
     {
-        _userRepository = userRepository;
-        _guidProvider = guidProvider;
-        _jwtTokenGenerator = jwtTokenGenerator;
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
+        _jwtTokenGenerator = jwtTokenGenerator ?? throw new ArgumentNullException(nameof(jwtTokenGenerator));
     }
 
     public async Task<UserDataResponse> GetUserByIdAsync(Guid userId)
@@ -57,9 +57,9 @@ public class UserService : IUserService
 
         IdentityResult registrationResult =
             await _userRepository.RegisterUserAsync(userToCreate, createUserRequest.Password);
-        
+
         IdentityResult lockoutResult = await _userRepository.SetLockoutEnabledAsync(userToCreate, false);
-        
+
         if (!registrationResult.Succeeded || !lockoutResult.Succeeded)
         {
             throw new InternalServerErrorException();
@@ -83,7 +83,7 @@ public class UserService : IUserService
                 SecurityStamp = Guid.NewGuid().ToString()
             };
         }
-        
+
         SignInResult signInResult =
             await _userRepository.CheckCredentials(userToLogin, loginUserRequest.Password);
 
@@ -93,7 +93,7 @@ public class UserService : IUserService
             {
                 throw new LockedException("Essa conta está bloqueada, aguarde e tente novamente.");
             }
-            
+
             throw new UnauthorizedException("Credenciais inválidas.");
         }
 

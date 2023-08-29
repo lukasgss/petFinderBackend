@@ -15,9 +15,9 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 
     public JwtTokenGenerator(string secretKey, string audience, string issuer, int expiryInMinutes)
     {
-        _secretKey = secretKey;
-        _audience = audience;
-        _issuer = issuer;
+        _secretKey = secretKey ?? throw new ArgumentNullException(nameof(secretKey));
+        _audience = audience ?? throw new ArgumentNullException(nameof(audience));
+        _issuer = issuer ?? throw new ArgumentNullException(nameof(issuer));
         _expiryInMinutes = expiryInMinutes;
     }
 

@@ -10,7 +10,7 @@ public class BreedRepository : GenericRepository<Breed>, IBreedRepository
     private readonly AppDbContext _dbContext;
     public BreedRepository(AppDbContext dbContext) : base(dbContext)
     {
-        _dbContext = dbContext;
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
 
     public async Task<Breed?> GetBreedByIdAsync(int breedId)

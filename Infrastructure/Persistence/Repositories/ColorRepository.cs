@@ -10,7 +10,7 @@ public class ColorRepository : GenericRepository<Color>, IColorRepository
     private readonly AppDbContext _dbContext;
     public ColorRepository(AppDbContext dbContext) : base(dbContext)
     {
-        _dbContext = dbContext;
+        _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
 
     public async Task<List<Color>> GetMultipleColorsByIdsAsync(IEnumerable<int> colorIds)

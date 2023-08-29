@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Application.Common.Validations.Errors;
@@ -12,10 +13,12 @@ namespace Api.Controllers;
 public class PetController : ControllerBase
 {
     private readonly IPetService _petService;
+    private readonly IUserAuthorizationService _userAuthorizationService;
 
-    public PetController(IPetService petService)
+    public PetController(IPetService petService, IUserAuthorizationService userAuthorizationService)
     {
         _petService = petService;
+        _userAuthorizationService = userAuthorizationService;
     }
 
     [HttpGet("{petId:guid}", Name = "GetPetById")]
@@ -35,8 +38,10 @@ public class PetController : ControllerBase
                 .Select(e => new ValidationError(e.PropertyName, e.ErrorMessage));
             return BadRequest(errors);
         }
+
+        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
         
-        PetResponse createdPet = await _petService.CreatePetAsync(createPetRequest);
+        PetResponse createdPet = await _petService.CreatePetAsync(createPetRequest, userId);
 
         return new CreatedAtRouteResult(nameof(GetPetById), new { petId = createdPet.Id }, createdPet);
     }

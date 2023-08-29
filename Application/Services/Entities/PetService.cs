@@ -5,6 +5,7 @@ using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
+using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
 
@@ -17,21 +18,24 @@ public class PetService : IPetService
     private readonly ISpeciesRepository _speciesRepository;
     private readonly IColorRepository _colorRepository;
     private readonly IGuidProvider _guidProvider;
+    private readonly IUserRepository _userRepository;
 
     public PetService(IPetRepository petRepository,
         IBreedRepository breedRepository,
         ISpeciesRepository speciesRepository,
         IColorRepository colorRepository,
-        IGuidProvider guidProvider)
+        IGuidProvider guidProvider,
+        IUserRepository userRepository)
     {
         _petRepository = petRepository;
         _breedRepository = breedRepository;
         _speciesRepository = speciesRepository;
         _colorRepository = colorRepository;
         _guidProvider = guidProvider;
+        _userRepository = userRepository;
     }
 
-    public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest)
+    public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest, Guid? userId)
     {
         Breed? breed = await _breedRepository.GetBreedByIdAsync(createPetRequest.BreedId);
         if (breed is null)
@@ -51,15 +55,18 @@ public class PetService : IPetService
             throw new NotFoundException("Alguma das cores especificadas não existe.");
         }
 
-        // TODO: Once registration is made, check if user is logged in.
-        // if he is, get his user id and register him as the owner of the pet
+        User? petOwner = null;
+        if (userId is not null)
+        {
+            petOwner = await _userRepository.GetUserByIdAsync((Guid)userId);
+        }
 
         Pet petToBeCreated = new()
         {
             Id = _guidProvider.NewGuid(),
             Name = createPetRequest.Name,
             Observations = createPetRequest.Observations,
-            Owner = null,
+            Owner = petOwner,
             Breed = breed,
             Species = species,
             Colors = colors
@@ -69,7 +76,7 @@ public class PetService : IPetService
         await _petRepository.CommitAsync();
 
         return petToBeCreated.ConvertToPetResponse(
-            owner: null,
+            owner: petOwner?.ConvertToOwnerResponse(),
             colors: colors.ConvertToListOfColorResponse(),
             breed.ConvertToBreedResponse());
     }

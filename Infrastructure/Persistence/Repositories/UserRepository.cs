@@ -22,12 +22,11 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         _signInManager = signInManager;
     }
 
-    public async Task<SignInResult> CheckCredentials(string email, string password)
+    public async Task<SignInResult> CheckCredentials(User user, string password)
     {
-        return await _signInManager.PasswordSignInAsync(
-            userName: email,
+        return await _signInManager.CheckPasswordSignInAsync(
+            user: user,
             password: password,
-            isPersistent: false,
             lockoutOnFailure: true);
     }
 

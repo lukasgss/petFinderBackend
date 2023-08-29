@@ -19,6 +19,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.ConfigureIdentity();
 
+builder.Services.ConfigureJwt(builder.Configuration);
+
 builder.Services.AddApplication(builder.Configuration)
     .AddInfrastructure();
 
@@ -34,6 +36,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

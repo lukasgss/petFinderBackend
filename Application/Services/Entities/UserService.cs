@@ -73,8 +73,19 @@ public class UserService : IUserService
     public async Task<UserResponse> LoginAsync(LoginUserRequest loginUserRequest)
     {
         User? userToLogin = await _userRepository.GetUserByEmailAsync(loginUserRequest.Email);
+        if (userToLogin is null)
+        {
+            // The userToLogin object is assigned to avoid time based attacks where
+            // it's possible to enumerate valid emails based on response times from
+            // the server
+            userToLogin = new User()
+            {
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+        }
+        
         SignInResult signInResult =
-            await _userRepository.CheckCredentials(loginUserRequest.Email, loginUserRequest.Password);
+            await _userRepository.CheckCredentials(userToLogin, loginUserRequest.Password);
 
         if (!signInResult.Succeeded || userToLogin is null)
         {

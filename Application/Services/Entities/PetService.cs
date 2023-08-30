@@ -53,32 +53,14 @@ public class PetService : IPetService
             Colors = searchedPet.Colors.ConvertToListOfColorResponse()
         };
     }
-    
+
     public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest, Guid? userId)
     {
-        Breed? breed = await _breedRepository.GetBreedByIdAsync(createPetRequest.BreedId);
-        if (breed is null)
-        {
-            throw new NotFoundException("Raça especificada não existe.");
-        }
+        Breed breed = await GetBreedAsync(createPetRequest.BreedId);
+        Species species = await GetSpeciesAsync(createPetRequest.SpeciesId);
+        List<Color> colors = await GetColorsAsync(createPetRequest.ColorIds);
 
-        Species? species = await _speciesRepository.GetSpeciesByIdAsync(createPetRequest.SpeciesId);
-        if (species is null)
-        {
-            throw new NotFoundException("Espécie especificada não existe.");
-        }
-
-        List<Color> colors = await _colorRepository.GetMultipleColorsByIdsAsync(createPetRequest.ColorIds);
-        if (colors.Count != createPetRequest.ColorIds.Count || colors.Count == 0)
-        {
-            throw new NotFoundException("Alguma das cores especificadas não existe.");
-        }
-
-        User? petOwner = null;
-        if (userId is not null)
-        {
-            petOwner = await _userRepository.GetUserByIdAsync((Guid)userId);
-        }
+        User? petOwner = await AssignPetOwner(userId);
 
         Pet petToBeCreated = new()
         {
@@ -90,13 +72,122 @@ public class PetService : IPetService
             Species = species,
             Colors = colors
         };
-
         _petRepository.Add(petToBeCreated);
         await _petRepository.CommitAsync();
 
-        return petToBeCreated.ConvertToPetResponse(
-            owner: petOwner?.ConvertToOwnerResponse(),
-            colors: colors.ConvertToListOfColorResponse(),
-            breed.ConvertToBreedResponse());
+        return new PetResponse()
+        {
+            Id = petToBeCreated.Id,
+            Name = petToBeCreated.Name,
+            Observations = petToBeCreated.Observations,
+            Owner = petOwner?.ConvertToOwnerResponse(),
+            Breed = breed.ConvertToBreedResponse(),
+            Colors = colors.ConvertToListOfColorResponse()
+        };
+    }
+
+    public async Task<PetResponse> EditPetAsync(EditPetRequest editPetRequest, Guid? userId, Guid routeId)
+    {
+        if (editPetRequest.Id != routeId)
+        {
+            throw new BadRequestException("Id da rota não coincide com o id especificado.");
+        }
+        Pet dbPet = await GetPetAsync(editPetRequest.Id);
+
+        Breed breed = await GetBreedAsync(editPetRequest.BreedId);
+        Species species = await GetSpeciesAsync(editPetRequest.SpeciesId);
+        List<Color> colors = await GetColorsAsync(editPetRequest.ColorIds);
+        User? petOwner = await AssignPetOwner(userId);
+
+        if (petOwner is null || dbPet.Owner?.Id != petOwner.Id)
+        {
+            throw new UnauthorizedException("Você não possui permissão para editar dados desse animal.");
+        }
+
+        dbPet.Id = editPetRequest.Id;
+        dbPet.Name = editPetRequest.Name;
+        dbPet.Observations= editPetRequest.Observations;
+        dbPet.Owner = petOwner;
+        dbPet.Breed = breed;
+        dbPet.Colors = colors;
+        dbPet.Species = species;
+        
+        await _petRepository.CommitAsync();
+
+        return new PetResponse()
+        {
+            Id = dbPet.Id,
+            Name = dbPet.Name,
+            Observations = dbPet.Observations,
+            Owner = petOwner.ConvertToOwnerResponse(),
+            Breed = breed.ConvertToBreedResponse(),
+            Colors = colors.ConvertToListOfColorResponse(),
+        };
+    }
+
+    public async Task DeletePetAsync(Guid petId, Guid? userId)
+    {
+        Pet petToDelete = await GetPetAsync(petId);
+        if (petToDelete.Owner is null || petToDelete.Owner.Id != userId)
+        {
+            throw new UnauthorizedException("Você não possui permissão para excluir o animal.");
+        }
+        
+        _petRepository.Delete(petToDelete);
+        await _petRepository.CommitAsync();
+    }
+    
+    private async Task<User?> AssignPetOwner(Guid? userId)
+    {
+        if (userId is null)
+        {
+            return null;
+        }
+
+        return await _userRepository.GetUserByIdAsync((Guid)userId);
+    }
+
+    private async Task<Pet> GetPetAsync(Guid petId)
+    {
+        Pet? pet = await _petRepository.GetPetByIdAsync(petId);
+        if (pet is null)
+        {
+            throw new NotFoundException("Animal especificado não existe.");
+        }
+
+        return pet;
+    }
+
+    private async Task<Breed> GetBreedAsync(int breedId)
+    {
+        Breed? breed = await _breedRepository.GetBreedByIdAsync(breedId);
+        if (breed is null)
+        {
+            throw new NotFoundException("Raça especificada não existe.");
+        }
+
+        return breed;
+    }
+
+    private async Task<Species> GetSpeciesAsync(int speciesId)
+    {
+        Species? species = await _speciesRepository.GetSpeciesByIdAsync(speciesId);
+        if (species is null)
+        {
+            throw new NotFoundException("Espécie especificada não existe.");
+        }
+
+        return species;
+    }
+
+    private async Task<List<Color>> GetColorsAsync(List<int> colorIds)
+    {
+        List<Color> colors = await _colorRepository.GetMultipleColorsByIdsAsync(colorIds);
+        if (colors.Count != colorIds.Count || colors.Count == 0)
+        {
+            throw new NotFoundException("Alguma das cores especificadas não existe.");
+        }
+
+        return colors;
     }
 }

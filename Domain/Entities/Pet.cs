@@ -15,7 +15,7 @@ public class Pet
 
     [ForeignKey("UserId")]
     public virtual User? Owner { get; set; }
-    public Guid OwnerId { get; set; }
+    public Guid? UserId { get; set; }
 
     [ForeignKey("BreedId")]
     public Breed Breed { get; set; } = null!;

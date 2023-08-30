@@ -35,6 +35,25 @@ public class PetService : IPetService
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
     }
 
+    public async Task<PetResponse> GetPetBydIdAsync(Guid petId)
+    {
+        Pet? searchedPet = await _petRepository.GetPetByIdAsync(petId);
+        if (searchedPet is null)
+        {
+            throw new NotFoundException("Animal com o id especificado não existe.");
+        }
+
+        return new PetResponse()
+        {
+            Id = searchedPet.Id,
+            Name = searchedPet.Name,
+            Observations = searchedPet.Observations,
+            Owner = searchedPet.Owner?.ConvertToOwnerResponse(),
+            Breed = searchedPet.Breed.ConvertToBreedResponse(),
+            Colors = searchedPet.Colors.ConvertToListOfColorResponse()
+        };
+    }
+    
     public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest, Guid? userId)
     {
         Breed? breed = await _breedRepository.GetBreedByIdAsync(createPetRequest.BreedId);
@@ -79,24 +98,5 @@ public class PetService : IPetService
             owner: petOwner?.ConvertToOwnerResponse(),
             colors: colors.ConvertToListOfColorResponse(),
             breed.ConvertToBreedResponse());
-    }
-
-    public async Task<PetResponse> GetPetBydIdAsync(Guid petId)
-    {
-        Pet? searchedPet = await _petRepository.GetPetByIdAsync(petId);
-        if (searchedPet is null)
-        {
-            throw new NotFoundException("Animal com o id especificado não existe.");
-        }
-
-        return new PetResponse()
-        {
-            Id = searchedPet.Id,
-            Name = searchedPet.Name,
-            Observations = searchedPet.Observations,
-            Owner = searchedPet.Owner?.ConvertToOwnerResponse(),
-            Breed = searchedPet.Breed.ConvertToBreedResponse(),
-            Colors = searchedPet.Colors.ConvertToListOfColorResponse()
-        };
     }
 }

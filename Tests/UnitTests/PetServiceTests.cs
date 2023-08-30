@@ -134,7 +134,7 @@ public class PetServiceTests
         List<Color> colors = ColorGenerator.GenerateListOfColors();
         _colorRepositoryMock.GetMultipleColorsByIdsAsync(createPetRequest.ColorIds).Returns(colors);
         _guidProviderMock.NewGuid().Returns(_petId);
-        
+
         Pet petToBeCreated = PetGenerator.GeneratePetFromCreatePetRequest(
             createPetRequest: createPetRequest,
             petId: _petId,
@@ -149,7 +149,7 @@ public class PetServiceTests
 
         // Act
         PetResponse petResponse = await _sut.CreatePetAsync(createPetRequest, userId: null);
-        
+
         // Assert
         Assert.Equivalent(expectedPetResponse, petResponse);
     }
@@ -168,7 +168,7 @@ public class PetServiceTests
         User loggedInUser = UserGenerator.GenerateUser();
         _userRepositoryMock.GetUserByIdAsync(_userId).Returns(loggedInUser);
         _guidProviderMock.NewGuid().Returns(_petId);
-        
+
         Pet petToBeCreated = PetGenerator.GeneratePetFromCreatePetRequest(
             createPetRequest: createPetRequest,
             petId: _petId,
@@ -176,7 +176,7 @@ public class PetServiceTests
             breed: breed,
             species: species,
             colors: colors);
-        
+
         PetResponse expectedPetResponse = petToBeCreated.ConvertToPetResponse(
             owner: loggedInUser.ConvertToOwnerResponse(),
             colors.ConvertToListOfColorResponse(),
@@ -184,8 +184,136 @@ public class PetServiceTests
 
         // Act
         PetResponse petResponse = await _sut.CreatePetAsync(createPetRequest, userId: _userId);
-        
+
         // Assert
         Assert.Equivalent(expectedPetResponse, petResponse);
+    }
+
+    [Fact]
+    public async Task Edit_Pet_With_Route_Id_Different_Than_Specified_On_Request_Throws_BadRequestException()
+    {
+        EditPetRequest editPetRequest = PetGenerator.GenerateEditPetRequest();
+
+        async Task Result() => await _sut.EditPetAsync(editPetRequest, _userId, routeId: Guid.NewGuid());
+
+        var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+        Assert.Equal("Id da rota não coincide com o id especificado.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Edit_Non_Existent_Pet_Throws_NotFoundException()
+    {
+        EditPetRequest editPetRequest = PetGenerator.GenerateEditPetRequest();
+        _petRepositoryMock.GetPetByIdAsync(_petId).ReturnsNull();
+
+        async Task Result() => await _sut.EditPetAsync(editPetRequest, _userId, editPetRequest.Id);
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+        Assert.Equal("Animal especificado não existe.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Edit_Pet_With_Non_Existent_Breed_Throws_NotFoundException()
+    {
+        EditPetRequest editPetRequest = PetGenerator.GenerateEditPetRequest();
+        Pet pet = PetGenerator.GeneratePet();
+        _petRepositoryMock.GetPetByIdAsync(editPetRequest.Id).Returns(pet);
+        _breedRepositoryMock.GetBreedByIdAsync(editPetRequest.BreedId).ReturnsNull();
+
+        async Task Result() => await _sut.EditPetAsync(editPetRequest, _userId, editPetRequest.Id);
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+        Assert.Equal("Raça especificada não existe.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Edit_Pet_With_Non_Existent_Species_Throws_NotFoundException()
+    {
+        EditPetRequest editPetRequest = PetGenerator.GenerateEditPetRequest();
+        Pet pet = PetGenerator.GeneratePet();
+        _petRepositoryMock.GetPetByIdAsync(editPetRequest.Id).Returns(pet);
+        Breed breed = BreedGenerator.GenerateBreed();
+        _breedRepositoryMock.GetBreedByIdAsync(breed.Id).Returns(breed);
+        _speciesRepositoryMock.GetSpeciesByIdAsync(editPetRequest.SpeciesId).ReturnsNull();
+
+        async Task Result() => await _sut.EditPetAsync(editPetRequest, _userId, editPetRequest.Id);
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+        Assert.Equal("Espécie especificada não existe.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Edit_Pet_With_Non_Existent_Colors_Throws_NotFoundException()
+    {
+        EditPetRequest editPetRequest = PetGenerator.GenerateEditPetRequest();
+        Pet pet = PetGenerator.GeneratePet();
+        _petRepositoryMock.GetPetByIdAsync(editPetRequest.Id).Returns(pet);
+        Breed breed = BreedGenerator.GenerateBreed();
+        _breedRepositoryMock.GetBreedByIdAsync(breed.Id).Returns(breed);
+        Species species = SpeciesGenerator.GenerateSpecies();
+        _speciesRepositoryMock.GetSpeciesByIdAsync(species.Id).Returns(species);
+        List<Color> emptyColorsList = new();
+        _colorRepositoryMock.GetMultipleColorsByIdsAsync(editPetRequest.ColorIds).Returns(emptyColorsList);
+
+        async Task Result() => await _sut.EditPetAsync(editPetRequest, _userId, editPetRequest.Id);
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+        Assert.Equal("Alguma das cores especificadas não existe.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Edit_Pet_Without_Being_Owner_Throws_UnauthorizedException()
+    {
+        EditPetRequest editPetRequest = PetGenerator.GenerateEditPetRequest();
+        Pet pet = PetGenerator.GeneratePet();
+        _petRepositoryMock.GetPetByIdAsync(editPetRequest.Id).Returns(pet);
+        Breed breed = BreedGenerator.GenerateBreed();
+        _breedRepositoryMock.GetBreedByIdAsync(breed.Id).Returns(breed);
+        Species species = SpeciesGenerator.GenerateSpecies();
+        _speciesRepositoryMock.GetSpeciesByIdAsync(species.Id).Returns(species);
+        List<Color> colors = ColorGenerator.GenerateListOfColors();
+        _colorRepositoryMock.GetMultipleColorsByIdsAsync(editPetRequest.ColorIds).Returns(colors);
+        User user = UserGenerator.GenerateUser();
+        _userRepositoryMock.GetUserByIdAsync(_userId).Returns(user);
+
+        async Task Result() => await _sut.EditPetAsync(editPetRequest, _userId, editPetRequest.Id);
+
+        var exception = await Assert.ThrowsAsync<UnauthorizedException>(Result);
+        Assert.Equal("Você não possui permissão para editar dados desse animal.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Delete_Non_Existent_Pet_Throws_NotFoundException()
+    {
+        _petRepositoryMock.GetPetByIdAsync(_petId).ReturnsNull();
+
+        async Task Result() => await _sut.DeletePetAsync(_petId, _userId);
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+        Assert.Equal("Animal especificado não existe.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Delete_Pet_Without_Assigned_Owner_Throws_UnauthorizedException()
+    {
+        Pet petWithoutOwner = PetGenerator.GeneratePetWithoutOwner();
+        _petRepositoryMock.GetPetByIdAsync(_petId).Returns(petWithoutOwner);
+
+        async Task Result() => await _sut.DeletePetAsync(_petId, _userId);
+
+        var exception = await Assert.ThrowsAsync<UnauthorizedException>(Result);
+        Assert.Equal("Você não possui permissão para excluir o animal.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Delete_Pet_Without_Being_Its_Owner_Throws_UnauthorizedException()
+    {
+        Pet pet = PetGenerator.GeneratePet();
+        _petRepositoryMock.GetPetByIdAsync(_petId).Returns(pet);
+
+        async Task Result() => await _sut.DeletePetAsync(_petId, _userId);
+
+        var exception = await Assert.ThrowsAsync<UnauthorizedException>(Result);
+        Assert.Equal("Você não possui permissão para excluir o animal.", exception.Message);
     }
 }

@@ -3,10 +3,14 @@ using FluentValidation;
 
 namespace Application.Common.Validations.PetValidations;
 
-public class CreatePetValidator : AbstractValidator<CreatePetRequest>
+public class EditPetValidator : AbstractValidator<EditPetRequest>
 {
-    public CreatePetValidator()
+    public EditPetValidator()
     {
+        RuleFor(pet => pet.Id)
+            .NotEmpty()
+            .WithMessage("Campo de id é obrigatório.");
+        
         RuleFor(pet => pet.Name)
             .NotEmpty()
             .WithMessage("Campo de nome é obrigatório.")

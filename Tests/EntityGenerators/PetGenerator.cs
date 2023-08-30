@@ -18,7 +18,25 @@ public static class PetGenerator
             Name = "animal",
             Observations = "observations",
             Owner = owner,
-            OwnerId = owner.Id,
+            UserId = owner.Id,
+            Breed = breed,
+            BreedId = breed.Id,
+            Species = species,
+            SpeciesId = species.Id,
+            Colors = ColorGenerator.GenerateListOfColors()
+        };
+    }
+
+    public static Pet GeneratePetWithoutOwner()
+    {
+        Breed breed = BreedGenerator.GenerateBreed();
+        Species species = SpeciesGenerator.GenerateSpecies();
+
+        return new Pet()
+        {
+            Id = Guid.NewGuid(),
+            Name = "animal",
+            Observations = "observations",
             Breed = breed,
             BreedId = breed.Id,
             Species = species,
@@ -39,6 +57,19 @@ public static class PetGenerator
         };
     }
 
+    public static EditPetRequest GenerateEditPetRequest()
+    {
+        return new EditPetRequest()
+        {
+            Id = Guid.NewGuid(),
+            Name = "animal",
+            Observations = "observations",
+            BreedId = 1,
+            SpeciesId = 1,
+            ColorIds = new List<int>() { 1 }
+        };
+    }
+    
     public static Pet GeneratePetFromCreatePetRequest(
         CreatePetRequest createPetRequest,
         Guid petId,

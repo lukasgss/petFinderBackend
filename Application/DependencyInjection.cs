@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Authorization;
+using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IGuidProvider, GuidProvider>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserAuthorizationService, UserAuthorizationService>();
+        services.AddScoped<IBreedService, BreedService>();
 
         services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>(_ =>

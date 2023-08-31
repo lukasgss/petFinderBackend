@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Domain.Entities;
 
 namespace Tests.EntityGenerators;
@@ -11,9 +12,17 @@ public static class BreedGenerator
         return new Breed()
         {
             Id = 1,
-            Name = "Border Collie",
+            Name = "Text",
             Species = species,
             SpeciesId = species.Id
+        };
+    }
+
+    public static List<Breed> GenerateListOfBreeds()
+    {
+        return new List<Breed>()
+        {
+            GenerateBreed()
         };
     }
 }

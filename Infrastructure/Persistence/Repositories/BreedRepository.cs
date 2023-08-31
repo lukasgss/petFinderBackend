@@ -27,4 +27,13 @@ public class BreedRepository : GenericRepository<Breed>, IBreedRepository
             .Where(breed => breed.SpeciesId == speciesId)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<Breed>> GetBreedsByNameAsync(string breedName, int speciesId)
+    {
+        return await _dbContext.Breeds
+            .Include(breed => breed.Species)
+            .Where(breed => breed.Name.ToLower().Contains(breedName.ToLowerInvariant()))
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }

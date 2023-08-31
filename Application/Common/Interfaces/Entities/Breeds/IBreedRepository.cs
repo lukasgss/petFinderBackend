@@ -7,4 +7,5 @@ public interface IBreedRepository : IGenericRepository<Breed>
 {
     Task<Breed?> GetBreedByIdAsync(int breedId);
     Task<IEnumerable<Breed>> GetBreedsBySpeciesIdAsync(int speciesId);
+    Task<IEnumerable<Breed>> GetBreedsByNameAsync(string breedName, int speciesId);
 }

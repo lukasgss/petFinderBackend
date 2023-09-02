@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230830201736_FixUserIdColumnOnPetTable")]
+    partial class FixUserIdColumnOnPetTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,49 +37,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("PetsId");
 
                     b.ToTable("ColorPet");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Alerts.MissingAlert", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("LastSeenLocationLatitude")
-                        .HasColumnType("numeric(6,3)");
-
-                    b.Property<decimal>("LastSeenLocationLongitude")
-                        .HasColumnType("numeric(6,3)");
-
-                    b.Property<string>("OwnerName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("OwnerPhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<bool>("PetHasBeenRecovered")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("PetId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PetId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("MissingAlerts");
                 });
 
             modelBuilder.Entity("Domain.Entities.Breed", b =>
@@ -462,23 +421,6 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("PetsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Entities.Alerts.MissingAlert", b =>
-                {
-                    b.HasOne("Domain.Entities.Pet", "Pet")
-                        .WithMany()
-                        .HasForeignKey("PetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Pet");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Breed", b =>

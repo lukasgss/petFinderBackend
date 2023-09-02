@@ -23,4 +23,18 @@ public static class PetMappings
             Colors = colors
         };
     }
+
+    public static PetResponseNoOwner ConvertToPetResponseNoOwner(this Pet pet,
+        IEnumerable<ColorResponse> colors,
+        BreedResponse breed)
+    {
+        return new PetResponseNoOwner()
+        {
+            Id = pet.Id,
+            Name = pet.Name,
+            Observations = pet.Observations,
+            Breed = breed,
+            Colors = colors
+        };
+    }
 }

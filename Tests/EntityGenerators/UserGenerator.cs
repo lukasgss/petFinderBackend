@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Entities.Users.DTOs;
 using Domain.Entities;
 
 namespace Tests.EntityGenerators;
@@ -10,7 +11,7 @@ public static class UserGenerator
         {
             Id = Guid.NewGuid(),
             FullName = "fullName",
-            PhoneNumber = "(21) 98121-1828",
+            PhoneNumber = "(11) 11111-1111",
             UserName = "email@email.com",
             Email = "email@email.com",
             EmailConfirmed = true

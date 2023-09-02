@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Entities.Alerts;
 using Infrastructure.Persistence.DataSeed;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -14,6 +15,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     public DbSet<Breed> Breeds { get; set; } = null!;
     public DbSet<Color> Colors { get; set; } = null!;
     public DbSet<Species> Species { get; set; } = null!;
+    public DbSet<MissingAlert> MissingAlerts { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

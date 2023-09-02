@@ -1,1 +1,3 @@
-# Pet Finder Backend
+# Pet Finder
+
+This project is a web application that was created to serve as a bridge between rescue organizations or individuals seeking to adopt pets and people/organizations who found lost and/or abandoned animals and are putting them up for adoption. It's also useful in case of someone that lost his pet and is trying to find it, creating a lost alert in the platform, so if others find it, it's easy to make contact and return the animal to its owner. The platform's main purpose is to facilitate communication and data sharing, maximizing the opportunities for pets to be adopted by centralizing the search, communication and all the necessary steps in only one spot.

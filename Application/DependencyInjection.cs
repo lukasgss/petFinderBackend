@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Authorization;
+using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Users;
@@ -20,11 +21,14 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<IPetService, PetService>();
-        services.AddScoped<IGuidProvider, GuidProvider>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserAuthorizationService, UserAuthorizationService>();
         services.AddScoped<IBreedService, BreedService>();
+        services.AddScoped<IMissingAlertService, MissingAlertService>();
 
+        services.AddScoped<IGuidProvider, GuidProvider>();
+        services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+        
         services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>(_ =>
         {

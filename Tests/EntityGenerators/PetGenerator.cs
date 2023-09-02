@@ -27,6 +27,27 @@ public static class PetGenerator
         };
     }
 
+    public static Pet GeneratePetWithId(Guid id)
+    {
+        User owner = UserGenerator.GenerateUser();
+        Breed breed = BreedGenerator.GenerateBreed();
+        Species species = SpeciesGenerator.GenerateSpecies();
+
+        return new Pet
+        {
+            Id = id,
+            Name = "animal",
+            Observations = "observations",
+            Owner = owner,
+            UserId = owner.Id,
+            Breed = breed,
+            BreedId = breed.Id,
+            Species = species,
+            SpeciesId = species.Id,
+            Colors = ColorGenerator.GenerateListOfColors()
+        };
+    }
+
     public static Pet GeneratePetWithoutOwner()
     {
         Breed breed = BreedGenerator.GenerateBreed();

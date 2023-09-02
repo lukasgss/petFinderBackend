@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
@@ -17,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<IBreedRepository, BreedRepository>();
         services.AddScoped<IColorRepository, ColorRepository>();
         services.AddScoped<ISpeciesRepository, SpeciesRepository>();
+        services.AddScoped<IMissingAlertRepository, MissingAlertRepository>();
         
         return services;
     }

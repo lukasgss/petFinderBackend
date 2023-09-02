@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Domain.Entities;
+using Tests.TestUtils.Constants;
 
 namespace Tests.EntityGenerators;
 
@@ -11,10 +12,10 @@ public static class BreedGenerator
         
         return new Breed()
         {
-            Id = 1,
-            Name = "Text",
-            Species = species,
-            SpeciesId = species.Id
+            Id = Constants.BreedData.SpeciesId,
+            Name = Constants.BreedData.Name,
+            Species = Constants.BreedData.Species,
+            SpeciesId = Constants.BreedData.SpeciesId
         };
     }
 

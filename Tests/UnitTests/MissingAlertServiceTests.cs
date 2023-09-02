@@ -95,7 +95,7 @@ public class MissingAlertServiceTests
         var createMissingAlertRequest = MissingAlertGenerator.GenerateCreateMissingAlertWithoutOwner();
         var expectedMissingAlert =
             MissingAlertGenerator.GenerateMissingAlertResponseFromCreateRequest(createMissingAlertRequest);
-        Pet returnedPet = PetGenerator.GeneratePetWithId(expectedMissingAlert.Pet.Id);
+        Pet returnedPet = PetGenerator.GeneratePet();
         _petRepositoryMock.GetPetByIdAsync(createMissingAlertRequest.PetId).Returns(returnedPet);
         _dateTimeProviderMock.UtcNow().Returns(expectedMissingAlert.RegistrationDate);
         _guidProviderMock.NewGuid().Returns(expectedMissingAlert.Id);
@@ -112,7 +112,7 @@ public class MissingAlertServiceTests
         var createMissingAlertRequest = MissingAlertGenerator.GenerateCreateMissingAlert();
         var expectedMissingAlert =
             MissingAlertGenerator.GenerateMissingAlertResponseFromCreateRequest(createMissingAlertRequest);
-        Pet returnedPet = PetGenerator.GeneratePetWithId(expectedMissingAlert.Pet.Id);
+        Pet returnedPet = PetGenerator.GeneratePet();
         _petRepositoryMock.GetPetByIdAsync(createMissingAlertRequest.PetId).Returns(returnedPet);
         User returnedUser = UserGenerator.GenerateUser();
         _userRepositoryMock.GetUserByIdAsync(Arg.Any<Guid>()).Returns(returnedUser);

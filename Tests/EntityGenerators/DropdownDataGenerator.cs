@@ -1,41 +1,23 @@
 using System.Collections.Generic;
 using Application.Common.Interfaces.FrontendDropdownData;
+using Domain.Entities;
 
 namespace Tests.EntityGenerators;
 
 public static class DropdownDataGenerator
 {
-    public static DropdownDataResponse<Guid> GenerateDropdownDataResponseGuid()
+    public static List<DropdownDataResponse<int>> GenerateDropdownDataResponsesOfBreeds(List<Breed> breeds)
     {
-        return new DropdownDataResponse<Guid>()
+        List<DropdownDataResponse<int>> dropdownDataResponses = new();
+        foreach (Breed breed in breeds)
         {
-            Text = "Text",
-            Value = Guid.NewGuid()
-        };
-    }
+            dropdownDataResponses.Add(new DropdownDataResponse<int>()
+            {
+                Text = breed.Name,
+                Value = breed.Id
+            });
+        }
 
-    public static List<DropdownDataResponse<Guid>> GenerateListDropdownDataResponseGuid()
-    {
-        return new List<DropdownDataResponse<Guid>>()
-        {
-            GenerateDropdownDataResponseGuid()
-        };
-    }
-    
-    public static DropdownDataResponse<int> GenerateDropdownDataResponseInt()
-    {
-        return new DropdownDataResponse<int>()
-        {
-            Text = "Text",
-            Value = 1
-        };
-    }
-
-    public static List<DropdownDataResponse<int>> GenerateListDropdownDataInt()
-    {
-        return new List<DropdownDataResponse<int>>()
-        {
-            GenerateDropdownDataResponseInt()
-        };
+        return dropdownDataResponses;
     }
 }

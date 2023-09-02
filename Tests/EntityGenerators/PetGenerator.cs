@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Domain.Entities;
+using Constants = Tests.TestUtils.Constants.Constants;
 
 namespace Tests.EntityGenerators;
 
@@ -14,32 +15,11 @@ public static class PetGenerator
 
         return new Pet
         {
-            Id = Guid.NewGuid(),
-            Name = "animal",
-            Observations = "observations",
-            Owner = owner,
-            UserId = owner.Id,
-            Breed = breed,
-            BreedId = breed.Id,
-            Species = species,
-            SpeciesId = species.Id,
-            Colors = ColorGenerator.GenerateListOfColors()
-        };
-    }
-
-    public static Pet GeneratePetWithId(Guid id)
-    {
-        User owner = UserGenerator.GenerateUser();
-        Breed breed = BreedGenerator.GenerateBreed();
-        Species species = SpeciesGenerator.GenerateSpecies();
-
-        return new Pet
-        {
-            Id = id,
-            Name = "animal",
-            Observations = "observations",
-            Owner = owner,
-            UserId = owner.Id,
+            Id = Constants.PetData.Id,
+            Name = Constants.PetData.Name,
+            Observations= Constants.PetData.Observations,
+            Owner = Constants.PetData.User,
+            UserId = Constants.UserData.Id,
             Breed = breed,
             BreedId = breed.Id,
             Species = species,
@@ -50,19 +30,26 @@ public static class PetGenerator
 
     public static Pet GeneratePetWithoutOwner()
     {
-        Breed breed = BreedGenerator.GenerateBreed();
-        Species species = SpeciesGenerator.GenerateSpecies();
-
         return new Pet()
         {
-            Id = Guid.NewGuid(),
-            Name = "animal",
-            Observations = "observations",
-            Breed = breed,
-            BreedId = breed.Id,
-            Species = species,
-            SpeciesId = species.Id,
+            Id = Constants.PetData.Id,
+            Name = Constants.PetData.Name,
+            Observations = Constants.PetData.Observations,
+            Owner = null,
+            UserId = null,
+            Breed = Constants.PetData.Breed,
+            BreedId = Constants.PetData.BreedId,
+            Species = Constants.PetData.Species,
+            SpeciesId = Constants.PetData.SpeciesId,
             Colors = ColorGenerator.GenerateListOfColors()
+        };
+    }
+
+    public static List<Pet> GenerateListOfPet()
+    {
+        return new List<Pet>()
+        {
+            GeneratePet()
         };
     }
 
@@ -70,11 +57,11 @@ public static class PetGenerator
     {
         return new CreatePetRequest()
         {
-            Name = "animal",
-            Observations = "observations",
-            BreedId = 1,
-            SpeciesId = 1,
-            ColorIds = new List<int>() { 1 }
+            Name = Constants.PetData.Name,
+            Observations = Constants.PetData.Observations,
+            BreedId = Constants.PetData.BreedId,
+            SpeciesId = Constants.PetData.SpeciesId,
+            ColorIds = Constants.PetData.ColorIds
         };
     }
 
@@ -82,32 +69,12 @@ public static class PetGenerator
     {
         return new EditPetRequest()
         {
-            Id = Guid.NewGuid(),
-            Name = "animal",
-            Observations = "observations",
-            BreedId = 1,
-            SpeciesId = 1,
-            ColorIds = new List<int>() { 1 }
-        };
-    }
-    
-    public static Pet GeneratePetFromCreatePetRequest(
-        CreatePetRequest createPetRequest,
-        Guid petId,
-        User? owner,
-        Breed breed,
-        Species species,
-        List<Color> colors)
-    {
-        return new Pet()
-        {
-            Id = petId,
-            Name = createPetRequest.Name,
-            Observations = createPetRequest.Observations,
-            Owner = owner,
-            Breed = breed,
-            Species = species,
-            Colors = colors
+            Id = Constants.PetData.Id,
+            Name = Constants.PetData.Name,
+            Observations = Constants.PetData.Observations,
+            BreedId = Constants.PetData.BreedId,
+            SpeciesId = Constants.PetData.SpeciesId,
+            ColorIds = Constants.PetData.ColorIds
         };
     }
 }

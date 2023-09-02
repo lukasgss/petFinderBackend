@@ -6,6 +6,7 @@ using Application.Services.Entities;
 using Domain.Entities;
 using NSubstitute;
 using Tests.EntityGenerators;
+using Constants = Tests.TestUtils.Constants.Constants;
 
 namespace Tests.UnitTests;
 
@@ -13,8 +14,6 @@ public class BreedServiceTests
 {
     private readonly IBreedRepository _breedRepositoryMock;
     private readonly IBreedService _sut;
-
-    private const int _speciesId = 1;
 
     public BreedServiceTests()
     {
@@ -28,7 +27,7 @@ public class BreedServiceTests
     {
         const string searchedName = "a";
 
-        async Task Result() => await _sut.GetBreedsForDropdown(searchedName, _speciesId);
+        async Task Result() => await _sut.GetBreedsForDropdown(searchedName, Constants.SpeciesData.Id);
 
         var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
         Assert.Equal("Preencha no mínimo 2 caracteres para buscar a raça pelo nome.", exception.Message);
@@ -37,14 +36,15 @@ public class BreedServiceTests
     [Fact]
     public async Task Get_Breeds_For_Dropdown_Returns_Searched_Breeds()
     {
-        const string breedName = "pug";
-
         List<Breed> returnedBreeds = BreedGenerator.GenerateListOfBreeds();
-        _breedRepositoryMock.GetBreedsByNameAsync(breedName, _speciesId).Returns(returnedBreeds);
-        IEnumerable<DropdownDataResponse<int>> expectedData = DropdownDataGenerator.GenerateListDropdownDataInt();
+        _breedRepositoryMock.GetBreedsByNameAsync(Constants.BreedData.Name, Constants.SpeciesData.Id)
+            .Returns(returnedBreeds);
+        IEnumerable<DropdownDataResponse<int>> expectedData =
+            DropdownDataGenerator.GenerateDropdownDataResponsesOfBreeds(returnedBreeds);
 
-        IEnumerable<DropdownDataResponse<int>> breedData = await _sut.GetBreedsForDropdown(breedName, _speciesId);
-        
+        IEnumerable<DropdownDataResponse<int>> breedData =
+            await _sut.GetBreedsForDropdown(Constants.BreedData.Name, Constants.SpeciesData.Id);
+
         Assert.Equivalent(expectedData, breedData);
     }
 }

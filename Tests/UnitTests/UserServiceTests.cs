@@ -10,7 +10,9 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
+using Tests.EntityGenerators;
 using Tests.Fakes.Identity;
+using Constants = Tests.TestUtils.Constants.Constants;
 
 namespace Tests.UnitTests;
 
@@ -20,13 +22,6 @@ public class UserServiceTests
     private readonly IGuidProvider _guidProviderMock;
     private readonly IJwtTokenGenerator _jwtTokenGeneratorMock;
     private readonly IUserService _sut;
-
-    private readonly Guid _userId = Guid.NewGuid();
-    private const string _fullName = "full name";
-    private const string _email = "email@email.com";
-    private const string _phoneNumber = "(21) 98421-9821";
-    private const string _password = "password";
-    private const string _jwtToken = "jwtToken";
 
     public UserServiceTests()
     {
@@ -40,9 +35,9 @@ public class UserServiceTests
     [Fact]
     public async Task Get_Non_Existent_User_By_Id_Throws_NotFoundException()
     {
-        _userRepositoryMock.GetUserByIdAsync(_userId).ReturnsNull();
+        _userRepositoryMock.GetUserByIdAsync(Constants.UserData.Id).ReturnsNull();
 
-        async Task Result() => await _sut.GetUserByIdAsync(_userId);
+        async Task Result() => await _sut.GetUserByIdAsync(Constants.UserData.Id);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
         Assert.Equal("Não foi possível obter o usuário com o id especificado.", exception.Message);
@@ -51,11 +46,11 @@ public class UserServiceTests
     [Fact]
     public async Task Get_User_By_Id_Returns_User_Data()
     {
-        User searchedUser = GenerateUser();
-        _userRepositoryMock.GetUserByIdAsync(_userId).Returns(searchedUser);
+        User searchedUser = UserGenerator.GenerateUser();
+        _userRepositoryMock.GetUserByIdAsync(searchedUser.Id).Returns(searchedUser);
         UserDataResponse expectedUser = searchedUser.ConvertToUserDataResponse();
 
-        UserDataResponse userResponse = await _sut.GetUserByIdAsync(_userId);
+        UserDataResponse userResponse = await _sut.GetUserByIdAsync(searchedUser.Id);
 
         Assert.Equivalent(expectedUser, userResponse);
     }
@@ -63,8 +58,8 @@ public class UserServiceTests
     [Fact]
     public async Task Register_Attempt_With_Already_Existing_Email_Throws_ConflictException()
     {
-        CreateUserRequest createUserRequest = GenerateCreateUserRequest();
-        User alreadyExistingUser = GenerateUser();
+        CreateUserRequest createUserRequest = UserGenerator.GenerateCreateUserRequest();
+        User alreadyExistingUser = UserGenerator.GenerateUser();
         _userRepositoryMock.GetUserByEmailAsync(createUserRequest.Email).Returns(alreadyExistingUser);
 
         async Task Result() => await _sut.RegisterAsync(createUserRequest);
@@ -76,9 +71,9 @@ public class UserServiceTests
     [Fact]
     public async Task Register_Attempt_With_Any_Registration_Error_Throws_InternalServerErrorException()
     {
-        _guidProviderMock.NewGuid().Returns(_userId);
-        _userRepositoryMock.GetUserByEmailAsync(_email).ReturnsNull();
-        CreateUserRequest createUserRequest = GenerateCreateUserRequest();
+        _guidProviderMock.NewGuid().Returns(Constants.UserData.Id);
+        _userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
+        CreateUserRequest createUserRequest = UserGenerator.GenerateCreateUserRequest();
         IdentityResult expectedIdentityResult = new FakeIdentityResult(false);
         _userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), createUserRequest.Password).Returns(expectedIdentityResult);
         _userRepositoryMock.SetLockoutEnabledAsync(Arg.Any<User>(), false).Returns(expectedIdentityResult);
@@ -92,18 +87,18 @@ public class UserServiceTests
     public async Task Registration_Returns_User_Response()
     {
         // Arrange
-        _guidProviderMock.NewGuid().Returns(_userId);
-        _userRepositoryMock.GetUserByEmailAsync(_email).ReturnsNull();
-        CreateUserRequest createUserRequest = GenerateCreateUserRequest();
+        _guidProviderMock.NewGuid().Returns(Constants.UserData.Id);
+        _userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
+        CreateUserRequest createUserRequest = UserGenerator.GenerateCreateUserRequest();
         
         IdentityResult expectedIdentityResult = new FakeIdentityResult(true);
         _userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), createUserRequest.Password)
             .Returns(expectedIdentityResult);
         _userRepositoryMock.SetLockoutEnabledAsync(Arg.Any<User>(), false)
             .Returns(expectedIdentityResult);
-        _jwtTokenGeneratorMock.GenerateToken(_userId, _fullName).Returns(_jwtToken);
+        _jwtTokenGeneratorMock.GenerateToken(Constants.UserData.Id, Constants.UserData.FullName).Returns(Constants.UserData.JwtToken);
         
-        UserResponse expectedUserResponse = GenerateUser().ConvertToUserResponse(_jwtToken);
+        UserResponse expectedUserResponse = UserGenerator.GenerateUser().ConvertToUserResponse(Constants.UserData.JwtToken);
 
         // Act
         UserResponse userResponse = await _sut.RegisterAsync(createUserRequest);
@@ -115,8 +110,8 @@ public class UserServiceTests
     [Fact]
     public async Task Login_With_Locked_Account_Throws_LockedException()
     {
-        LoginUserRequest loginUserRequest = GenerateLoginUserRequest();
-        User user = GenerateUser();
+        LoginUserRequest loginUserRequest = UserGenerator.GenerateLoginUserRequest();
+        User user = UserGenerator.GenerateUser();
         _userRepositoryMock.GetUserByEmailAsync(loginUserRequest.Email).Returns(user);
         FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: false, isLockedOut: true);
         _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
@@ -131,8 +126,8 @@ public class UserServiceTests
     [Fact]
     public async Task Login_With_Invalid_Credentials_Throws_UnauthorizedException()
     {
-        LoginUserRequest loginUserRequest = GenerateLoginUserRequest();
-        User user = GenerateUser();
+        LoginUserRequest loginUserRequest = UserGenerator.GenerateLoginUserRequest();
+        User user = UserGenerator.GenerateUser();
         _userRepositoryMock.GetUserByEmailAsync(loginUserRequest.Email).Returns(user);
         FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: false, isLockedOut: false);
         _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
@@ -147,51 +142,17 @@ public class UserServiceTests
     [Fact]
     public async Task Login_With_Valid_Credentials_Returns_UserResponse()
     {
-        LoginUserRequest loginUserRequest = GenerateLoginUserRequest();
-        User user = GenerateUser();
+        LoginUserRequest loginUserRequest = UserGenerator.GenerateLoginUserRequest();
+        User user = UserGenerator.GenerateUser();
         _userRepositoryMock.GetUserByEmailAsync(loginUserRequest.Email).Returns(user);
         FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: true, isLockedOut: false);
         _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
             .Returns(fakeSignInResult);
-        _jwtTokenGeneratorMock.GenerateToken(_userId, _fullName).Returns(_jwtToken);
-        UserResponse expectedUserResponse = GenerateUser().ConvertToUserResponse(_jwtToken);
+        _jwtTokenGeneratorMock.GenerateToken(user.Id, user.FullName).Returns(Constants.UserData.JwtToken);
+        UserResponse expectedUserResponse = UserGenerator.GenerateUser().ConvertToUserResponse(Constants.UserData.JwtToken);
 
         UserResponse userResponse = await _sut.LoginAsync(loginUserRequest);
 
         Assert.Equivalent(expectedUserResponse, userResponse);
-    }
-
-    private LoginUserRequest GenerateLoginUserRequest()
-    {
-        return new LoginUserRequest()
-        {
-            Email = _email,
-            Password = _password
-        };
-    }
-
-    private CreateUserRequest GenerateCreateUserRequest()
-    {
-        return new CreateUserRequest()
-        {
-            FullName = _fullName,
-            Email = _email,
-            PhoneNumber = _phoneNumber,
-            Password = _password,
-            ConfirmPassword = _password
-        };
-    }
-
-    private User GenerateUser()
-    {
-        return new User()
-        {
-            Id = _userId,
-            FullName = _fullName,
-            UserName = _email,
-            PhoneNumber = _phoneNumber,
-            Email = _email,
-            EmailConfirmed = true
-        };
     }
 }

@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Entities.Alerts;
+using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Users;
@@ -25,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IUserAuthorizationService, UserAuthorizationService>();
         services.AddScoped<IBreedService, BreedService>();
         services.AddScoped<IMissingAlertService, MissingAlertService>();
+        services.AddScoped<ISpeciesService, SpeciesService>();
 
         services.AddScoped<IGuidProvider, GuidProvider>();
         services.AddScoped<IDateTimeProvider, DateTimeProvider>();

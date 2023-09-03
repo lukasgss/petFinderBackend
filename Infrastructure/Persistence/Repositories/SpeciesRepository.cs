@@ -14,6 +14,13 @@ public class SpeciesRepository : GenericRepository<Species>, ISpeciesRepository
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     }
 
+    public async Task<IEnumerable<Species>> GetAllSpecies()
+    {
+        return await _dbContext.Species
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task<Species?> GetSpeciesByIdAsync(int speciesId)
     {
         return await _dbContext.Species

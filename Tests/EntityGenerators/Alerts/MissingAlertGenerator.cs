@@ -40,6 +40,24 @@ public static class MissingAlertGenerator
             Owner = Constants.MissingAlertData.User?.ConvertToOwnerResponse()
         };
     }
+
+    public static MissingAlertResponse GenerateRecoveredMissingAlertResponse()
+    {
+        return new MissingAlertResponse()
+        {
+            Id = Constants.MissingAlertData.Id,
+            OwnerName = Constants.MissingAlertData.OwnerName,
+            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
+            RegistrationDate = Constants.MissingAlertData.RegistrationDate,
+            LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
+            LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+            PetHasBeenRecovered = true,
+            Pet = Constants.MissingAlertData.Pet.ConvertToPetResponseNoOwner(
+                ColorGenerator.GenerateListOfColors().ConvertToListOfColorResponse(),
+                BreedGenerator.GenerateBreed().ConvertToBreedResponse()),
+            Owner = Constants.MissingAlertData.User?.ConvertToOwnerResponse()
+        };
+    }
     
     public static MissingAlertResponse GenerateMissingAlertResponseWithoutOwner()
     {

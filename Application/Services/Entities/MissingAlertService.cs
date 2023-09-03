@@ -113,7 +113,7 @@ public class MissingAlertService : IMissingAlertService
         {
             throw new NotFoundException("Animal com o id especificado não existe.");
         }
-        
+
         CheckUserPermissionToEdit(userId, editMissingAlertRequest.UserId);
 
         User? user = await _userRepository.GetUserByIdAsync(editMissingAlertRequest.UserId);
@@ -146,9 +146,28 @@ public class MissingAlertService : IMissingAlertService
         {
             throw new ForbiddenException("Não é possível excluir alertas de outros usuários.");
         }
-        
+
         _missingAlertRepository.Delete(alertToDelete);
         await _missingAlertRepository.CommitAsync();
+    }
+
+    public async Task<MissingAlertResponse> MarkAsResolved(Guid alertId, Guid? userId)
+    {
+        MissingAlert? missingAlert = await _missingAlertRepository.GetByIdAsync(alertId);
+        if (missingAlert is null)
+        {
+            throw new NotFoundException("Alerta com o id especificado não existe.");
+        }
+
+        if (userId != missingAlert.User?.Id)
+        {
+            throw new ForbiddenException("Não é possível marcar alertas de outros usuários como encontrado.");
+        }
+
+        missingAlert.PetHasBeenRecovered = true;
+        await _missingAlertRepository.CommitAsync();
+
+        return missingAlert.ConvertToMissingAlertResponse();
     }
 
     private static void CheckUserPermissionToCreate(Guid? userId, Guid? requestUserId)

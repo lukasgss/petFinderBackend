@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<IColorRepository, ColorRepository>();
         services.AddScoped<ISpeciesRepository, SpeciesRepository>();
         services.AddScoped<IMissingAlertRepository, MissingAlertRepository>();
+        services.AddScoped<ISpeciesRepository, SpeciesRepository>();
         
         return services;
     }

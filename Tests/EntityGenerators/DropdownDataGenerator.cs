@@ -20,4 +20,19 @@ public static class DropdownDataGenerator
 
         return dropdownDataResponses;
     }
+
+    public static List<DropdownDataResponse<int>> GenerateDropdownDataResponsesOfSpecies(List<Species> species)
+    {
+        List<DropdownDataResponse<int>> dropdownDataResponses = new();
+        foreach (Species speciesValue in species)
+        {
+            dropdownDataResponses.Add(new DropdownDataResponse<int>()
+            {
+                Text = speciesValue.Name,
+                Value = speciesValue.Id
+            });
+        }
+
+        return dropdownDataResponses;
+    }
 }

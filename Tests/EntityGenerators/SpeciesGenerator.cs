@@ -15,4 +15,12 @@ public static class SpeciesGenerator
             Pets = new List<Pet>()
         };
     }
+
+    public static List<Species> GenerateListOfSpecies()
+    {
+        return new List<Species>()
+        {
+            GenerateSpecies()
+        };
+    }
 }

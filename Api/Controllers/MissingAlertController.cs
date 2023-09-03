@@ -25,7 +25,7 @@ public class MissingAlertController : ControllerBase
     }
 
     [HttpGet("{alertId:guid}", Name = "GetMissingAlertById")]
-    public async Task<ActionResult<MissingAlertResponse>> GetById(Guid alertId)
+    public async Task<ActionResult<MissingAlertResponse>> GetMissingAlertById(Guid alertId)
     {
         MissingAlertResponse missingAlert = await _missingAlertService.GetByIdAsync(alertId);
         return Ok(missingAlert);
@@ -49,7 +49,7 @@ public class MissingAlertController : ControllerBase
             await _missingAlertService.CreateAsync(createAlertRequest, userId);
 
         return new CreatedAtRouteResult(
-            nameof(GetById),
+            nameof(GetMissingAlertById),
             new { alertId = createdMissingAlert.Id },
             createdMissingAlert);
     }
@@ -81,7 +81,17 @@ public class MissingAlertController : ControllerBase
     {
         Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
         await _missingAlertService.DeleteAsync(alertId, userId);
-        
+
         return Ok();
+    }
+
+    [Authorize]
+    [HttpPost("resolve/{alertId:guid}")]
+    public async Task<ActionResult<MissingAlertResponse>> MarkAsResolved(Guid alertId)
+    {
+        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        MissingAlertResponse missingAlertResponse = await _missingAlertService.MarkAsResolved(alertId, userId);
+
+        return Ok(missingAlertResponse);
     }
 }

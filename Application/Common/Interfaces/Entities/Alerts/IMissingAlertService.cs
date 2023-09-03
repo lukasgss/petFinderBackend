@@ -11,4 +11,5 @@ public interface IMissingAlertService
         Guid? userId);
     Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest, Guid? userId, Guid routeId);
     Task DeleteAsync(Guid missingAlertId, Guid? userId);
+    Task<MissingAlertResponse> MarkAsResolved(Guid alertId, Guid? userId);
 }

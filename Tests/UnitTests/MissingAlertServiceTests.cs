@@ -252,4 +252,39 @@ public class MissingAlertServiceTests
         var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
         Assert.Equal("Não é possível excluir alertas de outros usuários.", exception.Message);
     }
+
+    [Fact]
+    public async Task Mark_Non_Existent_Missing_Alert_As_Resolved_Throws_NotFoundException()
+    {
+        _missingAlertRepositoryMock.GetByIdAsync(Constants.MissingAlertData.Id).ReturnsNull();
+
+        async Task Result() => await _sut.MarkAsResolved(Constants.MissingAlertData.Id, Constants.UserData.Id);
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+        Assert.Equal("Alerta com o id especificado não existe.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Mark_Missing_Alert_As_Resolved_Not_Being_The_Owner_Throws_ForbiddenException()
+    {
+        MissingAlert missingAlert = MissingAlertGenerator.GenerateMissingAlert();
+        _missingAlertRepositoryMock.GetByIdAsync(missingAlert.Id).Returns(missingAlert);
+
+        async Task Result() => await _sut.MarkAsResolved(missingAlert.Id, Guid.NewGuid());
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
+        Assert.Equal("Não é possível marcar alertas de outros usuários como encontrado.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Mark_Missing_Alert_As_Resolved_Returns_Missing_Alert()
+    {
+        MissingAlert missingAlert = MissingAlertGenerator.GenerateMissingAlert();
+        _missingAlertRepositoryMock.GetByIdAsync(missingAlert.Id).Returns(missingAlert);
+        MissingAlertResponse expectedMissingAlert = MissingAlertGenerator.GenerateRecoveredMissingAlertResponse();
+
+        MissingAlertResponse missingAlertResponse = await _sut.MarkAsResolved(missingAlert.Id, missingAlert.User?.Id);
+        
+        Assert.Equivalent(expectedMissingAlert, missingAlertResponse);
+    }
 }

@@ -33,9 +33,9 @@ public class MissingAlertService : IMissingAlertService
         _dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
     }
 
-    public async Task<MissingAlertResponse> GetMissingAlertByIdAsync(Guid missingAlertId)
+    public async Task<MissingAlertResponse> GetByIdAsync(Guid missingAlertId)
     {
-        MissingAlert? missingAlert = await _missingAlertRepository.GetMissingAlertByIdAsync(missingAlertId);
+        MissingAlert? missingAlert = await _missingAlertRepository.GetByIdAsync(missingAlertId);
         if (missingAlert is null)
         {
             throw new NotFoundException("Alerta de desaparecimento com o id especificado não existe.");
@@ -57,7 +57,7 @@ public class MissingAlertService : IMissingAlertService
         };
     }
 
-    public async Task<MissingAlertResponse> CreateMissingAlertAsync(CreateMissingAlertRequest createMissingAlertRequest,
+    public async Task<MissingAlertResponse> CreateAsync(CreateMissingAlertRequest createMissingAlertRequest,
         Guid? userId)
     {
         Pet? missingPet = await _petRepository.GetPetByIdAsync(createMissingAlertRequest.PetId);
@@ -66,7 +66,7 @@ public class MissingAlertService : IMissingAlertService
             throw new NotFoundException("Animal com o id especificado não existe.");
         }
 
-        CheckUserPermission(userId, createMissingAlertRequest.UserId);
+        CheckUserPermissionToCreate(userId, createMissingAlertRequest.UserId);
 
         User? petOwner = null;
         if (userId is not null)
@@ -93,11 +93,77 @@ public class MissingAlertService : IMissingAlertService
         return missingAlertToCreate.ConvertToMissingAlertResponse();
     }
 
-    private void CheckUserPermission(Guid? userId, Guid? requestUserId)
+    public async Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest,
+        Guid? userId,
+        Guid routeId)
+    {
+        if (editMissingAlertRequest.Id != routeId)
+        {
+            throw new BadRequestException("Id da rota não coincide com o id especificado.");
+        }
+
+        MissingAlert? dbMissingAlert = await _missingAlertRepository.GetByIdAsync(editMissingAlertRequest.Id);
+        if (dbMissingAlert is null)
+        {
+            throw new NotFoundException("Alerta com o id especificado não existe.");
+        }
+
+        Pet? pet = await _petRepository.GetPetByIdAsync(editMissingAlertRequest.PetId);
+        if (pet is null)
+        {
+            throw new NotFoundException("Animal com o id especificado não existe.");
+        }
+        
+        CheckUserPermissionToEdit(userId, editMissingAlertRequest.UserId);
+
+        User? user = await _userRepository.GetUserByIdAsync(editMissingAlertRequest.UserId);
+        if (user is null)
+        {
+            throw new NotFoundException("Usuário com o id especificado não existe.");
+        }
+
+        dbMissingAlert.OwnerName = editMissingAlertRequest.OwnerName;
+        dbMissingAlert.OwnerPhoneNumber = editMissingAlertRequest.OwnerPhoneNumber;
+        dbMissingAlert.LastSeenLocationLatitude = editMissingAlertRequest.LastSeenLocationLatitude;
+        dbMissingAlert.LastSeenLocationLongitude = editMissingAlertRequest.LastSeenLocationLongitude;
+        dbMissingAlert.Pet = pet;
+        dbMissingAlert.User = user;
+
+        await _missingAlertRepository.CommitAsync();
+
+        return dbMissingAlert.ConvertToMissingAlertResponse();
+    }
+
+    public async Task DeleteAsync(Guid missingAlertId, Guid? userId)
+    {
+        MissingAlert? alertToDelete = await _missingAlertRepository.GetByIdAsync(missingAlertId);
+        if (alertToDelete is null)
+        {
+            throw new NotFoundException("Alerta com o id especificado não existe.");
+        }
+
+        if (alertToDelete.User?.Id != userId)
+        {
+            throw new ForbiddenException("Não é possível excluir alertas de outros usuários.");
+        }
+        
+        _missingAlertRepository.Delete(alertToDelete);
+        await _missingAlertRepository.CommitAsync();
+    }
+
+    private static void CheckUserPermissionToCreate(Guid? userId, Guid? requestUserId)
     {
         if (userId is not null && userId != requestUserId)
         {
             throw new ForbiddenException("Não é possível criar alertas para outros usuários.");
+        }
+    }
+
+    private static void CheckUserPermissionToEdit(Guid? userId, Guid requestUserId)
+    {
+        if (userId != requestUserId)
+        {
+            throw new ForbiddenException("Não é possível editar alertas de outros usuários.");
         }
     }
 }

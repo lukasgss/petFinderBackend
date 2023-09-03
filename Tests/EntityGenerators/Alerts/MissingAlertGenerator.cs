@@ -1,8 +1,7 @@
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.Alerts.DTOs;
-using Application.Common.Interfaces.Entities.Users.DTOs;
-using Domain.Entities;
 using Domain.Entities.Alerts;
+using Constants = Tests.TestUtils.Constants.Constants;
 
 namespace Tests.EntityGenerators.Alerts;
 
@@ -10,41 +9,53 @@ public static class MissingAlertGenerator
 {
     public static MissingAlert GenerateMissingAlert()
     {
-        Pet pet = PetGenerator.GeneratePet();
-        User user = UserGenerator.GenerateUser();
-
         return new MissingAlert()
         {
-            Id = Guid.NewGuid(),
-            OwnerName = "Text",
-            OwnerPhoneNumber = "(11) 11111-1111",
-            RegistrationDate = new DateTime(2020, 1, 1),
-            LastSeenLocationLatitude = 90,
-            LastSeenLocationLongitude = 90,
-            PetHasBeenRecovered = false,
-            Pet = pet,
-            User = user
+            Id = Constants.MissingAlertData.Id,
+            OwnerName = Constants.MissingAlertData.OwnerName,
+            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
+            RegistrationDate = Constants.MissingAlertData.RegistrationDate,
+            LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
+            LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+            PetHasBeenRecovered = Constants.MissingAlertData.PetHasBeenRecovered,
+            Pet = Constants.MissingAlertData.Pet,
+            User = Constants.MissingAlertData.User
         };
     }
 
-    public static MissingAlertResponse GenerateMissingAlertResponseFromCreateRequest(
-        CreateMissingAlertRequest createMissingAlertRequest)
+    public static MissingAlertResponse GenerateMissingAlertResponse()
     {
         return new MissingAlertResponse()
         {
-            Id = Guid.NewGuid(),
-            OwnerName = createMissingAlertRequest.OwnerName,
-            OwnerPhoneNumber = createMissingAlertRequest.OwnerPhoneNumber,
-            RegistrationDate = new DateTime(2020, 1, 1),
-            LastSeenLocationLatitude = createMissingAlertRequest.LastSeenLocationLatitude,
-            LastSeenLocationLongitude = createMissingAlertRequest.LastSeenLocationLongitude,
-            PetHasBeenRecovered = false,
-            Pet = PetGenerator.GeneratePet().ConvertToPetResponseNoOwner(
+            Id = Constants.MissingAlertData.Id,
+            OwnerName = Constants.MissingAlertData.OwnerName,
+            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
+            RegistrationDate = Constants.MissingAlertData.RegistrationDate,
+            LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
+            LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+            PetHasBeenRecovered = Constants.MissingAlertData.PetHasBeenRecovered,
+            Pet = Constants.MissingAlertData.Pet.ConvertToPetResponseNoOwner(
                 ColorGenerator.GenerateListOfColors().ConvertToListOfColorResponse(),
                 BreedGenerator.GenerateBreed().ConvertToBreedResponse()),
-            Owner = createMissingAlertRequest.UserId is not null
-                ? UserGenerator.GenerateUser().ConvertToOwnerResponse()
-                : null
+            Owner = Constants.MissingAlertData.User?.ConvertToOwnerResponse()
+        };
+    }
+    
+    public static MissingAlertResponse GenerateMissingAlertResponseWithoutOwner()
+    {
+        return new MissingAlertResponse()
+        {
+            Id = Constants.MissingAlertData.Id,
+            OwnerName = Constants.MissingAlertData.OwnerName,
+            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
+            RegistrationDate = Constants.MissingAlertData.RegistrationDate,
+            LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
+            LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+            PetHasBeenRecovered = Constants.MissingAlertData.PetHasBeenRecovered,
+            Pet = Constants.MissingAlertData.Pet.ConvertToPetResponseNoOwner(
+                ColorGenerator.GenerateListOfColors().ConvertToListOfColorResponse(),
+                BreedGenerator.GenerateBreed().ConvertToBreedResponse()),
+            Owner = null
         };
     }
 
@@ -52,12 +63,12 @@ public static class MissingAlertGenerator
     {
         return new CreateMissingAlertRequest()
         {
-            OwnerName = "Text",
-            OwnerPhoneNumber = "(11) 11111-1111",
-            LastSeenLocationLatitude = 90,
-            LastSeenLocationLongitude = 90,
-            UserId = Guid.NewGuid(),
-            PetId = Guid.NewGuid()
+            OwnerName = Constants.MissingAlertData.OwnerName,
+            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
+            LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
+            LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+            UserId = Constants.UserData.Id,
+            PetId = Constants.PetData.Id
         };
     }
 
@@ -65,12 +76,25 @@ public static class MissingAlertGenerator
     {
         return new CreateMissingAlertRequest()
         {
-            OwnerName = "Text",
-            OwnerPhoneNumber = "(11) 11111-1111",
-            LastSeenLocationLatitude = 90,
-            LastSeenLocationLongitude = 90,
+            OwnerName = Constants.MissingAlertData.OwnerName,
+            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
+            LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
+            LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
             UserId = null,
-            PetId = Guid.NewGuid()
+            PetId = Constants.PetData.Id
+        };
+    }
+
+    public static EditMissingAlertRequest GenerateEditMissingAlertRequest()
+    {
+        return new EditMissingAlertRequest()
+        {
+            OwnerName = Constants.UserData.FullName,
+            OwnerPhoneNumber = Constants.UserData.PhoneNumber,
+            LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
+            LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+            UserId = Constants.MissingAlertData.UserId,
+            PetId = Constants.MissingAlertData.PetId
         };
     }
 }

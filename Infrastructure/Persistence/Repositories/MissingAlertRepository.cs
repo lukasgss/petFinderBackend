@@ -14,10 +14,9 @@ public class MissingAlertRepository : GenericRepository<MissingAlert>, IMissingA
         _dbContext = dbContext;
     }
 
-    public async Task<MissingAlert?> GetMissingAlertByIdAsync(Guid id)
+    public async Task<MissingAlert?> GetByIdAsync(Guid id)
     {
         return await _dbContext.MissingAlerts
-            .AsNoTracking()
             .Include(alert => alert.Pet)
                 .ThenInclude(pet => pet.Breed)
             .Include(alert => alert.Pet)

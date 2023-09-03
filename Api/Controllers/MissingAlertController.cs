@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Entities.Alerts.DTOs;
 using Application.Common.Validations.Alerts.MissingAlertValidations;
 using Application.Common.Validations.Errors;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -24,14 +25,14 @@ public class MissingAlertController : ControllerBase
     }
 
     [HttpGet("{alertId:guid}", Name = "GetMissingAlertById")]
-    public async Task<ActionResult<MissingAlertResponse>> GetMissingAlertById(Guid alertId)
+    public async Task<ActionResult<MissingAlertResponse>> GetById(Guid alertId)
     {
-        MissingAlertResponse missingAlert = await _missingAlertService.GetMissingAlertByIdAsync(alertId);
+        MissingAlertResponse missingAlert = await _missingAlertService.GetByIdAsync(alertId);
         return Ok(missingAlert);
     }
 
     [HttpPost]
-    public async Task<ActionResult<MissingAlertResponse>> CreateMissingAlert(
+    public async Task<ActionResult<MissingAlertResponse>> Create(
         CreateMissingAlertRequest createAlertRequest)
     {
         CreateMissingAlertValidator requestValidator = new();
@@ -45,11 +46,42 @@ public class MissingAlertController : ControllerBase
         Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         MissingAlertResponse createdMissingAlert =
-            await _missingAlertService.CreateMissingAlertAsync(createAlertRequest, userId);
+            await _missingAlertService.CreateAsync(createAlertRequest, userId);
 
         return new CreatedAtRouteResult(
-            nameof(GetMissingAlertById),
+            nameof(GetById),
             new { alertId = createdMissingAlert.Id },
             createdMissingAlert);
+    }
+
+    [Authorize]
+    [HttpPut("{alertId:guid}")]
+    public async Task<ActionResult<MissingAlertResponse>> Edit(EditMissingAlertRequest editMissingAlertRequest,
+        Guid alertId)
+    {
+        EditMissingAlertValidator requestValidator = new();
+        ValidationResult validationResult = requestValidator.Validate(editMissingAlertRequest);
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.Errors.Select(e => new ValidationError(e.PropertyName, e.ErrorMessage));
+            return BadRequest(errors);
+        }
+
+        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+        MissingAlertResponse editedAlert =
+            await _missingAlertService.EditAsync(editMissingAlertRequest, userId, alertId);
+
+        return Ok(editedAlert);
+    }
+
+    [Authorize]
+    [HttpDelete("{alertId:guid}")]
+    public async Task<ActionResult> Delete(Guid alertId)
+    {
+        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        await _missingAlertService.DeleteAsync(alertId, userId);
+        
+        return Ok();
     }
 }

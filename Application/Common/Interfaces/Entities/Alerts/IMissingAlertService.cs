@@ -4,9 +4,11 @@ namespace Application.Common.Interfaces.Entities.Alerts;
 
 public interface IMissingAlertService
 {
-    Task<MissingAlertResponse> GetMissingAlertByIdAsync(Guid missingAlertId);
+    Task<MissingAlertResponse> GetByIdAsync(Guid missingAlertId);
 
-    Task<MissingAlertResponse> CreateMissingAlertAsync(
+    Task<MissingAlertResponse> CreateAsync(
         CreateMissingAlertRequest createMissingAlertRequest,
         Guid? userId);
+    Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest, Guid? userId, Guid routeId);
+    Task DeleteAsync(Guid missingAlertId, Guid? userId);
 }

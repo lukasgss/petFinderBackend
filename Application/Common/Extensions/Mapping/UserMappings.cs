@@ -5,7 +5,7 @@ namespace Application.Common.Extensions.Mapping;
 
 public static class UserMappings
 {
-    public static OwnerResponse ConvertToOwnerResponse(this User user)
+    public static OwnerResponse ToOwnerResponse(this User user)
     {
         return new OwnerResponse()
         {
@@ -15,7 +15,7 @@ public static class UserMappings
         };
     }
 
-    public static UserDataResponse ConvertToUserDataResponse(this User user)
+    public static UserDataResponse ToUserDataResponse(this User user)
     {
         return new UserDataResponse()
         {
@@ -26,7 +26,7 @@ public static class UserMappings
         };
     }
 
-    public static UserResponse ConvertToUserResponse(this User user, string jwtToken)
+    public static UserResponse ToUserResponse(this User user, string jwtToken)
     {
         return new UserResponse()
         {

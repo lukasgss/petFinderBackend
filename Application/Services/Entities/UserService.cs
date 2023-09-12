@@ -34,7 +34,7 @@ public class UserService : IUserService
             throw new NotFoundException("Não foi possível obter o usuário com o id especificado.");
         }
 
-        return searchedUser.ConvertToUserDataResponse();
+        return searchedUser.ToUserDataResponse();
     }
 
     public async Task<UserResponse> RegisterAsync(CreateUserRequest createUserRequest)
@@ -67,7 +67,7 @@ public class UserService : IUserService
 
         string jwtToken = _jwtTokenGenerator.GenerateToken(userToCreate.Id, userToCreate.FullName);
 
-        return userToCreate.ConvertToUserResponse(jwtToken);
+        return userToCreate.ToUserResponse(jwtToken);
     }
 
     public async Task<UserResponse> LoginAsync(LoginUserRequest loginUserRequest)
@@ -99,6 +99,6 @@ public class UserService : IUserService
 
         string jwtToken = _jwtTokenGenerator.GenerateToken(userToLogin.Id, userToLogin.FullName);
 
-        return userToLogin.ConvertToUserResponse(jwtToken);
+        return userToLogin.ToUserResponse(jwtToken);
     }
 }

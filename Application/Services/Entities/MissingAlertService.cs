@@ -1,5 +1,4 @@
 using Application.Common.Exceptions;
-using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
 using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.DTOs;
@@ -41,20 +40,7 @@ public class MissingAlertService : IMissingAlertService
             throw new NotFoundException("Alerta de desaparecimento com o id especificado não existe.");
         }
 
-        return new MissingAlertResponse()
-        {
-            Id = missingAlert.Id,
-            OwnerName = missingAlert.OwnerName,
-            OwnerPhoneNumber = missingAlert.OwnerPhoneNumber,
-            RegistrationDate = missingAlert.RegistrationDate,
-            LastSeenLocationLatitude = missingAlert.LastSeenLocationLatitude,
-            LastSeenLocationLongitude = missingAlert.LastSeenLocationLongitude,
-            PetHasBeenRecovered = missingAlert.PetHasBeenRecovered,
-            Pet = missingAlert.Pet.ConvertToPetResponseNoOwner(
-                missingAlert.Pet.Colors.ConvertToListOfColorResponse(),
-                missingAlert.Pet.Breed.ConvertToBreedResponse()),
-            Owner = missingAlert.User?.ConvertToOwnerResponse()
-        };
+        return missingAlert.ToMissingAlertResponse();
     }
 
     public async Task<MissingAlertResponse> CreateAsync(CreateMissingAlertRequest createMissingAlertRequest,
@@ -90,7 +76,7 @@ public class MissingAlertService : IMissingAlertService
         _missingAlertRepository.Add(missingAlertToCreate);
         await _missingAlertRepository.CommitAsync();
 
-        return missingAlertToCreate.ConvertToMissingAlertResponse();
+        return missingAlertToCreate.ToMissingAlertResponse();
     }
 
     public async Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest,
@@ -131,7 +117,7 @@ public class MissingAlertService : IMissingAlertService
 
         await _missingAlertRepository.CommitAsync();
 
-        return dbMissingAlert.ConvertToMissingAlertResponse();
+        return dbMissingAlert.ToMissingAlertResponse();
     }
 
     public async Task DeleteAsync(Guid missingAlertId, Guid? userId)
@@ -167,7 +153,7 @@ public class MissingAlertService : IMissingAlertService
         missingAlert.PetHasBeenRecovered = true;
         await _missingAlertRepository.CommitAsync();
 
-        return missingAlert.ConvertToMissingAlertResponse();
+        return missingAlert.ToMissingAlertResponse();
     }
 
     private static void CheckUserPermissionToCreate(Guid? userId, Guid? requestUserId)

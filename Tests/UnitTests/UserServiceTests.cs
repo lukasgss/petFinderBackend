@@ -1,4 +1,3 @@
-using System;
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Authentication;
@@ -48,7 +47,7 @@ public class UserServiceTests
     {
         User searchedUser = UserGenerator.GenerateUser();
         _userRepositoryMock.GetUserByIdAsync(searchedUser.Id).Returns(searchedUser);
-        UserDataResponse expectedUser = searchedUser.ConvertToUserDataResponse();
+        UserDataResponse expectedUser = searchedUser.ToUserDataResponse();
 
         UserDataResponse userResponse = await _sut.GetUserByIdAsync(searchedUser.Id);
 
@@ -98,7 +97,7 @@ public class UserServiceTests
             .Returns(expectedIdentityResult);
         _jwtTokenGeneratorMock.GenerateToken(Constants.UserData.Id, Constants.UserData.FullName).Returns(Constants.UserData.JwtToken);
         
-        UserResponse expectedUserResponse = UserGenerator.GenerateUser().ConvertToUserResponse(Constants.UserData.JwtToken);
+        UserResponse expectedUserResponse = UserGenerator.GenerateUser().ToUserResponse(Constants.UserData.JwtToken);
 
         // Act
         UserResponse userResponse = await _sut.RegisterAsync(createUserRequest);
@@ -149,7 +148,7 @@ public class UserServiceTests
         _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
             .Returns(fakeSignInResult);
         _jwtTokenGeneratorMock.GenerateToken(user.Id, user.FullName).Returns(Constants.UserData.JwtToken);
-        UserResponse expectedUserResponse = UserGenerator.GenerateUser().ConvertToUserResponse(Constants.UserData.JwtToken);
+        UserResponse expectedUserResponse = UserGenerator.GenerateUser().ToUserResponse(Constants.UserData.JwtToken);
 
         UserResponse userResponse = await _sut.LoginAsync(loginUserRequest);
 

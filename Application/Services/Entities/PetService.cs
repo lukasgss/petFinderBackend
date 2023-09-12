@@ -43,15 +43,7 @@ public class PetService : IPetService
             throw new NotFoundException("Animal com o id especificado não existe.");
         }
 
-        return new PetResponse()
-        {
-            Id = searchedPet.Id,
-            Name = searchedPet.Name,
-            Observations = searchedPet.Observations,
-            Owner = searchedPet.Owner?.ConvertToOwnerResponse(),
-            Breed = searchedPet.Breed.ConvertToBreedResponse(),
-            Colors = searchedPet.Colors.ConvertToListOfColorResponse()
-        };
+        return searchedPet.ToPetResponse(searchedPet.Owner, searchedPet.Colors, searchedPet.Breed);
     }
 
     public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest, Guid? userId)
@@ -75,15 +67,7 @@ public class PetService : IPetService
         _petRepository.Add(petToBeCreated);
         await _petRepository.CommitAsync();
 
-        return new PetResponse()
-        {
-            Id = petToBeCreated.Id,
-            Name = petToBeCreated.Name,
-            Observations = petToBeCreated.Observations,
-            Owner = petOwner?.ConvertToOwnerResponse(),
-            Breed = breed.ConvertToBreedResponse(),
-            Colors = colors.ConvertToListOfColorResponse()
-        };
+        return petToBeCreated.ToPetResponse(petOwner, colors, breed);
     }
 
     public async Task<PetResponse> EditPetAsync(EditPetRequest editPetRequest, Guid? userId, Guid routeId)
@@ -114,15 +98,7 @@ public class PetService : IPetService
         
         await _petRepository.CommitAsync();
 
-        return new PetResponse()
-        {
-            Id = dbPet.Id,
-            Name = dbPet.Name,
-            Observations = dbPet.Observations,
-            Owner = petOwner.ConvertToOwnerResponse(),
-            Breed = breed.ConvertToBreedResponse(),
-            Colors = colors.ConvertToListOfColorResponse(),
-        };
+        return dbPet.ToPetResponse(petOwner, colors, breed);
     }
 
     public async Task DeletePetAsync(Guid petId, Guid? userId)

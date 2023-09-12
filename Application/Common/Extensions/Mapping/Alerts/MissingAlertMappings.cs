@@ -5,7 +5,7 @@ namespace Application.Common.Extensions.Mapping.Alerts;
 
 public static class MissingAlertMappings
 {
-    public static MissingAlertResponse ConvertToMissingAlertResponse(this MissingAlert missingAlert)
+    public static MissingAlertResponse ToMissingAlertResponse(this MissingAlert missingAlert)
     {
         return new MissingAlertResponse()
         {
@@ -16,10 +16,10 @@ public static class MissingAlertMappings
             LastSeenLocationLatitude = missingAlert.LastSeenLocationLatitude,
             LastSeenLocationLongitude = missingAlert.LastSeenLocationLongitude,
             PetHasBeenRecovered = missingAlert.PetHasBeenRecovered,
-            Pet = missingAlert.Pet.ConvertToPetResponseNoOwner(
-                missingAlert.Pet.Colors.ConvertToListOfColorResponse(),
-                missingAlert.Pet.Breed.ConvertToBreedResponse()),
-            Owner = missingAlert.User?.ConvertToOwnerResponse()
+            Pet = missingAlert.Pet.ToPetResponseNoOwner(
+                missingAlert.Pet.Colors,
+                missingAlert.Pet.Breed),
+            Owner = missingAlert.User?.ToOwnerResponse()
         };
     }
 }

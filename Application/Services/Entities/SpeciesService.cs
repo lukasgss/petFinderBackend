@@ -18,6 +18,6 @@ public class SpeciesService : ISpeciesService
     {
         IEnumerable<Species> species = await _speciesRepository.GetAllSpecies();
 
-        return species.ConvertToListOfDropdownData();
+        return species.ToListOfDropdownData();
     }
 }

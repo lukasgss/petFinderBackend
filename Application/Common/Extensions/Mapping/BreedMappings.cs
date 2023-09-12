@@ -6,7 +6,7 @@ namespace Application.Common.Extensions.Mapping;
 
 public static class BreedMappings
 {
-    public static BreedResponse ConvertToBreedResponse(this Breed breed)
+    public static BreedResponse ToBreedResponse(this Breed breed)
     {
         return new BreedResponse()
         {
@@ -15,7 +15,7 @@ public static class BreedMappings
         };
     }
 
-    public static DropdownDataResponse<int> ConvertToDropdownData(this Breed breed)
+    public static DropdownDataResponse<int> ToDropdownData(this Breed breed)
     {
         return new DropdownDataResponse<int>()
         {
@@ -24,12 +24,12 @@ public static class BreedMappings
         };
     }
 
-    public static List<DropdownDataResponse<int>> ConvertToListOfDropdownData(this IEnumerable<Breed> breeds)
+    public static List<DropdownDataResponse<int>> ToListOfDropdownData(this IEnumerable<Breed> breeds)
     {
         List<DropdownDataResponse<int>> dropdownDataBreeds= new();
         foreach (Breed breed in breeds)
         {
-            dropdownDataBreeds.Add(breed.ConvertToDropdownData());
+            dropdownDataBreeds.Add(breed.ToDropdownData());
         }
 
         return dropdownDataBreeds;

@@ -58,7 +58,7 @@ public class MissingAlertServiceTests
     {
         MissingAlert missingAlert = MissingAlertGenerator.GenerateMissingAlert();
         _missingAlertRepositoryMock.GetByIdAsync(missingAlert.Id).Returns(missingAlert);
-        MissingAlertResponse expectedMissingAlert = missingAlert.ConvertToMissingAlertResponse();
+        MissingAlertResponse expectedMissingAlert = missingAlert.ToMissingAlertResponse();
 
         MissingAlertResponse missingAlertResponse = await _sut.GetByIdAsync(missingAlert.Id);
 

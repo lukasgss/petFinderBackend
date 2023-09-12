@@ -5,7 +5,7 @@ namespace Application.Common.Extensions.Mapping;
 
 public static class ColorMappings
 {
-    public static ColorResponse ConvertToColorResponse(this Color color)
+    public static ColorResponse ToColorResponse(this Color color)
     {
         return new ColorResponse()
         {
@@ -15,21 +15,13 @@ public static class ColorMappings
         };
     }
 
-    public static IEnumerable<ColorResponse> ConvertToListOfColorResponse(this IEnumerable<Color> colors)
+    public static IEnumerable<ColorResponse> ToListOfColorResponse(this IEnumerable<Color> colors)
     {
-        List<ColorResponse> colorResponses = new();
-
-        foreach (Color color in colors)
+        return colors.Select(color => new ColorResponse()
         {
-            colorResponses.Add(new ColorResponse()
-            {
-                Id = color.Id,
-                Name = color.Name,
-                HexCode = color.HexCode
-            });
-        }
-
-        return colorResponses;
+            Id = color.Id,
+            Name = color.Name,
+            HexCode = color.HexCode
+        }).ToList();
     }
-
 }

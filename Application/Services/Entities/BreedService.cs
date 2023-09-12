@@ -24,6 +24,6 @@ public class BreedService : IBreedService
 
         IEnumerable<Breed> breeds = await _breedRepository.GetBreedsByNameAsync(breedName, speciesId);
         
-        return breeds.ConvertToListOfDropdownData();
+        return breeds.ToListOfDropdownData();
     }
 }

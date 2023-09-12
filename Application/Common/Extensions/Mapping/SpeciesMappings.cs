@@ -5,7 +5,7 @@ namespace Application.Common.Extensions.Mapping;
 
 public static class SpeciesMappings
 {
-    public static DropdownDataResponse<int> ConvertToDropdownData(this Species species)
+    public static DropdownDataResponse<int> ToDropdownData(this Species species)
     {
         return new DropdownDataResponse<int>()
         {
@@ -14,12 +14,12 @@ public static class SpeciesMappings
         };
     }
     
-    public static List<DropdownDataResponse<int>> ConvertToListOfDropdownData(this IEnumerable<Species> species)
+    public static List<DropdownDataResponse<int>> ToListOfDropdownData(this IEnumerable<Species> species)
     {
         List<DropdownDataResponse<int>> dropdownDataSpecies = new();
         foreach (Species speciesValue in species)
         {
-            dropdownDataSpecies.Add(speciesValue.ConvertToDropdownData());
+            dropdownDataSpecies.Add(speciesValue.ToDropdownData());
         }
 
         return dropdownDataSpecies;

@@ -34,10 +34,10 @@ public static class MissingAlertGenerator
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
             PetHasBeenRecovered = Constants.MissingAlertData.PetHasBeenRecovered,
-            Pet = Constants.MissingAlertData.Pet.ConvertToPetResponseNoOwner(
-                ColorGenerator.GenerateListOfColors().ConvertToListOfColorResponse(),
-                BreedGenerator.GenerateBreed().ConvertToBreedResponse()),
-            Owner = Constants.MissingAlertData.User?.ConvertToOwnerResponse()
+            Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
+                ColorGenerator.GenerateListOfColors(),
+                BreedGenerator.GenerateBreed()),
+            Owner = Constants.MissingAlertData.User?.ToOwnerResponse()
         };
     }
 
@@ -52,10 +52,10 @@ public static class MissingAlertGenerator
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
             PetHasBeenRecovered = true,
-            Pet = Constants.MissingAlertData.Pet.ConvertToPetResponseNoOwner(
-                ColorGenerator.GenerateListOfColors().ConvertToListOfColorResponse(),
-                BreedGenerator.GenerateBreed().ConvertToBreedResponse()),
-            Owner = Constants.MissingAlertData.User?.ConvertToOwnerResponse()
+            Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
+                ColorGenerator.GenerateListOfColors(),
+                BreedGenerator.GenerateBreed()),
+            Owner = Constants.MissingAlertData.User?.ToOwnerResponse()
         };
     }
     
@@ -70,9 +70,9 @@ public static class MissingAlertGenerator
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
             PetHasBeenRecovered = Constants.MissingAlertData.PetHasBeenRecovered,
-            Pet = Constants.MissingAlertData.Pet.ConvertToPetResponseNoOwner(
-                ColorGenerator.GenerateListOfColors().ConvertToListOfColorResponse(),
-                BreedGenerator.GenerateBreed().ConvertToBreedResponse()),
+            Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
+                ColorGenerator.GenerateListOfColors(),
+                BreedGenerator.GenerateBreed()),
             Owner = null
         };
     }

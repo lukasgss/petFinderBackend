@@ -61,10 +61,7 @@ public class PetServiceTests
     {
         Pet pet = PetGenerator.GeneratePet();
         _petRepositoryMock.GetPetByIdAsync(Arg.Any<Guid>()).Returns(pet);
-        PetResponse expectedPetResponse = pet.ConvertToPetResponse(
-            pet.Owner!.ConvertToOwnerResponse(),
-            pet.Colors.ConvertToListOfColorResponse(),
-            pet.Breed.ConvertToBreedResponse());
+        PetResponse expectedPetResponse = pet.ToPetResponse(pet.Owner, pet.Colors, pet.Breed);
 
         PetResponse petResponse = await _sut.GetPetBydIdAsync(pet.Id);
 
@@ -128,10 +125,7 @@ public class PetServiceTests
         Pet petToBeCreated = PetGenerator.GeneratePet();
         _guidProviderMock.NewGuid().Returns(petToBeCreated.Id);
 
-        PetResponse expectedPetResponse = petToBeCreated.ConvertToPetResponse(
-            owner: null,
-            colors.ConvertToListOfColorResponse(),
-            breed.ConvertToBreedResponse());
+        PetResponse expectedPetResponse = petToBeCreated.ToPetResponse(owner: null, colors, breed);
 
         // Act
         PetResponse petResponse = await _sut.CreatePetAsync(createPetRequest, userId: null);
@@ -157,10 +151,7 @@ public class PetServiceTests
         _guidProviderMock.NewGuid().Returns(petToBeCreated.Id);
 
 
-        PetResponse expectedPetResponse = petToBeCreated.ConvertToPetResponse(
-            owner: loggedInUser.ConvertToOwnerResponse(),
-            colors.ConvertToListOfColorResponse(),
-            breed.ConvertToBreedResponse());
+        PetResponse expectedPetResponse = petToBeCreated.ToPetResponse(owner: loggedInUser, colors, breed);
 
         // Act
         PetResponse petResponse = await _sut.CreatePetAsync(createPetRequest, userId: loggedInUser.Id);

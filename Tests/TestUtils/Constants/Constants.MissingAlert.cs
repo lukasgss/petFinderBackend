@@ -16,7 +16,7 @@ public static partial class Constants
         public const bool PetHasBeenRecovered = Constants.PetData.PetHasBeenRecovered;
         public static readonly Pet Pet = PetGenerator.GeneratePet();
         public static readonly Guid PetId = Pet.Id;
-        public static readonly User? User = UserGenerator.GenerateUser();
+        public static readonly User User = UserGenerator.GenerateUser();
         public static readonly Guid UserId = User.Id;
     }
 }

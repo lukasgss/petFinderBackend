@@ -37,7 +37,7 @@ public static class MissingAlertGenerator
             Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
                 ColorGenerator.GenerateListOfColors(),
                 BreedGenerator.GenerateBreed()),
-            Owner = Constants.MissingAlertData.User?.ToOwnerResponse()
+            Owner = Constants.MissingAlertData.User.ToOwnerResponse()
         };
     }
 
@@ -55,25 +55,7 @@ public static class MissingAlertGenerator
             Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
                 ColorGenerator.GenerateListOfColors(),
                 BreedGenerator.GenerateBreed()),
-            Owner = Constants.MissingAlertData.User?.ToOwnerResponse()
-        };
-    }
-    
-    public static MissingAlertResponse GenerateMissingAlertResponseWithoutOwner()
-    {
-        return new MissingAlertResponse()
-        {
-            Id = Constants.MissingAlertData.Id,
-            OwnerName = Constants.MissingAlertData.OwnerName,
-            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
-            RegistrationDate = Constants.MissingAlertData.RegistrationDate,
-            LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
-            LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
-            PetHasBeenRecovered = Constants.MissingAlertData.PetHasBeenRecovered,
-            Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
-                ColorGenerator.GenerateListOfColors(),
-                BreedGenerator.GenerateBreed()),
-            Owner = null
+            Owner = Constants.MissingAlertData.User.ToOwnerResponse()
         };
     }
 
@@ -86,19 +68,6 @@ public static class MissingAlertGenerator
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
             UserId = Constants.UserData.Id,
-            PetId = Constants.PetData.Id
-        };
-    }
-
-    public static CreateMissingAlertRequest GenerateCreateMissingAlertWithoutOwner()
-    {
-        return new CreateMissingAlertRequest()
-        {
-            OwnerName = Constants.MissingAlertData.OwnerName,
-            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
-            LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
-            LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
-            UserId = null,
             PetId = Constants.PetData.Id
         };
     }

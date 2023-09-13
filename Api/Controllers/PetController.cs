@@ -41,7 +41,7 @@ public class PetController : ControllerBase
             return BadRequest(errors);
         }
 
-        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         PetResponse createdPet = await _petService.CreatePetAsync(createPetRequest, userId);
 
@@ -61,7 +61,7 @@ public class PetController : ControllerBase
             return BadRequest(errors);
         }
 
-        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         PetResponse editedPet = await _petService.EditPetAsync(editPetRequest, userId, petId);
         return Ok(editedPet);
@@ -71,7 +71,7 @@ public class PetController : ControllerBase
     [HttpDelete("{petId:guid}")]
     public async Task<ActionResult> DeletePet(Guid petId)
     {
-        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         await _petService.DeletePetAsync(petId, userId);
         return Ok();

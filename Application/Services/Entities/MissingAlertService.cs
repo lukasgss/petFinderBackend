@@ -34,31 +34,19 @@ public class MissingAlertService : IMissingAlertService
 
     public async Task<MissingAlertResponse> GetByIdAsync(Guid missingAlertId)
     {
-        MissingAlert? missingAlert = await _missingAlertRepository.GetByIdAsync(missingAlertId);
-        if (missingAlert is null)
-        {
-            throw new NotFoundException("Alerta de desaparecimento com o id especificado não existe.");
-        }
+        MissingAlert missingAlert = await ValidateAndAssignMissingAlertAsync(missingAlertId);
 
         return missingAlert.ToMissingAlertResponse();
     }
 
     public async Task<MissingAlertResponse> CreateAsync(CreateMissingAlertRequest createMissingAlertRequest,
-        Guid? userId)
+        Guid userId)
     {
-        Pet? missingPet = await _petRepository.GetPetByIdAsync(createMissingAlertRequest.PetId);
-        if (missingPet is null)
-        {
-            throw new NotFoundException("Animal com o id especificado não existe.");
-        }
+        Pet missingPet = await ValidateAndAssignPetAsync(createMissingAlertRequest.PetId);
 
         CheckUserPermissionToCreate(userId, createMissingAlertRequest.UserId);
 
-        User? petOwner = null;
-        if (userId is not null)
-        {
-            petOwner = await _userRepository.GetUserByIdAsync((Guid)userId);
-        }
+        User petOwner = await ValidateAndAssignUserAsync(userId);
 
         MissingAlert missingAlertToCreate = new()
         {
@@ -80,7 +68,7 @@ public class MissingAlertService : IMissingAlertService
     }
 
     public async Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest,
-        Guid? userId,
+        Guid userId,
         Guid routeId)
     {
         if (editMissingAlertRequest.Id != routeId)
@@ -88,25 +76,12 @@ public class MissingAlertService : IMissingAlertService
             throw new BadRequestException("Id da rota não coincide com o id especificado.");
         }
 
-        MissingAlert? dbMissingAlert = await _missingAlertRepository.GetByIdAsync(editMissingAlertRequest.Id);
-        if (dbMissingAlert is null)
-        {
-            throw new NotFoundException("Alerta com o id especificado não existe.");
-        }
-
-        Pet? pet = await _petRepository.GetPetByIdAsync(editMissingAlertRequest.PetId);
-        if (pet is null)
-        {
-            throw new NotFoundException("Animal com o id especificado não existe.");
-        }
+        MissingAlert dbMissingAlert = await ValidateAndAssignMissingAlertAsync(editMissingAlertRequest.Id);
+        Pet pet = await ValidateAndAssignPetAsync(editMissingAlertRequest.PetId);
 
         CheckUserPermissionToEdit(userId, editMissingAlertRequest.UserId);
 
-        User? user = await _userRepository.GetUserByIdAsync(editMissingAlertRequest.UserId);
-        if (user is null)
-        {
-            throw new NotFoundException("Usuário com o id especificado não existe.");
-        }
+        User user = await ValidateAndAssignUserAsync(editMissingAlertRequest.UserId);
 
         dbMissingAlert.OwnerName = editMissingAlertRequest.OwnerName;
         dbMissingAlert.OwnerPhoneNumber = editMissingAlertRequest.OwnerPhoneNumber;
@@ -120,15 +95,11 @@ public class MissingAlertService : IMissingAlertService
         return dbMissingAlert.ToMissingAlertResponse();
     }
 
-    public async Task DeleteAsync(Guid missingAlertId, Guid? userId)
+    public async Task DeleteAsync(Guid missingAlertId, Guid userId)
     {
-        MissingAlert? alertToDelete = await _missingAlertRepository.GetByIdAsync(missingAlertId);
-        if (alertToDelete is null)
-        {
-            throw new NotFoundException("Alerta com o id especificado não existe.");
-        }
+        MissingAlert alertToDelete = await ValidateAndAssignMissingAlertAsync(missingAlertId);
 
-        if (alertToDelete.User?.Id != userId)
+        if (alertToDelete.User.Id != userId)
         {
             throw new ForbiddenException("Não é possível excluir alertas de outros usuários.");
         }
@@ -137,15 +108,11 @@ public class MissingAlertService : IMissingAlertService
         await _missingAlertRepository.CommitAsync();
     }
 
-    public async Task<MissingAlertResponse> MarkAsResolved(Guid alertId, Guid? userId)
+    public async Task<MissingAlertResponse> MarkAsResolvedAsync(Guid alertId, Guid userId)
     {
-        MissingAlert? missingAlert = await _missingAlertRepository.GetByIdAsync(alertId);
-        if (missingAlert is null)
-        {
-            throw new NotFoundException("Alerta com o id especificado não existe.");
-        }
+        MissingAlert missingAlert = await ValidateAndAssignMissingAlertAsync(alertId);
 
-        if (userId != missingAlert.User?.Id)
+        if (userId != missingAlert.User.Id)
         {
             throw new ForbiddenException("Não é possível marcar alertas de outros usuários como encontrado.");
         }
@@ -156,9 +123,9 @@ public class MissingAlertService : IMissingAlertService
         return missingAlert.ToMissingAlertResponse();
     }
 
-    private static void CheckUserPermissionToCreate(Guid? userId, Guid? requestUserId)
+    private static void CheckUserPermissionToCreate(Guid userId, Guid requestUserId)
     {
-        if (userId is not null && userId != requestUserId)
+        if (userId != requestUserId)
         {
             throw new ForbiddenException("Não é possível criar alertas para outros usuários.");
         }
@@ -170,5 +137,38 @@ public class MissingAlertService : IMissingAlertService
         {
             throw new ForbiddenException("Não é possível editar alertas de outros usuários.");
         }
+    }
+    
+    private async Task<MissingAlert> ValidateAndAssignMissingAlertAsync(Guid missingAlertId)
+    {
+        MissingAlert? dbMissingAlert = await _missingAlertRepository.GetByIdAsync(missingAlertId);
+        if (dbMissingAlert is null)
+        {
+            throw new NotFoundException("Alerta com o id especificado não existe.");
+        }
+
+        return dbMissingAlert;
+    }
+
+    private async Task<User> ValidateAndAssignUserAsync(Guid userId)
+    {
+        User? user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null)
+        {
+            throw new NotFoundException("Usuário com o id especificado não existe.");
+        }
+
+        return user;
+    }
+
+    private async Task<Pet> ValidateAndAssignPetAsync(Guid petId)
+    {
+        Pet? pet = await _petRepository.GetPetByIdAsync(petId);
+        if (pet is null)
+        {
+            throw new NotFoundException("Animal com o id especificado não existe.");
+        }
+        
+        return pet;
     }
 }

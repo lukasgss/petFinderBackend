@@ -8,8 +8,8 @@ public interface IMissingAlertService
 
     Task<MissingAlertResponse> CreateAsync(
         CreateMissingAlertRequest createMissingAlertRequest,
-        Guid? userId);
-    Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest, Guid? userId, Guid routeId);
-    Task DeleteAsync(Guid missingAlertId, Guid? userId);
-    Task<MissingAlertResponse> MarkAsResolved(Guid alertId, Guid? userId);
+        Guid userId);
+    Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest, Guid userId, Guid routeId);
+    Task DeleteAsync(Guid missingAlertId, Guid userId);
+    Task<MissingAlertResponse> MarkAsResolvedAsync(Guid alertId, Guid userId);
 }

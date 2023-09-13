@@ -37,22 +37,18 @@ public class PetService : IPetService
 
     public async Task<PetResponse> GetPetBydIdAsync(Guid petId)
     {
-        Pet? searchedPet = await _petRepository.GetPetByIdAsync(petId);
-        if (searchedPet is null)
-        {
-            throw new NotFoundException("Animal com o id especificado não existe.");
-        }
+        Pet searchedPet = await ValidateAndAssignPetAsync(petId);
 
         return searchedPet.ToPetResponse(searchedPet.Owner, searchedPet.Colors, searchedPet.Breed);
     }
 
-    public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest, Guid? userId)
+    public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest, Guid userId)
     {
-        Breed breed = await GetBreedAsync(createPetRequest.BreedId);
-        Species species = await GetSpeciesAsync(createPetRequest.SpeciesId);
-        List<Color> colors = await GetColorsAsync(createPetRequest.ColorIds);
+        Breed breed = await ValidateAndAssignBreedAsync(createPetRequest.BreedId);
+        Species species = await ValidateAndAssignSpeciesAsync(createPetRequest.SpeciesId);
+        List<Color> colors = await ValidateAndAssignColorsAsync(createPetRequest.ColorIds);
 
-        User? petOwner = await AssignPetOwner(userId);
+        User petOwner = await ValidateAndAssignUserAsync(userId);
 
         Pet petToBeCreated = new()
         {
@@ -70,20 +66,20 @@ public class PetService : IPetService
         return petToBeCreated.ToPetResponse(petOwner, colors, breed);
     }
 
-    public async Task<PetResponse> EditPetAsync(EditPetRequest editPetRequest, Guid? userId, Guid routeId)
+    public async Task<PetResponse> EditPetAsync(EditPetRequest editPetRequest, Guid userId, Guid routeId)
     {
         if (editPetRequest.Id != routeId)
         {
             throw new BadRequestException("Id da rota não coincide com o id especificado.");
         }
-        Pet dbPet = await GetPetAsync(editPetRequest.Id);
+        Pet dbPet = await ValidateAndAssignPetAsync(editPetRequest.Id);
 
-        Breed breed = await GetBreedAsync(editPetRequest.BreedId);
-        Species species = await GetSpeciesAsync(editPetRequest.SpeciesId);
-        List<Color> colors = await GetColorsAsync(editPetRequest.ColorIds);
-        User? petOwner = await AssignPetOwner(userId);
+        Breed breed = await ValidateAndAssignBreedAsync(editPetRequest.BreedId);
+        Species species = await ValidateAndAssignSpeciesAsync(editPetRequest.SpeciesId);
+        List<Color> colors = await ValidateAndAssignColorsAsync(editPetRequest.ColorIds);
+        User petOwner = await ValidateAndAssignUserAsync(userId);
 
-        if (petOwner is null || dbPet.Owner?.Id != petOwner.Id)
+        if (dbPet.Owner?.Id != userId)
         {
             throw new UnauthorizedException("Você não possui permissão para editar dados desse animal.");
         }
@@ -101,10 +97,10 @@ public class PetService : IPetService
         return dbPet.ToPetResponse(petOwner, colors, breed);
     }
 
-    public async Task DeletePetAsync(Guid petId, Guid? userId)
+    public async Task DeletePetAsync(Guid petId, Guid userId)
     {
-        Pet petToDelete = await GetPetAsync(petId);
-        if (petToDelete.Owner is null || petToDelete.Owner.Id != userId)
+        Pet petToDelete = await ValidateAndAssignPetAsync(petId);
+        if (petToDelete.Owner.Id != userId)
         {
             throw new UnauthorizedException("Você não possui permissão para excluir o animal.");
         }
@@ -113,28 +109,29 @@ public class PetService : IPetService
         await _petRepository.CommitAsync();
     }
     
-    private async Task<User?> AssignPetOwner(Guid? userId)
+    private async Task<User> ValidateAndAssignUserAsync(Guid userId)
     {
-        if (userId is null)
+        User? user = await _userRepository.GetUserByIdAsync(userId);
+        if (user is null)
         {
-            return null;
+            throw new NotFoundException("Usuário com o id especificado não existe.");
         }
 
-        return await _userRepository.GetUserByIdAsync((Guid)userId);
+        return user;
     }
 
-    private async Task<Pet> GetPetAsync(Guid petId)
+    private async Task<Pet> ValidateAndAssignPetAsync(Guid petId)
     {
         Pet? pet = await _petRepository.GetPetByIdAsync(petId);
         if (pet is null)
         {
-            throw new NotFoundException("Animal especificado não existe.");
+            throw new NotFoundException("Animal com o id especificado não existe.");
         }
 
         return pet;
     }
 
-    private async Task<Breed> GetBreedAsync(int breedId)
+    private async Task<Breed> ValidateAndAssignBreedAsync(int breedId)
     {
         Breed? breed = await _breedRepository.GetBreedByIdAsync(breedId);
         if (breed is null)
@@ -145,7 +142,7 @@ public class PetService : IPetService
         return breed;
     }
 
-    private async Task<Species> GetSpeciesAsync(int speciesId)
+    private async Task<Species> ValidateAndAssignSpeciesAsync(int speciesId)
     {
         Species? species = await _speciesRepository.GetSpeciesByIdAsync(speciesId);
         if (species is null)
@@ -156,7 +153,7 @@ public class PetService : IPetService
         return species;
     }
 
-    private async Task<List<Color>> GetColorsAsync(List<int> colorIds)
+    private async Task<List<Color>> ValidateAndAssignColorsAsync(List<int> colorIds)
     {
         List<Color> colors = await _colorRepository.GetMultipleColorsByIdsAsync(colorIds);
         if (colors.Count != colorIds.Count || colors.Count == 0)

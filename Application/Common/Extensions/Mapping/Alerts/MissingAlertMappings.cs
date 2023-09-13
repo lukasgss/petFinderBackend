@@ -19,7 +19,7 @@ public static class MissingAlertMappings
             Pet = missingAlert.Pet.ToPetResponseNoOwner(
                 missingAlert.Pet.Colors,
                 missingAlert.Pet.Breed),
-            Owner = missingAlert.User?.ToOwnerResponse()
+            Owner = missingAlert.User.ToOwnerResponse()
         };
     }
 }

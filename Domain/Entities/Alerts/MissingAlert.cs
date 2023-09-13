@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Entities;
 
 namespace Domain.Entities.Alerts;
 
@@ -23,13 +22,13 @@ public class MissingAlert
     [Required, Column(TypeName = "decimal(6, 3)")]
     public double LastSeenLocationLongitude { get; set; }
 
-    public bool PetHasBeenRecovered { get; set; } = false;
+    public bool PetHasBeenRecovered { get; set; }
 
     [Required, ForeignKey("PetId")] 
     public virtual Pet Pet { get; set; } = null!;
     public Guid PetId { get; set; }
 
-    [ForeignKey("UserId")]
-    public virtual User? User { get; set; }
-    public Guid? UserId { get; set; }
+    [Required, ForeignKey("UserId")] 
+    public virtual User User { get; set; } = null!;
+    public Guid UserId { get; set; }
 }

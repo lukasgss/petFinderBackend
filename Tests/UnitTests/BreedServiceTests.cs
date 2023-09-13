@@ -15,6 +15,11 @@ public class BreedServiceTests
     private readonly IBreedRepository _breedRepositoryMock;
     private readonly IBreedService _sut;
 
+    private static readonly List<Breed> Breeds = BreedGenerator.GenerateListOfBreeds();
+
+    private static readonly List<DropdownDataResponse<int>> DropdownDataResponses =
+        DropdownDataGenerator.GenerateDropdownDataResponsesOfBreeds(Breeds);
+
     public BreedServiceTests()
     {
         _breedRepositoryMock = Substitute.For<IBreedRepository>();
@@ -36,15 +41,11 @@ public class BreedServiceTests
     [Fact]
     public async Task Get_Breeds_For_Dropdown_Returns_Searched_Breeds()
     {
-        List<Breed> returnedBreeds = BreedGenerator.GenerateListOfBreeds();
         _breedRepositoryMock.GetBreedsByNameAsync(Constants.BreedData.Name, Constants.SpeciesData.Id)
-            .Returns(returnedBreeds);
-        IEnumerable<DropdownDataResponse<int>> expectedData =
-            DropdownDataGenerator.GenerateDropdownDataResponsesOfBreeds(returnedBreeds);
+            .Returns(Breeds);
 
-        IEnumerable<DropdownDataResponse<int>> breedData =
-            await _sut.GetBreedsForDropdown(Constants.BreedData.Name, Constants.SpeciesData.Id);
+        var breedData = await _sut.GetBreedsForDropdown(Constants.BreedData.Name, Constants.SpeciesData.Id);
 
-        Assert.Equivalent(expectedData, breedData);
+        Assert.Equivalent(DropdownDataResponses, breedData);
     }
 }

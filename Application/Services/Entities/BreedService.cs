@@ -15,7 +15,7 @@ public class BreedService : IBreedService
         _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
     }
 
-    public async Task<IEnumerable<DropdownDataResponse<int>>> GetBreedsForDropdown(string breedName, int speciesId)
+    public async Task<List<DropdownDataResponse<int>>> GetBreedsForDropdown(string breedName, int speciesId)
     {
         if (breedName.Length < 2)
         {

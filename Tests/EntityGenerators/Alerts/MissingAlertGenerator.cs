@@ -63,11 +63,8 @@ public static class MissingAlertGenerator
     {
         return new CreateMissingAlertRequest()
         {
-            OwnerName = Constants.MissingAlertData.OwnerName,
-            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
-            UserId = Constants.UserData.Id,
             PetId = Constants.PetData.Id
         };
     }
@@ -76,11 +73,8 @@ public static class MissingAlertGenerator
     {
         return new EditMissingAlertRequest()
         {
-            OwnerName = Constants.UserData.FullName,
-            OwnerPhoneNumber = Constants.UserData.PhoneNumber,
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
-            UserId = Constants.MissingAlertData.UserId,
             PetId = Constants.MissingAlertData.PetId
         };
     }

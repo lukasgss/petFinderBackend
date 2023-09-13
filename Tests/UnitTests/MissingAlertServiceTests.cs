@@ -90,8 +90,10 @@ public class MissingAlertServiceTests
     public async Task Create_Missing_Alert_For_Other_Users_Throws_ForbiddenException()
     {
         _petRepositoryMock.GetPetByIdAsync(CreateMissingAlertRequest.PetId).Returns(Pet);
+        Guid otherUserId = Guid.NewGuid();
+        _userRepositoryMock.GetUserByIdAsync(otherUserId).Returns(User);
 
-        async Task Result() => await _sut.CreateAsync(CreateMissingAlertRequest, userId: Guid.NewGuid());
+        async Task Result() => await _sut.CreateAsync(CreateMissingAlertRequest, userId: otherUserId);
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
         Assert.Equal("Não é possível criar alertas para outros usuários.", exception.Message);
@@ -106,7 +108,7 @@ public class MissingAlertServiceTests
         _guidProviderMock.NewGuid().Returns(ExpectedMissingAlert.Id);
 
         MissingAlertResponse missingAlertResponse =
-            await _sut.CreateAsync(CreateMissingAlertRequest, userId: CreateMissingAlertRequest.UserId);
+            await _sut.CreateAsync(CreateMissingAlertRequest, userId: User.Id);
 
         Assert.Equivalent(ExpectedMissingAlert, missingAlertResponse);
     }
@@ -130,7 +132,7 @@ public class MissingAlertServiceTests
 
         async Task Result() => await _sut.EditAsync(
             editMissingAlertRequest: EditMissingAlertRequest,
-            userId: EditMissingAlertRequest.UserId,
+            userId: User.Id,
             routeId: EditMissingAlertRequest.Id);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
@@ -145,7 +147,7 @@ public class MissingAlertServiceTests
 
         async Task Result() => await _sut.EditAsync(
             editMissingAlertRequest: EditMissingAlertRequest,
-            userId: EditMissingAlertRequest.UserId,
+            userId: User.Id,
             routeId: EditMissingAlertRequest.Id);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);

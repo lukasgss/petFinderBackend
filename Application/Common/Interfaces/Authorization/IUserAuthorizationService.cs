@@ -4,5 +4,5 @@ namespace Application.Common.Interfaces.Authorization;
 
 public interface IUserAuthorizationService
 {
-    Guid? GetUserIdFromJwtToken(ClaimsPrincipal user);
+    Guid GetUserIdFromJwtToken(ClaimsPrincipal user);
 }

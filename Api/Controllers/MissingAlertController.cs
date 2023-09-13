@@ -30,7 +30,8 @@ public class MissingAlertController : ControllerBase
         MissingAlertResponse missingAlert = await _missingAlertService.GetByIdAsync(alertId);
         return Ok(missingAlert);
     }
-
+    
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<MissingAlertResponse>> Create(
         CreateMissingAlertRequest createAlertRequest)
@@ -43,7 +44,7 @@ public class MissingAlertController : ControllerBase
             return BadRequest(errors);
         }
 
-        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         MissingAlertResponse createdMissingAlert =
             await _missingAlertService.CreateAsync(createAlertRequest, userId);
@@ -67,7 +68,7 @@ public class MissingAlertController : ControllerBase
             return BadRequest(errors);
         }
 
-        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         MissingAlertResponse editedAlert =
             await _missingAlertService.EditAsync(editMissingAlertRequest, userId, alertId);
@@ -79,7 +80,7 @@ public class MissingAlertController : ControllerBase
     [HttpDelete("{alertId:guid}")]
     public async Task<ActionResult> Delete(Guid alertId)
     {
-        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
         await _missingAlertService.DeleteAsync(alertId, userId);
 
         return Ok();
@@ -89,8 +90,8 @@ public class MissingAlertController : ControllerBase
     [HttpPost("resolve/{alertId:guid}")]
     public async Task<ActionResult<MissingAlertResponse>> MarkAsResolved(Guid alertId)
     {
-        Guid? userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
-        MissingAlertResponse missingAlertResponse = await _missingAlertService.MarkAsResolved(alertId, userId);
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        MissingAlertResponse missingAlertResponse = await _missingAlertService.MarkAsResolvedAsync(alertId, userId);
 
         return Ok(missingAlertResponse);
     }

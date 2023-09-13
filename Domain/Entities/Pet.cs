@@ -13,9 +13,9 @@ public class Pet
     [MaxLength(500)]
     public string? Observations { get; set; }
 
-    [ForeignKey("UserId")]
-    public virtual User? Owner { get; set; }
-    public Guid? UserId { get; set; }
+    [Required, ForeignKey("UserId")] 
+    public virtual User Owner { get; set; } = null!;
+    public Guid UserId { get; set; }
 
     [ForeignKey("BreedId")]
     public Breed Breed { get; set; } = null!;

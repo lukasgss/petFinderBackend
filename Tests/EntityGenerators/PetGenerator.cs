@@ -9,10 +9,6 @@ public static class PetGenerator
 {
     public static Pet GeneratePet()
     {
-        User owner = UserGenerator.GenerateUser();
-        Breed breed = BreedGenerator.GenerateBreed();
-        Species species = SpeciesGenerator.GenerateSpecies();
-
         return new Pet
         {
             Id = Constants.PetData.Id,
@@ -20,27 +16,10 @@ public static class PetGenerator
             Observations= Constants.PetData.Observations,
             Owner = Constants.PetData.User,
             UserId = Constants.UserData.Id,
-            Breed = breed,
-            BreedId = breed.Id,
-            Species = species,
-            SpeciesId = species.Id,
-            Colors = ColorGenerator.GenerateListOfColors()
-        };
-    }
-
-    public static Pet GeneratePetWithoutOwner()
-    {
-        return new Pet()
-        {
-            Id = Constants.PetData.Id,
-            Name = Constants.PetData.Name,
-            Observations = Constants.PetData.Observations,
-            Owner = null,
-            UserId = null,
-            Breed = Constants.PetData.Breed,
-            BreedId = Constants.PetData.BreedId,
-            Species = Constants.PetData.Species,
-            SpeciesId = Constants.PetData.SpeciesId,
+            Breed = BreedGenerator.GenerateBreed(),
+            BreedId = Constants.BreedData.Id,
+            Species = SpeciesGenerator.GenerateSpecies(),
+            SpeciesId = Constants.SpeciesData.Id,
             Colors = ColorGenerator.GenerateListOfColors()
         };
     }

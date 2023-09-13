@@ -50,7 +50,7 @@ public class MissingAlertServiceTests
         async Task Result() => await _sut.GetByIdAsync(missingAlert.Id);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal("Alerta de desaparecimento com o id especificado não existe.", exception.Message);
+        Assert.Equal("Alerta com o id especificado não existe.", exception.Message);
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class MissingAlertServiceTests
         var createMissingAlertRequest = MissingAlertGenerator.GenerateCreateMissingAlert();
         _petRepositoryMock.GetPetByIdAsync(createMissingAlertRequest.PetId).ReturnsNull();
 
-        async Task Result() => await _sut.CreateAsync(createMissingAlertRequest, userId: null);
+        async Task Result() => await _sut.CreateAsync(createMissingAlertRequest, Constants.UserData.Id);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
         Assert.Equal("Animal com o id especificado não existe.", exception.Message);
@@ -91,24 +91,7 @@ public class MissingAlertServiceTests
     }
 
     [Fact]
-    public async Task Create_Missing_Alert_Without_Owner_Returns_MissingAlert()
-    {
-        var createMissingAlertRequest = MissingAlertGenerator.GenerateCreateMissingAlertWithoutOwner();
-        var expectedMissingAlert =
-            MissingAlertGenerator.GenerateMissingAlertResponseWithoutOwner();
-        Pet returnedPet = PetGenerator.GeneratePet();
-        _petRepositoryMock.GetPetByIdAsync(createMissingAlertRequest.PetId).Returns(returnedPet);
-        _dateTimeProviderMock.UtcNow().Returns(expectedMissingAlert.RegistrationDate);
-        _guidProviderMock.NewGuid().Returns(expectedMissingAlert.Id);
-
-        MissingAlertResponse missingAlertResponse =
-            await _sut.CreateAsync(createMissingAlertRequest, userId: null);
-
-        Assert.Equivalent(expectedMissingAlert, missingAlertResponse);
-    }
-
-    [Fact]
-    public async Task Create_Missing_Alert_With_Owner_Returns_Missing_Alert_With_Owner()
+    public async Task Create_Missing_Alert_Returns_Missing_Alert()
     {
         var createMissingAlertRequest = MissingAlertGenerator.GenerateCreateMissingAlert();
         var expectedMissingAlert =
@@ -258,7 +241,7 @@ public class MissingAlertServiceTests
     {
         _missingAlertRepositoryMock.GetByIdAsync(Constants.MissingAlertData.Id).ReturnsNull();
 
-        async Task Result() => await _sut.MarkAsResolved(Constants.MissingAlertData.Id, Constants.UserData.Id);
+        async Task Result() => await _sut.MarkAsResolvedAsync(Constants.MissingAlertData.Id, Constants.UserData.Id);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
         Assert.Equal("Alerta com o id especificado não existe.", exception.Message);
@@ -270,7 +253,7 @@ public class MissingAlertServiceTests
         MissingAlert missingAlert = MissingAlertGenerator.GenerateMissingAlert();
         _missingAlertRepositoryMock.GetByIdAsync(missingAlert.Id).Returns(missingAlert);
 
-        async Task Result() => await _sut.MarkAsResolved(missingAlert.Id, Guid.NewGuid());
+        async Task Result() => await _sut.MarkAsResolvedAsync(missingAlert.Id, Guid.NewGuid());
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
         Assert.Equal("Não é possível marcar alertas de outros usuários como encontrado.", exception.Message);
@@ -283,7 +266,7 @@ public class MissingAlertServiceTests
         _missingAlertRepositoryMock.GetByIdAsync(missingAlert.Id).Returns(missingAlert);
         MissingAlertResponse expectedMissingAlert = MissingAlertGenerator.GenerateRecoveredMissingAlertResponse();
 
-        MissingAlertResponse missingAlertResponse = await _sut.MarkAsResolved(missingAlert.Id, missingAlert.User?.Id);
+        MissingAlertResponse missingAlertResponse = await _sut.MarkAsResolvedAsync(missingAlert.Id, missingAlert.User.Id);
         
         Assert.Equivalent(expectedMissingAlert, missingAlertResponse);
     }

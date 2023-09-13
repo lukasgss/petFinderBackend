@@ -13,5 +13,5 @@ public class MissingAlertResponse
     public double LastSeenLocationLongitude { get; set; }
     public bool PetHasBeenRecovered { get; set; }
     public PetResponseNoOwner Pet { get; set; } = null!;
-    public OwnerResponse? Owner { get; set; }
+    public OwnerResponse Owner { get; set; } = null!;
 }

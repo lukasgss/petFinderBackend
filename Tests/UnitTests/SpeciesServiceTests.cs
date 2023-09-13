@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
+using Application.Common.Interfaces.FrontendDropdownData;
 using Application.Services.Entities;
 using Domain.Entities;
 using NSubstitute;
@@ -12,6 +13,11 @@ public class SpeciesServiceTests
     private readonly ISpeciesRepository _speciesRepositoryMock;
     private readonly ISpeciesService _sut;
 
+    private static readonly List<Species> Species = SpeciesGenerator.GenerateListOfSpecies();
+
+    private static readonly List<DropdownDataResponse<int>> ExpectedDropdownData =
+        DropdownDataGenerator.GenerateDropdownDataResponsesOfSpecies(Species);
+
     public SpeciesServiceTests()
     {
         _speciesRepositoryMock = Substitute.For<ISpeciesRepository>();
@@ -22,12 +28,10 @@ public class SpeciesServiceTests
     [Fact]
     public async Task Get_All_Species_For_Dropdown_Returns_All_Species()
     {
-        List<Species> species = SpeciesGenerator.GenerateListOfSpecies();
-        _speciesRepositoryMock.GetAllSpecies().Returns(species);
-        var expectedDropdownData = DropdownDataGenerator.GenerateDropdownDataResponsesOfSpecies(species);
+        _speciesRepositoryMock.GetAllSpecies().Returns(Species);
 
         var dropdownData = await _sut.GetAllSpeciesForDropdown();
-        
-        Assert.Equivalent(expectedDropdownData, dropdownData);
+
+        Assert.Equivalent(ExpectedDropdownData, dropdownData);
     }
 }

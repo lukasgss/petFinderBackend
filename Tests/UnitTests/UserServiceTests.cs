@@ -22,6 +22,12 @@ public class UserServiceTests
     private readonly IJwtTokenGenerator _jwtTokenGeneratorMock;
     private readonly IUserService _sut;
 
+    private static readonly User User = UserGenerator.GenerateUser();
+    private static readonly UserDataResponse UserDataResponse = User.ToUserDataResponse();
+    private static readonly UserResponse UserResponse = User.ToUserResponse(Constants.UserData.JwtToken);
+    private static readonly CreateUserRequest CreateUserRequest = UserGenerator.GenerateCreateUserRequest();
+    private static readonly LoginUserRequest LoginUserRequest = UserGenerator.GenerateLoginUserRequest();
+
     public UserServiceTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
@@ -45,23 +51,20 @@ public class UserServiceTests
     [Fact]
     public async Task Get_User_By_Id_Returns_User_Data()
     {
-        User searchedUser = UserGenerator.GenerateUser();
-        _userRepositoryMock.GetUserByIdAsync(searchedUser.Id).Returns(searchedUser);
-        UserDataResponse expectedUser = searchedUser.ToUserDataResponse();
+        _userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
 
-        UserDataResponse userResponse = await _sut.GetUserByIdAsync(searchedUser.Id);
+        UserDataResponse userResponse = await _sut.GetUserByIdAsync(User.Id);
 
-        Assert.Equivalent(expectedUser, userResponse);
+        Assert.Equivalent(UserDataResponse, userResponse);
     }
 
     [Fact]
     public async Task Register_Attempt_With_Already_Existing_Email_Throws_ConflictException()
     {
-        CreateUserRequest createUserRequest = UserGenerator.GenerateCreateUserRequest();
-        User alreadyExistingUser = UserGenerator.GenerateUser();
-        _userRepositoryMock.GetUserByEmailAsync(createUserRequest.Email).Returns(alreadyExistingUser);
+        _guidProviderMock.NewGuid().Returns(User.Id);
+        _userRepositoryMock.GetUserByEmailAsync(CreateUserRequest.Email).Returns(User);
 
-        async Task Result() => await _sut.RegisterAsync(createUserRequest);
+        async Task Result() => await _sut.RegisterAsync(CreateUserRequest);
 
         var exception = await Assert.ThrowsAsync<ConflictException>(Result);
         Assert.Equal("Usuário com o e-mail especificado já existe.", exception.Message);
@@ -72,12 +75,11 @@ public class UserServiceTests
     {
         _guidProviderMock.NewGuid().Returns(Constants.UserData.Id);
         _userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
-        CreateUserRequest createUserRequest = UserGenerator.GenerateCreateUserRequest();
-        IdentityResult expectedIdentityResult = new FakeIdentityResult(false);
-        _userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), createUserRequest.Password).Returns(expectedIdentityResult);
+        IdentityResult expectedIdentityResult = new FakeIdentityResult(succeeded: false);
+        _userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), CreateUserRequest.Password).Returns(expectedIdentityResult);
         _userRepositoryMock.SetLockoutEnabledAsync(Arg.Any<User>(), false).Returns(expectedIdentityResult);
 
-        async Task Result() => await _sut.RegisterAsync(createUserRequest);
+        async Task Result() => await _sut.RegisterAsync(CreateUserRequest);
 
         await Assert.ThrowsAsync<InternalServerErrorException>(Result);
     }
@@ -88,35 +90,31 @@ public class UserServiceTests
         // Arrange
         _guidProviderMock.NewGuid().Returns(Constants.UserData.Id);
         _userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
-        CreateUserRequest createUserRequest = UserGenerator.GenerateCreateUserRequest();
-        
-        IdentityResult expectedIdentityResult = new FakeIdentityResult(true);
-        _userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), createUserRequest.Password)
+
+        IdentityResult expectedIdentityResult = new FakeIdentityResult(succeeded: true);
+        _userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), CreateUserRequest.Password)
             .Returns(expectedIdentityResult);
         _userRepositoryMock.SetLockoutEnabledAsync(Arg.Any<User>(), false)
             .Returns(expectedIdentityResult);
-        _jwtTokenGeneratorMock.GenerateToken(Constants.UserData.Id, Constants.UserData.FullName).Returns(Constants.UserData.JwtToken);
-        
-        UserResponse expectedUserResponse = UserGenerator.GenerateUser().ToUserResponse(Constants.UserData.JwtToken);
+        _jwtTokenGeneratorMock.GenerateToken(User.Id, Constants.UserData.FullName)
+            .Returns(Constants.UserData.JwtToken);
 
         // Act
-        UserResponse userResponse = await _sut.RegisterAsync(createUserRequest);
-        
+        UserResponse userResponse = await _sut.RegisterAsync(CreateUserRequest);
+
         // Assert
-        Assert.Equivalent(expectedUserResponse, userResponse);       
+        Assert.Equivalent(UserResponse, userResponse);
     }
 
     [Fact]
     public async Task Login_With_Locked_Account_Throws_LockedException()
     {
-        LoginUserRequest loginUserRequest = UserGenerator.GenerateLoginUserRequest();
-        User user = UserGenerator.GenerateUser();
-        _userRepositoryMock.GetUserByEmailAsync(loginUserRequest.Email).Returns(user);
+        _userRepositoryMock.GetUserByEmailAsync(LoginUserRequest.Email).Returns(User);
         FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: false, isLockedOut: true);
-        _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
+        _userRepositoryMock.CheckCredentials(User, LoginUserRequest.Password)
             .Returns(fakeSignInResult);
 
-        async Task Result() => await _sut.LoginAsync(loginUserRequest);
+        async Task Result() => await _sut.LoginAsync(LoginUserRequest);
 
         var exception = await Assert.ThrowsAsync<LockedException>(Result);
         Assert.Equal("Essa conta está bloqueada, aguarde e tente novamente.", exception.Message);
@@ -125,14 +123,12 @@ public class UserServiceTests
     [Fact]
     public async Task Login_With_Invalid_Credentials_Throws_UnauthorizedException()
     {
-        LoginUserRequest loginUserRequest = UserGenerator.GenerateLoginUserRequest();
-        User user = UserGenerator.GenerateUser();
-        _userRepositoryMock.GetUserByEmailAsync(loginUserRequest.Email).Returns(user);
+        _userRepositoryMock.GetUserByEmailAsync(LoginUserRequest.Email).Returns(User);
         FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: false, isLockedOut: false);
-        _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
+        _userRepositoryMock.CheckCredentials(User, LoginUserRequest.Password)
             .Returns(fakeSignInResult);
 
-        async Task Result() => await _sut.LoginAsync(loginUserRequest);
+        async Task Result() => await _sut.LoginAsync(LoginUserRequest);
 
         var exception = await Assert.ThrowsAsync<UnauthorizedException>(Result);
         Assert.Equal("Credenciais inválidas.", exception.Message);
@@ -141,17 +137,14 @@ public class UserServiceTests
     [Fact]
     public async Task Login_With_Valid_Credentials_Returns_UserResponse()
     {
-        LoginUserRequest loginUserRequest = UserGenerator.GenerateLoginUserRequest();
-        User user = UserGenerator.GenerateUser();
-        _userRepositoryMock.GetUserByEmailAsync(loginUserRequest.Email).Returns(user);
+        _userRepositoryMock.GetUserByEmailAsync(LoginUserRequest.Email).Returns(User);
         FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: true, isLockedOut: false);
-        _userRepositoryMock.CheckCredentials(user, loginUserRequest.Password)
+        _userRepositoryMock.CheckCredentials(Arg.Any<User>(), LoginUserRequest.Password)
             .Returns(fakeSignInResult);
-        _jwtTokenGeneratorMock.GenerateToken(user.Id, user.FullName).Returns(Constants.UserData.JwtToken);
-        UserResponse expectedUserResponse = UserGenerator.GenerateUser().ToUserResponse(Constants.UserData.JwtToken);
+        _jwtTokenGeneratorMock.GenerateToken(User.Id, User.FullName).Returns(Constants.UserData.JwtToken);
 
-        UserResponse userResponse = await _sut.LoginAsync(loginUserRequest);
+        UserResponse userResponse = await _sut.LoginAsync(LoginUserRequest);
 
-        Assert.Equivalent(expectedUserResponse, userResponse);
+        Assert.Equivalent(UserResponse, userResponse);
     }
 }

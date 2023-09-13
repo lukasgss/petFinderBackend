@@ -56,7 +56,7 @@ public class MissingAlertService : IMissingAlertService
             RegistrationDate = _dateTimeProvider.UtcNow(),
             LastSeenLocationLatitude = createMissingAlertRequest.LastSeenLocationLatitude,
             LastSeenLocationLongitude = createMissingAlertRequest.LastSeenLocationLongitude,
-            PetHasBeenRecovered = false,
+            RecoveryDate = null,
             Pet = missingPet,
             User = petOwner,
         };
@@ -117,7 +117,7 @@ public class MissingAlertService : IMissingAlertService
             throw new ForbiddenException("Não é possível marcar alertas de outros usuários como encontrado.");
         }
 
-        missingAlert.PetHasBeenRecovered = true;
+        missingAlert.RecoveryDate = _dateTimeProvider.DateOnlyNow();
         await _missingAlertRepository.CommitAsync();
 
         return missingAlert.ToMissingAlertResponse();

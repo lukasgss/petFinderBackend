@@ -22,7 +22,7 @@ public class MissingAlert
     [Required, Column(TypeName = "decimal(6, 3)")]
     public double LastSeenLocationLongitude { get; set; }
 
-    public bool PetHasBeenRecovered { get; set; }
+    public DateOnly? RecoveryDate { get; set; }
 
     [Required, ForeignKey("PetId")] 
     public virtual Pet Pet { get; set; } = null!;

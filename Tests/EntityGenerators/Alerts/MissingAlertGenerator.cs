@@ -17,7 +17,7 @@ public static class MissingAlertGenerator
             RegistrationDate = Constants.MissingAlertData.RegistrationDate,
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
-            PetHasBeenRecovered = Constants.MissingAlertData.PetHasBeenRecovered,
+            RecoveryDate = Constants.MissingAlertData.NonRecoveredRecoveryDate,
             Pet = Constants.MissingAlertData.Pet,
             User = Constants.MissingAlertData.User
         };
@@ -33,7 +33,7 @@ public static class MissingAlertGenerator
             RegistrationDate = Constants.MissingAlertData.RegistrationDate,
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
-            PetHasBeenRecovered = Constants.MissingAlertData.PetHasBeenRecovered,
+            RecoveryDate = Constants.MissingAlertData.NonRecoveredRecoveryDate,
             Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
                 ColorGenerator.GenerateListOfColors(),
                 BreedGenerator.GenerateBreed()),
@@ -51,7 +51,7 @@ public static class MissingAlertGenerator
             RegistrationDate = Constants.MissingAlertData.RegistrationDate,
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
-            PetHasBeenRecovered = true,
+            RecoveryDate = Constants.MissingAlertData.RecoveryDate,
             Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
                 ColorGenerator.GenerateListOfColors(),
                 BreedGenerator.GenerateBreed()),

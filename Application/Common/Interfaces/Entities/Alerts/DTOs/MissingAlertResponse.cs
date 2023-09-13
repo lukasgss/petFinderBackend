@@ -11,7 +11,7 @@ public class MissingAlertResponse
     public DateTime RegistrationDate { get; set; }
     public double LastSeenLocationLatitude { get; set; }
     public double LastSeenLocationLongitude { get; set; }
-    public bool PetHasBeenRecovered { get; set; }
+    public DateOnly? RecoveryDate { get; set; }
     public PetResponseNoOwner Pet { get; set; } = null!;
     public OwnerResponse Owner { get; set; } = null!;
 }

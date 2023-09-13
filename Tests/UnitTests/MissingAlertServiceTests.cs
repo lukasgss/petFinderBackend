@@ -249,6 +249,7 @@ public class MissingAlertServiceTests
     {
         _missingAlertRepositoryMock.GetByIdAsync(MissingAlert.Id).Returns(MissingAlert);
         MissingAlertResponse expectedMissingAlert = MissingAlertGenerator.GenerateRecoveredMissingAlertResponse();
+        _dateTimeProviderMock.DateOnlyNow().Returns(Constants.MissingAlertData.RecoveryDate);
 
         MissingAlertResponse missingAlertResponse =
             await _sut.MarkAsResolvedAsync(MissingAlert.Id, MissingAlert.User.Id);

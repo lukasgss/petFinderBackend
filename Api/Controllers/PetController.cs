@@ -29,6 +29,7 @@ public class PetController : ControllerBase
         return await _petService.GetPetBydIdAsync(petId);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<PetResponse>> CreatePet(CreatePetRequest createPetRequest)
     {

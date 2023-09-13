@@ -44,15 +44,15 @@ public class MissingAlertService : IMissingAlertService
     {
         Pet missingPet = await ValidateAndAssignPetAsync(createMissingAlertRequest.PetId);
 
-        CheckUserPermissionToCreate(userId, createMissingAlertRequest.UserId);
-
+        CheckUserPermissionToCreate(missingPet.Owner.Id, userId);
+        
         User petOwner = await ValidateAndAssignUserAsync(userId);
 
         MissingAlert missingAlertToCreate = new()
         {
             Id = _guidProvider.NewGuid(),
-            OwnerName = createMissingAlertRequest.OwnerName,
-            OwnerPhoneNumber = createMissingAlertRequest.OwnerPhoneNumber,
+            OwnerName = petOwner.FullName,
+            OwnerPhoneNumber = petOwner.PhoneNumber,
             RegistrationDate = _dateTimeProvider.UtcNow(),
             LastSeenLocationLatitude = createMissingAlertRequest.LastSeenLocationLatitude,
             LastSeenLocationLongitude = createMissingAlertRequest.LastSeenLocationLongitude,
@@ -79,12 +79,12 @@ public class MissingAlertService : IMissingAlertService
         MissingAlert dbMissingAlert = await ValidateAndAssignMissingAlertAsync(editMissingAlertRequest.Id);
         Pet pet = await ValidateAndAssignPetAsync(editMissingAlertRequest.PetId);
 
-        CheckUserPermissionToEdit(userId, editMissingAlertRequest.UserId);
+        CheckUserPermissionToEdit(dbMissingAlert.User.Id, userId);
 
-        User user = await ValidateAndAssignUserAsync(editMissingAlertRequest.UserId);
+        User user = await ValidateAndAssignUserAsync(userId);
 
-        dbMissingAlert.OwnerName = editMissingAlertRequest.OwnerName;
-        dbMissingAlert.OwnerPhoneNumber = editMissingAlertRequest.OwnerPhoneNumber;
+        dbMissingAlert.OwnerName = user.FullName;
+        dbMissingAlert.OwnerPhoneNumber = user.PhoneNumber;
         dbMissingAlert.LastSeenLocationLatitude = editMissingAlertRequest.LastSeenLocationLatitude;
         dbMissingAlert.LastSeenLocationLongitude = editMissingAlertRequest.LastSeenLocationLongitude;
         dbMissingAlert.Pet = pet;

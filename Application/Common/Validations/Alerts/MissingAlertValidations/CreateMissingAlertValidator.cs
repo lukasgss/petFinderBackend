@@ -7,18 +7,6 @@ public class CreateMissingAlertValidator : AbstractValidator<CreateMissingAlertR
 {
     public CreateMissingAlertValidator()
     {
-        RuleFor(alert => alert.OwnerName)
-            .NotEmpty()
-            .WithMessage("Campo de nome do dono é obrigatório.")
-            .MaximumLength(255)
-            .WithMessage("Máximo de 255 caracteres permitidos.");
-
-        RuleFor(alert => alert.OwnerPhoneNumber)
-            .NotEmpty()
-            .WithMessage("Campo de telefone do dono é obrigatório.")
-            .MaximumLength(30)
-            .WithMessage("Máximo de 30 caracteres permitidos.");
-
         RuleFor(alert => alert.LastSeenLocationLatitude)
             .NotNull()
             .WithMessage("Campo de latitude é obrigatório.")

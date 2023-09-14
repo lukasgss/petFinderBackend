@@ -16,6 +16,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     public DbSet<Color> Colors { get; set; } = null!;
     public DbSet<Species> Species { get; set; } = null!;
     public DbSet<MissingAlert> MissingAlerts { get; set; } = null!;
+    public DbSet<AdoptionAlert> AdoptionAlerts { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

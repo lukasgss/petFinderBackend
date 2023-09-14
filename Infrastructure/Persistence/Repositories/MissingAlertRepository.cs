@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Entities.Alerts;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Domain.Entities.Alerts;
 using Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;

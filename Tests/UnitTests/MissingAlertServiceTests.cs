@@ -1,7 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping.Alerts;
-using Application.Common.Interfaces.Entities.Alerts;
-using Application.Common.Interfaces.Entities.Alerts.DTOs;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;

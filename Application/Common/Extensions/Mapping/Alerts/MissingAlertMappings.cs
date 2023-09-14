@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Entities.Alerts.DTOs;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Domain.Entities.Alerts;
 
 namespace Application.Common.Extensions.Mapping.Alerts;
@@ -10,8 +10,6 @@ public static class MissingAlertMappings
         return new MissingAlertResponse()
         {
             Id = missingAlert.Id,
-            OwnerName = missingAlert.OwnerName,
-            OwnerPhoneNumber = missingAlert.OwnerPhoneNumber,
             RegistrationDate = missingAlert.RegistrationDate,
             LastSeenLocationLatitude = missingAlert.LastSeenLocationLatitude,
             LastSeenLocationLongitude = missingAlert.LastSeenLocationLongitude,

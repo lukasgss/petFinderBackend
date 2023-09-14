@@ -1,11 +1,10 @@
-using Application.Common.Interfaces.Entities.Alerts.DTOs;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 
-namespace Application.Common.Interfaces.Entities.Alerts;
+namespace Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 
 public interface IMissingAlertService
 {
     Task<MissingAlertResponse> GetByIdAsync(Guid missingAlertId);
-
     Task<MissingAlertResponse> CreateAsync(
         CreateMissingAlertRequest createMissingAlertRequest,
         Guid userId);

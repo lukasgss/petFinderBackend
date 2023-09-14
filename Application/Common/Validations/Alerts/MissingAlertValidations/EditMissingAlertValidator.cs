@@ -1,4 +1,4 @@
-using Application.Common.Interfaces.Entities.Alerts.DTOs;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using FluentValidation;
 
 namespace Application.Common.Validations.Alerts.MissingAlertValidations;

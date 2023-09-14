@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Application.Common.Interfaces.Entities.Users.DTOs;
 
-namespace Application.Common.Interfaces.Entities.Alerts.DTOs;
+namespace Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 
 public class MissingAlertResponse
 {

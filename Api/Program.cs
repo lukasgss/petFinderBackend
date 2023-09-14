@@ -2,8 +2,6 @@ using Api.Extensions;
 using Application;
 using Application.Middlewares;
 using Infrastructure;
-using Infrastructure.Persistence.DataContext;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,15 +12,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.ConfigureIdentity();
 
 builder.Services.ConfigureJwt(builder.Configuration);
 
 builder.Services.AddApplication(builder.Configuration)
-    .AddInfrastructure();
+    .AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 

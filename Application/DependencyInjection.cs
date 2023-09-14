@@ -30,21 +30,13 @@ public static class DependencyInjection
         services.AddScoped<ISpeciesService, SpeciesService>();
         services.AddScoped<IAdoptionAlertService, AdoptionAlertService>();
 
-        services.AddScoped<IGuidProvider, GuidProvider>();
-        services.AddScoped<IDateTimeProvider, DateTimeProvider>();
-        
         services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
-        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>(_ =>
-        {
-            IConfigurationSection jwtConfig = configuration.GetSection("JwtSettings");
-
-            return new JwtTokenGenerator(
-                secretKey: jwtConfig["SecretKey"],
-                audience: jwtConfig["Audience"],
-                issuer: jwtConfig["Issuer"],
-                expiryInMinutes: int.Parse(jwtConfig["ExpiryInMinutes"])
-            );
-        });
+        
+        services.AddSingleton<IGuidProvider, GuidProvider>();
+        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        
+        services.Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
+        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         
         return services;
     }

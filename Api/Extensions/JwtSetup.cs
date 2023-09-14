@@ -1,4 +1,5 @@
 using System.Text;
+using Application.Common.Interfaces.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,8 +16,8 @@ public static class JwtSetup
             })
             .AddJwtBearer(options =>
             {
-                IConfigurationSection jwtSettings = configuration.GetSection("JwtSettings");
-                string secret = jwtSettings["SecretKey"];
+                IConfigurationSection configJwt = configuration.GetSection(JwtConfig.SectionName);
+                string secret = configJwt["SecretKey"]!;
 
                 options.TokenValidationParameters = new()
                 {
@@ -24,8 +25,8 @@ public static class JwtSetup
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtSettings["Issuer"],
-                    ValidAudience = jwtSettings["Audience"],
+                    ValidIssuer = configJwt["Issuer"],
+                    ValidAudience = configJwt["Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(secret)
                     )

@@ -2,29 +2,27 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Application.Common.Interfaces.Authentication;
+using Application.Common.Interfaces.Providers;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Application.Services.Authentication;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
-    private readonly string _secretKey;
-    private readonly string _audience;
-    private readonly string _issuer;
-    private readonly int _expiryInMinutes;
+    private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly JwtConfig _jwtConfig;
 
-    public JwtTokenGenerator(string secretKey, string audience, string issuer, int expiryInMinutes)
+    public JwtTokenGenerator(IDateTimeProvider dateTimeProvider, IOptions<JwtConfig> jwtConfig)
     {
-        _secretKey = secretKey ?? throw new ArgumentNullException(nameof(secretKey));
-        _audience = audience ?? throw new ArgumentNullException(nameof(audience));
-        _issuer = issuer ?? throw new ArgumentNullException(nameof(issuer));
-        _expiryInMinutes = expiryInMinutes;
+        _dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
+        _jwtConfig = jwtConfig.Value ?? throw new ArgumentNullException(nameof(jwtConfig));
     }
 
     public string GenerateToken(Guid userId, string fullName)
     {
         SigningCredentials signingCredentials = new(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey)),
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.SecretKey)),
             SecurityAlgorithms.HmacSha256);
 
         Claim[] claims = new[]
@@ -35,10 +33,10 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         };
 
         JwtSecurityToken jwtSecurityToken = new(
-            issuer: _issuer,
-            audience: _audience,
+            issuer: _jwtConfig.Issuer,
+            audience: _jwtConfig.Audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(_expiryInMinutes),
+            expires: _dateTimeProvider.Now().AddMinutes(_jwtConfig.ExpiryTimeInMin),
             signingCredentials: signingCredentials);
 
         return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);

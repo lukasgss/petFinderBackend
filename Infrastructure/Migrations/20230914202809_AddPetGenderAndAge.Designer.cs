@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230914012805_AddAdoptionAlerts")]
-    partial class AddAdoptionAlerts
+    [Migration("20230914202809_AddPetGenderAndAge")]
+    partial class AddPetGenderAndAge
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -222,7 +222,13 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("AgeInMonths")
+                        .HasColumnType("integer");
+
                     b.Property<int>("BreedId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Gender")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
@@ -249,6 +255,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Pets");
+
+                    b.HasCheckConstraint("CK_Pets_Gender_Enum", "\"Gender\" IN (0, 1, 2)");
                 });
 
             modelBuilder.Entity("Domain.Entities.Species", b =>

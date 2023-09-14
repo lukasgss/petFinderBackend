@@ -27,7 +27,8 @@ public static class DependencyInjection
         services.AddScoped<IAdoptionAlertRepository, AdoptionAlertRepository>();
 
         services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+            .UseEnumCheckConstraints());
 
         return services;
     }

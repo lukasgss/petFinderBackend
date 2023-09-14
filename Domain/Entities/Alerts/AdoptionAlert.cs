@@ -7,7 +7,6 @@ public class AdoptionAlert
 {
     public Guid Id { get; set; }
     
-    [Required, Column(TypeName = "decimal(6, 3)")]
     public bool OnlyForScreenedProperties { get; set; }
     
     [Required, Column(TypeName = "decimal(6, 3)")] 

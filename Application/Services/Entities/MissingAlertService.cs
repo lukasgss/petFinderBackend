@@ -1,7 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping.Alerts;
-using Application.Common.Interfaces.Entities.Alerts;
-using Application.Common.Interfaces.Entities.Alerts.DTOs;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
@@ -51,8 +51,6 @@ public class MissingAlertService : IMissingAlertService
         MissingAlert missingAlertToCreate = new()
         {
             Id = _guidProvider.NewGuid(),
-            OwnerName = petOwner.FullName,
-            OwnerPhoneNumber = petOwner.PhoneNumber,
             RegistrationDate = _dateTimeProvider.UtcNow(),
             LastSeenLocationLatitude = createMissingAlertRequest.LastSeenLocationLatitude,
             LastSeenLocationLongitude = createMissingAlertRequest.LastSeenLocationLongitude,
@@ -83,8 +81,6 @@ public class MissingAlertService : IMissingAlertService
 
         User user = await ValidateAndAssignUserAsync(userId);
 
-        dbMissingAlert.OwnerName = user.FullName;
-        dbMissingAlert.OwnerPhoneNumber = user.PhoneNumber;
         dbMissingAlert.LastSeenLocationLatitude = editMissingAlertRequest.LastSeenLocationLatitude;
         dbMissingAlert.LastSeenLocationLongitude = editMissingAlertRequest.LastSeenLocationLongitude;
         dbMissingAlert.Pet = pet;

@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Authorization;
-using Application.Common.Interfaces.Entities.Alerts;
-using Application.Common.Interfaces.Entities.Alerts.DTOs;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Application.Common.Validations.Alerts.MissingAlertValidations;
 using Application.Common.Validations.Errors;
 using FluentValidation.Results;

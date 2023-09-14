@@ -1,8 +1,7 @@
-namespace Application.Common.Interfaces.Entities.Alerts.DTOs;
+namespace Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 
-public class EditMissingAlertRequest
+public class CreateMissingAlertRequest
 {
-    public Guid Id { get; set; }
     public double LastSeenLocationLatitude { get; set; }
     public double LastSeenLocationLongitude { get; set; }
     public Guid PetId { get; set; }

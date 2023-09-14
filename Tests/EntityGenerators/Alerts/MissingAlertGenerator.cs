@@ -1,5 +1,5 @@
 using Application.Common.Extensions.Mapping;
-using Application.Common.Interfaces.Entities.Alerts.DTOs;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Domain.Entities.Alerts;
 using Constants = Tests.TestUtils.Constants.Constants;
 
@@ -12,8 +12,6 @@ public static class MissingAlertGenerator
         return new MissingAlert()
         {
             Id = Constants.MissingAlertData.Id,
-            OwnerName = Constants.MissingAlertData.OwnerName,
-            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
             RegistrationDate = Constants.MissingAlertData.RegistrationDate,
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
@@ -28,8 +26,6 @@ public static class MissingAlertGenerator
         return new MissingAlertResponse()
         {
             Id = Constants.MissingAlertData.Id,
-            OwnerName = Constants.MissingAlertData.OwnerName,
-            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
             RegistrationDate = Constants.MissingAlertData.RegistrationDate,
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
@@ -46,8 +42,6 @@ public static class MissingAlertGenerator
         return new MissingAlertResponse()
         {
             Id = Constants.MissingAlertData.Id,
-            OwnerName = Constants.MissingAlertData.OwnerName,
-            OwnerPhoneNumber = Constants.MissingAlertData.OwnerPhoneNumber,
             RegistrationDate = Constants.MissingAlertData.RegistrationDate,
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,

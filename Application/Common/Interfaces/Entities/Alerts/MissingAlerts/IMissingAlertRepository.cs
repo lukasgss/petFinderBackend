@@ -1,7 +1,7 @@
 using Application.Common.Interfaces.GenericRepository;
 using Domain.Entities.Alerts;
 
-namespace Application.Common.Interfaces.Entities.Alerts;
+namespace Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 
 public interface IMissingAlertRepository : IGenericRepository<MissingAlert>
 {

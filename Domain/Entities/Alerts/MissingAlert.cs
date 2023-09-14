@@ -6,12 +6,6 @@ namespace Domain.Entities.Alerts;
 public class MissingAlert
 {
     public Guid Id { get; set; }
-
-    [Required, MaxLength(255)]
-    public string OwnerName { get; set; } = null!;
-    
-    [Required, MaxLength(30)]
-    public string OwnerPhoneNumber { get; set; } = null!;
     
     [Required]
     public DateTime RegistrationDate { get; set; }

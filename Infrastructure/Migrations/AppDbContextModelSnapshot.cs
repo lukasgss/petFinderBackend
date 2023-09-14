@@ -56,8 +56,8 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("LocationLongitude")
                         .HasColumnType("numeric(6,3)");
 
-                    b.Property<decimal>("OnlyForScreenedProperties")
-                        .HasColumnType("numeric(6,3)");
+                    b.Property<bool>("OnlyForScreenedProperties")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("PetId")
                         .HasColumnType("uuid");
@@ -220,7 +220,13 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("AgeInMonths")
+                        .HasColumnType("integer");
+
                     b.Property<int>("BreedId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Gender")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
@@ -247,6 +253,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Pets");
+
+                    b.HasCheckConstraint("CK_Pets_Gender_Enum", "\"Gender\" IN (0, 1, 2)");
                 });
 
             modelBuilder.Entity("Domain.Entities.Species", b =>

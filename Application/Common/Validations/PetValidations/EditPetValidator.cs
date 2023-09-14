@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Entities.Pets.DTOs;
+using Domain.Enums;
 using FluentValidation;
 
 namespace Application.Common.Validations.PetValidations;
@@ -20,6 +21,12 @@ public class EditPetValidator : AbstractValidator<EditPetRequest>
         RuleFor(pet => pet.Observations)
             .MaximumLength(500)
             .WithMessage("Máximo de 500 caracteres permitidos.");
+
+        RuleFor(pet => pet.Gender)
+            .NotNull()
+            .WithMessage("Campo de gênero é obrigatório.")
+            .Must(gender => Enum.IsDefined(typeof(Gender), gender))
+            .WithMessage("Valor inválido como gênero.");
 
         RuleFor(pet => pet.BreedId)
             .NotNull()

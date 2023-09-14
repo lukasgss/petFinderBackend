@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Enums;
 
 namespace Domain.Entities;
 
@@ -12,6 +13,11 @@ public class Pet
 
     [MaxLength(500)]
     public string? Observations { get; set; }
+
+    [Required, EnumDataType(typeof(Gender))]
+    public Gender Gender { get; set; }
+    
+    public int? AgeInMonths { get; set; }
 
     [Required, ForeignKey("UserId")] 
     public virtual User Owner { get; set; } = null!;

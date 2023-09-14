@@ -17,6 +17,8 @@ public static class PetMappings
             Id = pet.Id,
             Name = pet.Name,
             Observations = pet.Observations,
+            AgeInMonths = pet.AgeInMonths,
+            Gender = pet.Gender.ToString(),
             Owner = owner?.ToOwnerResponse(),
             Breed = breed.ToBreedResponse(),
             Colors = colors.ToListOfColorResponse()
@@ -32,6 +34,8 @@ public static class PetMappings
             Id = pet.Id,
             Name = pet.Name,
             Observations = pet.Observations,
+            AgeInMonths = pet.AgeInMonths,
+            Gender = pet.Gender,
             Breed = breed.ToBreedResponse(),
             Colors = colors.ToListOfColorResponse()
         };

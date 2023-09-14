@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Domain.Entities;
+using Domain.Enums;
 using Tests.EntityGenerators;
 
 namespace Tests.TestUtils.Constants;
@@ -11,6 +12,8 @@ public static partial class Constants
         public static readonly Guid Id = Guid.NewGuid();
         public const string Name = "Pet Name";
         public const string? Observations = "Observations";
+        public static readonly Gender Gender = Gender.Male;
+        public const int AgeInMonths = 30;
         public static readonly User User = UserGenerator.GenerateUser();
         public static readonly Guid? UserId = UserData.Id;
         public static readonly Breed Breed = BreedGenerator.GenerateBreed();

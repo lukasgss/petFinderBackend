@@ -22,7 +22,7 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    OnlyForScreenedProperties = table.Column<decimal>(type: "numeric(6,3)", nullable: false),
+                    OnlyForScreenedProperties = table.Column<bool>(type: "boolean", nullable: false),
                     LocationLatitude = table.Column<decimal>(type: "numeric(6,3)", nullable: false),
                     LocationLongitude = table.Column<decimal>(type: "numeric(6,3)", nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),

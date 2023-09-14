@@ -55,6 +55,8 @@ public class PetService : IPetService
             Id = _guidProvider.NewGuid(),
             Name = createPetRequest.Name,
             Observations = createPetRequest.Observations,
+            Gender = createPetRequest.Gender,
+            AgeInMonths = createPetRequest.AgeInMonths,
             Owner = petOwner,
             Breed = breed,
             Species = species,
@@ -87,6 +89,8 @@ public class PetService : IPetService
         dbPet.Id = editPetRequest.Id;
         dbPet.Name = editPetRequest.Name;
         dbPet.Observations= editPetRequest.Observations;
+        dbPet.Gender = editPetRequest.Gender;
+        dbPet.AgeInMonths = editPetRequest.AgeInMonths;
         dbPet.Owner = petOwner;
         dbPet.Breed = breed;
         dbPet.Colors = colors;

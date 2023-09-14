@@ -14,6 +14,8 @@ public static class PetGenerator
             Id = Constants.PetData.Id,
             Name = Constants.PetData.Name,
             Observations= Constants.PetData.Observations,
+            Gender = Constants.PetData.Gender,
+            AgeInMonths = Constants.PetData.AgeInMonths,
             Owner = Constants.PetData.User,
             UserId = Constants.UserData.Id,
             Breed = BreedGenerator.GenerateBreed(),
@@ -38,6 +40,8 @@ public static class PetGenerator
         {
             Name = Constants.PetData.Name,
             Observations = Constants.PetData.Observations,
+            Gender = Constants.PetData.Gender,
+            AgeInMonths = Constants.PetData.AgeInMonths,
             BreedId = Constants.PetData.BreedId,
             SpeciesId = Constants.PetData.SpeciesId,
             ColorIds = Constants.PetData.ColorIds
@@ -51,6 +55,8 @@ public static class PetGenerator
             Id = Constants.PetData.Id,
             Name = Constants.PetData.Name,
             Observations = Constants.PetData.Observations,
+            Gender = Constants.PetData.Gender,
+            AgeInMonths = Constants.PetData.AgeInMonths,
             BreedId = Constants.PetData.BreedId,
             SpeciesId = Constants.PetData.SpeciesId,
             ColorIds = Constants.PetData.ColorIds

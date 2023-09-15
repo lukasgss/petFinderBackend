@@ -18,6 +18,19 @@ public static class UserGenerator
             EmailConfirmed = Constants.UserData.EmailConfirmed
         };
     }
+
+    public static User GenerateUserWithRandomId()
+    {
+        return new User()
+        {
+            Id = Guid.NewGuid(),
+            FullName = Constants.UserData.FullName,
+            PhoneNumber = Constants.UserData.PhoneNumber,
+            UserName = Constants.UserData.UserName,
+            Email = Constants.UserData.Email,
+            EmailConfirmed = Constants.UserData.EmailConfirmed
+        };
+    }
     
     public static LoginUserRequest GenerateLoginUserRequest()
     {

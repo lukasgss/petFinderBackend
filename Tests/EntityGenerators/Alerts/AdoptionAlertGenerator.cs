@@ -25,10 +25,41 @@ public static class AdoptionAlertGenerator
         };
     }
 
+    public static AdoptionAlert GenerateAdoptionAlertWithRandomOwner()
+    {
+        return new AdoptionAlert()
+        {
+            Id = Constants.AdoptionAlertData.Id,
+            OnlyForScreenedProperties = Constants.AdoptionAlertData.OnlyForScreenedProperties,
+            LocationLatitude = Constants.AdoptionAlertData.LocationLatitude,
+            LocationLongitude = Constants.AdoptionAlertData.LocationLongitude,
+            Description = Constants.AdoptionAlertData.Description,
+            RegistrationDate = Constants.AdoptionAlertData.RegistrationDate,
+            AdoptionDate = null,
+            Pet = Constants.AdoptionAlertData.Pet,
+            PetId = Constants.AdoptionAlertData.PetId,
+            User = UserGenerator.GenerateUserWithRandomId(),
+            UserId = UserGenerator.GenerateUserWithRandomId().Id
+        };
+    }
+
     public static CreateAdoptionAlertRequest GenerateCreateAdoptionAlertRequest()
     {
         return new CreateAdoptionAlertRequest()
         {
+            OnlyForScreenedProperties = Constants.AdoptionAlertData.OnlyForScreenedProperties,
+            LocationLatitude = Constants.AdoptionAlertData.LocationLatitude,
+            LocationLongitude = Constants.AdoptionAlertData.LocationLongitude,
+            Description = Constants.AdoptionAlertData.Description,
+            PetId = Constants.AdoptionAlertData.PetId,
+        };
+    }
+
+    public static EditAdoptionAlertRequest GenerateEditAdoptionAlertRequest()
+    {
+        return new EditAdoptionAlertRequest()
+        {
+            Id = Constants.AdoptionAlertData.Id,
             OnlyForScreenedProperties = Constants.AdoptionAlertData.OnlyForScreenedProperties,
             LocationLatitude = Constants.AdoptionAlertData.LocationLatitude,
             LocationLongitude = Constants.AdoptionAlertData.LocationLongitude,

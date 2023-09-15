@@ -75,17 +75,7 @@ public class MissingAlertController : ControllerBase
 
         return Ok(editedAlert);
     }
-
-    [Authorize]
-    [HttpDelete("{alertId:guid}")]
-    public async Task<ActionResult> Delete(Guid alertId)
-    {
-        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
-        await _missingAlertService.DeleteAsync(alertId, userId);
-
-        return Ok();
-    }
-
+    
     [Authorize]
     [HttpPost("resolve/{alertId:guid}")]
     public async Task<ActionResult<MissingAlertResponse>> MarkAsResolved(Guid alertId)
@@ -94,5 +84,15 @@ public class MissingAlertController : ControllerBase
         MissingAlertResponse missingAlertResponse = await _missingAlertService.MarkAsResolvedAsync(alertId, userId);
 
         return Ok(missingAlertResponse);
+    }
+
+    [Authorize]
+    [HttpDelete("{alertId:guid}")]
+    public async Task<ActionResult> Delete(Guid alertId)
+    {
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        await _missingAlertService.DeleteAsync(alertId, userId);
+
+        return NoContent();
     }
 }

@@ -9,7 +9,7 @@ public static class PetGenerator
 {
     public static Pet GeneratePet()
     {
-        return new Pet
+        return new Pet()
         {
             Id = Constants.PetData.Id,
             Name = Constants.PetData.Name,
@@ -18,6 +18,25 @@ public static class PetGenerator
             AgeInMonths = Constants.PetData.AgeInMonths,
             Owner = Constants.PetData.User,
             UserId = Constants.UserData.Id,
+            Breed = BreedGenerator.GenerateBreed(),
+            BreedId = Constants.BreedData.Id,
+            Species = SpeciesGenerator.GenerateSpecies(),
+            SpeciesId = Constants.SpeciesData.Id,
+            Colors = ColorGenerator.GenerateListOfColors()
+        };
+    }
+
+    public static Pet GeneratePetWithRandomOwnerId()
+    {
+        return new Pet()
+        {
+            Id = Constants.PetData.Id,
+            Name = Constants.PetData.Name,
+            Observations = Constants.PetData.Observations,
+            Gender = Constants.PetData.Gender,
+            AgeInMonths = Constants.PetData.AgeInMonths,
+            Owner = UserGenerator.GenerateUserWithRandomId(),
+            UserId = UserGenerator.GenerateUserWithRandomId().Id,
             Breed = BreedGenerator.GenerateBreed(),
             BreedId = Constants.BreedData.Id,
             Species = SpeciesGenerator.GenerateSpecies(),

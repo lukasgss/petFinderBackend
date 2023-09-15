@@ -51,4 +51,31 @@ public class AdoptionAlertController : ControllerBase
             new { alertId = adoptionAlertResponse.Id },
             adoptionAlertResponse);
     }
+
+    [Authorize]
+    [HttpPut("{alertId:guid}")]
+    public async Task<ActionResult<AdoptionAlertResponse>> Edit(EditAdoptionAlertRequest editAlertRequest, Guid alertId)
+    {
+        EditAdoptionAlertValidator requestValidator = new();
+        ValidationResult validationResult = requestValidator.Validate(editAlertRequest);
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.Errors.Select(e => new ValidationError(e.PropertyName, e.ErrorMessage));
+            return BadRequest(errors);
+        }
+        
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+        return await _adoptionAlertService.EditAsync(editAlertRequest, userId, alertId);
+    }
+
+    [Authorize]
+    [HttpDelete("{alertId:guid}")]
+    public async Task<ActionResult> Delete(Guid alertId)
+    {
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+        await _adoptionAlertService.DeleteAsync(alertId, userId);
+        return NoContent();
+    }
 }

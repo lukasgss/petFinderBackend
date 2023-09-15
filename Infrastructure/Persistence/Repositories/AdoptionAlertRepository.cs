@@ -18,6 +18,9 @@ public class AdoptionAlertRepository : GenericRepository<AdoptionAlert>, IAdopti
     {
         return await _dbContext.AdoptionAlerts
             .Include(alert => alert.Pet)
+                .ThenInclude(pet => pet.Colors)
+            .Include(alert => alert.Pet)
+                .ThenInclude(pet => pet.Breed)
             .Include(alert => alert.User)
             .SingleOrDefaultAsync(alert => alert.Id == alertId);
     }

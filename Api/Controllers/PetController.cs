@@ -75,6 +75,6 @@ public class PetController : ControllerBase
         Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         await _petService.DeletePetAsync(petId, userId);
-        return Ok();
+        return new NoContentResult();
     }
 }

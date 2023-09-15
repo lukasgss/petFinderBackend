@@ -44,7 +44,7 @@ public class AdoptionAlertService : IAdoptionAlertService
         Guid userId)
     {
         Pet pet = await ValidateAndAssignPetAsync(createAlertRequest.PetId);
-        ValidateIfUserIsOwnerOfPetForCreation(pet.Owner.Id, userId);
+        ValidateIfUserIsOwnerOfPet(pet.Owner.Id, userId);
 
         User alertOwner = await ValidateAndAssignUserAsync(userId);
 
@@ -67,11 +67,54 @@ public class AdoptionAlertService : IAdoptionAlertService
         return adoptionAlertToCreate.ToAdoptionAlertResponse();
     }
 
-    private void ValidateIfUserIsOwnerOfPetForCreation(Guid actualPetOwnerId, Guid userId)
+    public async Task<AdoptionAlertResponse> EditAsync(EditAdoptionAlertRequest editAlertRequest, Guid userId, Guid routeId)
+    {
+        if (routeId != editAlertRequest.Id)
+        {
+            throw new BadRequestException("Id da rota não coincide com o id especificado.");
+        }
+        
+        AdoptionAlert adoptionAlertDb = await ValidateAndAssignAdoptionAlertAsync(editAlertRequest.Id);
+        ValidateIfUserIsOwnerOfAlert(adoptionAlertDb.User.Id, userId);
+
+        Pet pet = await ValidateAndAssignPetAsync(editAlertRequest.PetId);
+        ValidateIfUserIsOwnerOfPet(pet.Owner.Id, userId);
+
+        adoptionAlertDb.OnlyForScreenedProperties = editAlertRequest.OnlyForScreenedProperties;
+        adoptionAlertDb.LocationLatitude = editAlertRequest.LocationLatitude;
+        adoptionAlertDb.LocationLongitude = editAlertRequest.LocationLongitude;
+        adoptionAlertDb.Description = editAlertRequest.Description;
+        adoptionAlertDb.Pet = adoptionAlertDb.Pet;
+
+        await _adoptionAlertRepository.CommitAsync();
+
+        return adoptionAlertDb.ToAdoptionAlertResponse();
+    }
+
+    public async Task DeleteAsync(Guid alertId, Guid userId)
+    {
+        AdoptionAlert adoptionAlertDb = await ValidateAndAssignAdoptionAlertAsync(alertId);
+        ValidateIfUserIsOwnerOfAlert(adoptionAlertDb.User.Id, userId);
+        
+        _adoptionAlertRepository.Delete(adoptionAlertDb);
+        await _adoptionAlertRepository.CommitAsync();
+    }
+
+    private static void ValidateIfUserIsOwnerOfAlert(Guid actualOwnerId, Guid userId)
+    {
+        if (actualOwnerId != userId)
+        {
+            throw new UnauthorizedException("Não é possível alterar alertas de adoção de outros usuários.");
+        }
+    }
+
+
+    private static void ValidateIfUserIsOwnerOfPet(Guid actualPetOwnerId, Guid userId)
     {
         if (actualPetOwnerId != userId)
         {
-            throw new UnauthorizedException("Não é possível cadastrar adoções para animais em que não é dono.");
+            throw new UnauthorizedException(
+                "Não é possível cadastrar ou editar adoções para animais em que não é dono.");
         }
     }
 

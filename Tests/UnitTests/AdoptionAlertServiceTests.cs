@@ -24,7 +24,8 @@ public class AdoptionAlertServiceTests
     private readonly IGuidProvider _guidProviderMock;
     private readonly IAdoptionAlertService _sut;
 
-    private static readonly AdoptionAlert AdoptionAlert = AdoptionAlertGenerator.GenerateNonAdoptedAdoptionAlert();
+    private static readonly AdoptionAlert NonAdoptedAdoptionAlert = AdoptionAlertGenerator.GenerateNonAdoptedAdoptionAlert();
+    private static readonly AdoptionAlert AdoptedAdoptionAlert = AdoptionAlertGenerator.GenerateAdoptedAdoptionAlert();
     private static readonly Pet Pet = PetGenerator.GeneratePet();
     private static readonly User User = UserGenerator.GenerateUser();
 
@@ -33,6 +34,9 @@ public class AdoptionAlertServiceTests
 
     private static readonly EditAdoptionAlertRequest EditAlertRequest =
         AdoptionAlertGenerator.GenerateEditAdoptionAlertRequest();
+    
+    private static readonly AdoptionAlertResponse
+        AdoptedAdoptionAlertResponse = AdoptionAlertGenerator.GenerateAdoptedAdoptionAlertResponse();
 
     private static readonly AdoptionAlertResponse
         NonAdoptedAdoptionAlertResponse = AdoptionAlertGenerator.GenerateNonAdoptedAdoptionAlertResponse();
@@ -56,9 +60,9 @@ public class AdoptionAlertServiceTests
     [Fact]
     public async Task Get_Non_Existent_Alert_By_Id_Throws_NotFoundException()
     {
-        _adoptionAlertRepositoryMock.GetByIdAsync(AdoptionAlert.Id).ReturnsNull();
+        _adoptionAlertRepositoryMock.GetByIdAsync(NonAdoptedAdoptionAlert.Id).ReturnsNull();
 
-        async Task Result() => await _sut.GetByIdAsync(AdoptionAlert.Id);
+        async Task Result() => await _sut.GetByIdAsync(NonAdoptedAdoptionAlert.Id);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
         Assert.Equal("Alerta de adoção com o id especificado não existe.", exception.Message);
@@ -67,9 +71,9 @@ public class AdoptionAlertServiceTests
     [Fact]
     public async Task Get_Adoption_Alert_By_Id_Returns_Alert()
     {
-        _adoptionAlertRepositoryMock.GetByIdAsync(AdoptionAlert.Id).Returns(AdoptionAlert);
+        _adoptionAlertRepositoryMock.GetByIdAsync(NonAdoptedAdoptionAlert.Id).Returns(NonAdoptedAdoptionAlert);
 
-        AdoptionAlertResponse adoptionAlertResponse = await _sut.GetByIdAsync(AdoptionAlert.Id);
+        AdoptionAlertResponse adoptionAlertResponse = await _sut.GetByIdAsync(NonAdoptedAdoptionAlert.Id);
 
         Assert.Equivalent(NonAdoptedAdoptionAlertResponse, adoptionAlertResponse);
     }
@@ -134,7 +138,7 @@ public class AdoptionAlertServiceTests
     [Fact]
     public async Task Edit_Adoption_Alert_Without_Being_Owner_Of_Alert_Throws_NotFoundException()
     {
-        _adoptionAlertRepositoryMock.GetByIdAsync(EditAlertRequest.Id).Returns(AdoptionAlert);
+        _adoptionAlertRepositoryMock.GetByIdAsync(EditAlertRequest.Id).Returns(NonAdoptedAdoptionAlert);
         Guid idOfUserThatDoesntOwnAlert = Guid.NewGuid();
 
         async Task Result() => await _sut.EditAsync(EditAlertRequest, idOfUserThatDoesntOwnAlert, EditAlertRequest.Id);
@@ -146,7 +150,7 @@ public class AdoptionAlertServiceTests
     [Fact]
     public async Task Edit_Adoption_Alert_With_Non_Existent_Pet_Throws_NotFoundException()
     {
-        _adoptionAlertRepositoryMock.GetByIdAsync(EditAlertRequest.Id).Returns(AdoptionAlert);
+        _adoptionAlertRepositoryMock.GetByIdAsync(EditAlertRequest.Id).Returns(NonAdoptedAdoptionAlert);
         _petRepositoryMock.GetPetByIdAsync(EditAlertRequest.PetId).ReturnsNull();
 
         async Task Result() => await _sut.EditAsync(EditAlertRequest, User.Id, EditAlertRequest.Id);
@@ -158,7 +162,7 @@ public class AdoptionAlertServiceTests
     [Fact]
     public async Task Edit_Adoption_Alert_Without_Being_Owner_Of_Pet_Throws_UnauthorizedException()
     {
-        _adoptionAlertRepositoryMock.GetByIdAsync(EditAlertRequest.Id).Returns(AdoptionAlert);
+        _adoptionAlertRepositoryMock.GetByIdAsync(EditAlertRequest.Id).Returns(NonAdoptedAdoptionAlert);
         Pet petThatUserDoesNotOwn = PetGenerator.GeneratePetWithRandomOwnerId();
         _petRepositoryMock.GetPetByIdAsync(EditAlertRequest.PetId).Returns(petThatUserDoesNotOwn);
 
@@ -171,9 +175,9 @@ public class AdoptionAlertServiceTests
     [Fact]
     public async Task Delete_Non_Existent_Adoption_Alert_Throws_NotFoundException()
     {
-        _adoptionAlertRepositoryMock.GetByIdAsync(AdoptionAlert.Id).ReturnsNull();
+        _adoptionAlertRepositoryMock.GetByIdAsync(NonAdoptedAdoptionAlert.Id).ReturnsNull();
 
-        async Task Result() => await _sut.DeleteAsync(AdoptionAlert.Id, User.Id);
+        async Task Result() => await _sut.DeleteAsync(NonAdoptedAdoptionAlert.Id, User.Id);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
         Assert.Equal("Alerta de adoção com o id especificado não existe.", exception.Message);
@@ -183,12 +187,55 @@ public class AdoptionAlertServiceTests
     public async Task Delete_Adoption_Alert_Without_Being_Owner_Of_Alert_Throws_UnauthorizedException()
     {
         AdoptionAlert adoptionAlertWithRandomOwner = AdoptionAlertGenerator.GenerateAdoptionAlertWithRandomOwner();
-        _adoptionAlertRepositoryMock.GetByIdAsync(AdoptionAlert.Id).Returns(adoptionAlertWithRandomOwner);
+        _adoptionAlertRepositoryMock.GetByIdAsync(NonAdoptedAdoptionAlert.Id).Returns(adoptionAlertWithRandomOwner);
 
         async Task Result() => await _sut.DeleteAsync(adoptionAlertWithRandomOwner.Id, User.Id);
 
         var exception = await Assert.ThrowsAsync<UnauthorizedException>(Result);
         Assert.Equal("Não é possível alterar alertas de adoção de outros usuários.", exception.Message);
+    }
 
+    [Fact]
+    public async Task Toggle_Non_Existent_Adoption_Alert_Throws_NotFoundException()
+    {
+        _adoptionAlertRepositoryMock.GetByIdAsync(NonAdoptedAdoptionAlert.Id).ReturnsNull();
+
+        async Task Result() => await _sut.ToggleAdoptionAsync(NonAdoptedAdoptionAlert.Id, User.Id);
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+        Assert.Equal("Alerta de adoção com o id especificado não existe.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Toggle_Adoption_Alert_Without_Being_Its_Owner_Throws_ForbiddenException()
+    {
+        _adoptionAlertRepositoryMock.GetByIdAsync(NonAdoptedAdoptionAlert.Id).Returns(NonAdoptedAdoptionAlert);
+        Guid idOfUserThatDoesNotOwnAlert = Guid.NewGuid();
+
+        async Task Result() => await _sut.ToggleAdoptionAsync(NonAdoptedAdoptionAlert.Id, idOfUserThatDoesNotOwnAlert);
+
+        var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
+        Assert.Equal("Não é possível alterar o status de alertas em que não é dono.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Toggle_Adoption_Alert_Not_Adopted_Before_Returns_Adopted_Response()
+    {
+        _adoptionAlertRepositoryMock.GetByIdAsync(NonAdoptedAdoptionAlert.Id).Returns(NonAdoptedAdoptionAlert);
+        _dateTimeProviderMock.DateOnlyNow().Returns(Constants.AdoptionAlertData.AdoptedAdoptionDate);
+
+        AdoptionAlertResponse adoptionAlertResponse = await _sut.ToggleAdoptionAsync(NonAdoptedAdoptionAlert.Id, User.Id);
+        
+        Assert.Equivalent(AdoptedAdoptionAlertResponse, adoptionAlertResponse);
+    }
+
+    [Fact]
+    public async Task Toggle_Previously_Adopted_Alert_Returns_Non_Adopted_Alert()
+    {
+        _adoptionAlertRepositoryMock.GetByIdAsync(AdoptedAdoptionAlert.Id).Returns(AdoptedAdoptionAlert);
+
+        AdoptionAlertResponse adoptionAlertResponse = await _sut.ToggleAdoptionAsync(AdoptedAdoptionAlert.Id, User.Id);
+        
+        Assert.Equivalent(NonAdoptedAdoptionAlertResponse, adoptionAlertResponse);
     }
 }

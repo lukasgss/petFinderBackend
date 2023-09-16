@@ -67,13 +67,14 @@ public class AdoptionAlertService : IAdoptionAlertService
         return adoptionAlertToCreate.ToAdoptionAlertResponse();
     }
 
-    public async Task<AdoptionAlertResponse> EditAsync(EditAdoptionAlertRequest editAlertRequest, Guid userId, Guid routeId)
+    public async Task<AdoptionAlertResponse> EditAsync(EditAdoptionAlertRequest editAlertRequest, Guid userId,
+        Guid routeId)
     {
         if (routeId != editAlertRequest.Id)
         {
             throw new BadRequestException("Id da rota não coincide com o id especificado.");
         }
-        
+
         AdoptionAlert adoptionAlertDb = await ValidateAndAssignAdoptionAlertAsync(editAlertRequest.Id);
         ValidateIfUserIsOwnerOfAlert(adoptionAlertDb.User.Id, userId);
 
@@ -95,9 +96,32 @@ public class AdoptionAlertService : IAdoptionAlertService
     {
         AdoptionAlert adoptionAlertDb = await ValidateAndAssignAdoptionAlertAsync(alertId);
         ValidateIfUserIsOwnerOfAlert(adoptionAlertDb.User.Id, userId);
-        
+
         _adoptionAlertRepository.Delete(adoptionAlertDb);
         await _adoptionAlertRepository.CommitAsync();
+    }
+
+    public async Task<AdoptionAlertResponse> ToggleAdoptionAsync(Guid alertId, Guid userId)
+    {
+        AdoptionAlert adoptionAlert = await ValidateAndAssignAdoptionAlertAsync(alertId);
+
+        if (userId != adoptionAlert.User.Id)
+        {
+            throw new ForbiddenException("Não é possível alterar o status de alertas em que não é dono.");
+        }
+
+        if (adoptionAlert.AdoptionDate is null)
+        {
+            adoptionAlert.AdoptionDate = _dateTimeProvider.DateOnlyNow();
+        }
+        else
+        {
+            adoptionAlert.AdoptionDate = null;
+        }
+
+        await _adoptionAlertRepository.CommitAsync();
+
+        return adoptionAlert.ToAdoptionAlertResponse();
     }
 
     private static void ValidateIfUserIsOwnerOfAlert(Guid actualOwnerId, Guid userId)

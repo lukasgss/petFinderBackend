@@ -5,6 +5,7 @@ using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Pets;
+using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
 using Application.Common.Providers;
@@ -29,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<IMissingAlertService, MissingAlertService>();
         services.AddScoped<ISpeciesService, SpeciesService>();
         services.AddScoped<IAdoptionAlertService, AdoptionAlertService>();
+        services.AddScoped<IUserMessageService, UserMessageService>();
 
         services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
         

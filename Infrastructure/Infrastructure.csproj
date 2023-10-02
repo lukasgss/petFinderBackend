@@ -14,6 +14,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6" />
+    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="6.100.0.2" />
   </ItemGroup>
 
 

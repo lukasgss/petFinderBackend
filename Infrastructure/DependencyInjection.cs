@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
 using Application.Common.Interfaces.Entities.Pets;
+using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
 using Infrastructure.Persistence.DataContext;
 using Infrastructure.Persistence.Repositories;
@@ -25,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IMissingAlertRepository, MissingAlertRepository>();
         services.AddScoped<ISpeciesRepository, SpeciesRepository>();
         services.AddScoped<IAdoptionAlertRepository, AdoptionAlertRepository>();
+        services.AddScoped<IUserMessageRepository, UserMessageRepository>();
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))

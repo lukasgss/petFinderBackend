@@ -25,8 +25,7 @@ public class AdoptionAlertService : IAdoptionAlertService
         IDateTimeProvider dateTimeProvider,
         IGuidProvider guidProvider)
     {
-        _adoptionAlertRepository =
-            adoptionAlertRepository ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
+        _adoptionAlertRepository = adoptionAlertRepository ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
         _petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));

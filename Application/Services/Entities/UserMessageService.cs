@@ -25,21 +25,33 @@ public class UserMessageService : IUserMessageService
         _dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
     }
 
-    public async Task<UserMessageResponse> GetByIdAsync(long messageId, Guid receiverId)
+    public async Task<UserMessageResponse> GetByIdAsync(long messageId, Guid userId)
     {
-        UserMessage? message = await _userMessageRepository.GetByIdAsync(messageId, receiverId);
+        UserMessage? message = await _userMessageRepository.GetByIdAsync(messageId, userId);
         if (message is null)
         {
-            throw new NotFoundException("Mensagem com o id especificado não existe.");
+            throw new NotFoundException("Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.");
+
         }
         
         return message.ToUserMessageResponse();
     }
 
-    public async Task<PaginatedEntity<UserMessageResponse>> GetMessagesFromSenderAsync(Guid senderId, Guid receiverId, int pageNumber, int pageSize)
+    public async Task<PaginatedEntity<UserMessageResponse>> GetMessagesAsync(
+        Guid senderId, Guid receiverId, Guid currentUserId, int pageNumber, int pageSize)
     {
-        var messages = await _userMessageRepository.GetAllAsync(senderId, receiverId, pageNumber, pageSize);
-        await MarkAllMessagesAsReadAsync(senderId, receiverId);
+        if (currentUserId != senderId && currentUserId != receiverId)
+        {
+            throw new NotFoundException("Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.");
+        }
+
+        var messages = await _userMessageRepository.GetAllFromUserAsync(
+            senderId, receiverId, pageNumber, pageSize);
+        
+        if (currentUserId == receiverId)
+        {
+            await MarkAllMessagesAsReadAsync(senderId, receiverId);
+        }
 
         return messages.ToUserMessageResponsePagedList();
     }

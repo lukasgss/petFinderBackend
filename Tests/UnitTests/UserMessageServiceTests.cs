@@ -45,7 +45,25 @@ public class UserMessageServiceTests
         async Task Result() => await _sut.GetByIdAsync(UserMessage.Id, UserMessage.ReceiverId);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal("Mensagem com o id especificado não existe.", exception.Message);
+        Assert.Equal(
+            "Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.",
+            exception.Message);
+    }
+    
+    [Fact]
+    public async Task Get_Message_Without_Being_Sender_Or_Receiver_Throws_NotFoundException()
+    {
+        Guid userIdNotSenderOrReceiver = Guid.NewGuid();
+        _userMessageRepositoryMock
+            .GetByIdAsync(Constants.UserMessageData.Id, userIdNotSenderOrReceiver).ReturnsNull();
+
+        async Task Result() =>
+            await _sut.GetByIdAsync(Constants.UserMessageData.Id, userIdNotSenderOrReceiver);
+
+        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+        Assert.Equal(
+            "Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.",
+            exception.Message);
     }
 
     [Fact]
@@ -62,11 +80,11 @@ public class UserMessageServiceTests
     public async Task Get_Messages_From_Sender_Returns_Messages()
     {
         PagedList<UserMessage> pagedUserMessages = PagedListGenerator.GeneratePagedUserMessages();
-        _userMessageRepositoryMock.GetAllAsync(UserMessage.SenderId, UserMessage.ReceiverId, 1, 50).Returns(pagedUserMessages);
+        _userMessageRepositoryMock.GetAllFromUserAsync(UserMessage.SenderId, UserMessage.ReceiverId, 1, 50).Returns(pagedUserMessages);
         var expectedUserMessageResponse = PaginatedEntityGenerator.GeneratePaginatedUserMessageResponse();
 
         var userMessageResponse = 
-            await _sut.GetMessagesFromSenderAsync(UserMessage.SenderId, UserMessage.ReceiverId, 1, 50);
+            await _sut.GetMessagesAsync(UserMessage.SenderId, UserMessage.ReceiverId, UserMessage.ReceiverId, 1, 50);
         
         Assert.Equivalent(expectedUserMessageResponse, userMessageResponse);
     }
@@ -85,7 +103,6 @@ public class UserMessageServiceTests
     [Fact]
     public async Task Send_Message_As_Non_Existent_Sender_Throws_NotFoundException()
     {
-        
         _userRepositoryMock.GetUserByIdAsync(UserMessage.ReceiverId).Returns(User);
         _userRepositoryMock.GetUserByIdAsync(UserMessage.SenderId).ReturnsNull();
 

@@ -27,9 +27,9 @@ public class PagedList<T> : List<T>
 
     public static async Task<PagedList<T>> ToPagedListAsync(IQueryable<T> source, int pageNumber, int pageSize)
     {
-        if (pageSize > 50)
+        if (pageSize > MaxPageSize)
         {
-            pageSize = 50;
+            pageSize = MaxPageSize;
         }
 
         List<T> items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();

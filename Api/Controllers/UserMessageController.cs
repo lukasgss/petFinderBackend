@@ -1,14 +1,17 @@
+using System.ComponentModel.DataAnnotations;
 using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.UserMessages.DTOs;
+using Application.Common.Pagination;
+using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
-[Route("/api/user-messages")]
+[Route("/user-messages")]
 public class UserMessageController : ControllerBase
 {
     private readonly IUserMessageService _userMessageService;
@@ -21,21 +24,14 @@ public class UserMessageController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("{messageId:long}", Name = "GetUserMessageById")]
-    public async Task<ActionResult<UserMessageResponse>> GetUserMessageById(long messageId)
-    {
-        Guid receiverId = _userAuthorizationService.GetUserIdFromJwtToken(User);
-
-        return await _userMessageService.GetByIdAsync(messageId, receiverId);
-    }
-    
-    [Authorize]
     [HttpGet]
-    public async Task<ActionResult<PaginatedEntity<UserMessageResponse>>> GetAllMessages(Guid senderId, int pageNumber, int pageSize)
+    public async Task<ActionResult<PaginatedEntity<UserMessageResponse>>> GetAllMessages(
+        [Required] Guid senderId, [Required] Guid receiverId, int pageNumber = 1, int pageSize = PagedList<UserMessage>.MaxPageSize)
     {
-        Guid receiverId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+        Guid currentUserId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-        return await _userMessageService.GetMessagesFromSenderAsync(senderId, receiverId, pageNumber, pageSize);
+        return await _userMessageService.GetMessagesAsync(
+            senderId, receiverId, currentUserId, pageNumber, pageSize);
     }
 
     [Authorize]
@@ -45,6 +41,10 @@ public class UserMessageController : ControllerBase
         Guid senderId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         UserMessageResponse message = await _userMessageService.SendAsync(messageRequest, senderId);
-        return new CreatedAtRouteResult(nameof(GetUserMessageById), new { messageId = message.Id }, message);
+
+        return new ObjectResult(message)
+        {
+            StatusCode = StatusCodes.Status201Created
+        };
     }
 }

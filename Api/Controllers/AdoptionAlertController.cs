@@ -21,8 +21,7 @@ public class AdoptionAlertController : ControllerBase
         IUserAuthorizationService userAuthorizationService)
     {
         _adoptionAlertService = adoptionAlertService ?? throw new ArgumentNullException(nameof(adoptionAlertService));
-        _userAuthorizationService = userAuthorizationService ??
-                                    throw new ArgumentNullException(nameof(userAuthorizationService));
+        _userAuthorizationService = userAuthorizationService ?? throw new ArgumentNullException(nameof(userAuthorizationService));
     }
 
     [HttpGet("{alertId:guid}", Name = "GetAdoptionAlertById")]

@@ -11,6 +11,9 @@ namespace Application.Services.Entities;
 
 public class UserMessageService : IUserMessageService
 {
+    private const int MaximumTimeToEditMessageInMinutes = 7;
+    private const int MaximumTimeToDeleteMessageInMinutes = 5;
+    
     private readonly IUserMessageRepository _userMessageRepository;
     private readonly IUserRepository _userRepository;
     private readonly IDateTimeProvider _dateTimeProvider;
@@ -42,7 +45,8 @@ public class UserMessageService : IUserMessageService
     {
         if (currentUserId != senderId && currentUserId != receiverId)
         {
-            throw new NotFoundException("Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.");
+            throw new NotFoundException(
+                "Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.");
         }
 
         var messages = await _userMessageRepository.GetAllFromUserAsync(
@@ -73,8 +77,9 @@ public class UserMessageService : IUserMessageService
         UserMessage message = new()
         {
             Content = messageRequest.Content,
-            TimeStamp = _dateTimeProvider.UtcNow(),
+            TimeStampUtc = _dateTimeProvider.UtcNow(),
             HasBeenRead = false,
+            HasBeenEdited = false,
             Sender = sender,
             Receiver = receiver
         };
@@ -83,6 +88,52 @@ public class UserMessageService : IUserMessageService
         await _userMessageRepository.CommitAsync();
 
         return message.ToUserMessageResponse();
+    }
+    
+    public async Task<UserMessageResponse> EditAsync(long messageId, EditUserMessageRequest editUserMessageRequest, Guid userId, long routeId)
+    {
+        if (routeId != editUserMessageRequest.Id)
+        {
+            throw new BadRequestException("Id da rota não coincide com o id especificado.");
+        }
+        
+        UserMessage? dbUserMessage = await _userMessageRepository.GetByIdAsync(messageId, userId);
+        if (dbUserMessage is null || dbUserMessage.Sender.Id != userId)
+        {
+            throw new NotFoundException(
+                "Mensagem com o id especificado não existe ou você não tem permissão para editá-la.");
+        }
+        
+        if (_dateTimeProvider.UtcNow().Subtract(dbUserMessage.TimeStampUtc).TotalMinutes > MaximumTimeToEditMessageInMinutes)
+        {
+            throw new ForbiddenException("Não é possível editar a mensagem, o tempo limite foi expirado.");
+        }
+
+        dbUserMessage.Content = editUserMessageRequest.Content;
+        dbUserMessage.HasBeenEdited = true;
+        await _userMessageRepository.CommitAsync();
+
+        return dbUserMessage.ToUserMessageResponse();
+    }
+    
+    public async Task DeleteAsync(long messageId, Guid userId)
+    {
+        UserMessage? dbUserMessage = await _userMessageRepository.GetByIdAsync(messageId, userId);
+        if (dbUserMessage is null || dbUserMessage.Sender.Id != userId)
+        {
+            throw new NotFoundException(
+                "Mensagem com o id especificado não existe ou você não tem permissão para excluí-la.");
+        }
+
+        if (_dateTimeProvider.UtcNow().Subtract(dbUserMessage.TimeStampUtc).TotalMinutes >
+            MaximumTimeToDeleteMessageInMinutes)
+        {
+            throw new ForbiddenException(
+                "Não é possível excluir a mensagem, o tempo limite foi excedido.");
+        }
+
+        dbUserMessage.HasBeenDeleted = true;
+        await _userMessageRepository.CommitAsync();
     }
     
     private async Task MarkAllMessagesAsReadAsync(Guid senderId, Guid receiverId)

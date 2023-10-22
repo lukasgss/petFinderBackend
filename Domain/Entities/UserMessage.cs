@@ -11,11 +11,17 @@ public class UserMessage
     public string Content { get; set; } = null!;
     
     [Required]
-    public DateTime TimeStamp { get; set; }
+    public DateTime TimeStampUtc { get; set; }
     
     [Required]
     public bool HasBeenRead { get; set; }
-
+    
+    [Required]
+    public bool HasBeenEdited { get; set; }
+    
+    [Required]
+    public bool HasBeenDeleted { get; set; }
+    
     [Required, ForeignKey("SenderId")] 
     public virtual User Sender { get; set; } = null!;
     public Guid SenderId { get; set; }

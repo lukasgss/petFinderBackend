@@ -21,28 +21,8 @@ public class UserMessageRepository : GenericRepository<UserMessage>, IUserMessag
         return await _dbContext.UserMessages
             .Include(message => message.Sender)
             .Include(message => message.Receiver)
-            .Select(message =>
-                new UserMessage
-                {
-                    Id = message.Id,
-                    Content = message.Content,
-                    TimeStamp = message.TimeStamp,
-                    HasBeenRead = message.HasBeenRead,
-                    Sender = new User
-                    {
-                        Id = message.SenderId,
-                        Email = message.Sender.Email,
-                        FullName = message.Sender.FullName,
-                    },
-                    Receiver = new User
-                    {
-                        Id = message.ReceiverId,
-                        Email = message.Receiver.Email,
-                        FullName = message.Receiver.FullName,
-                    }
-                }
-            )
             .SingleOrDefaultAsync(message => message.Id == messageId
+                                             && !message.HasBeenDeleted
                                              && (message.Receiver.Id == userId
                                                  || message.Sender.Id == userId));
     }
@@ -58,24 +38,27 @@ public class UserMessageRepository : GenericRepository<UserMessage>, IUserMessag
             {
                 Id = message.Id,
                 Content = message.Content,
-                TimeStamp = message.TimeStamp,
+                TimeStampUtc = message.TimeStampUtc,
                 HasBeenRead = message.HasBeenRead,
+                HasBeenEdited = message.HasBeenEdited,
+                HasBeenDeleted = message.HasBeenDeleted,
                 Sender = new User
                 {
-                    Id = message.SenderId,
+                    Id = message.Sender.Id,
                     Email = message.Sender.Email,
                     FullName = message.Sender.FullName
                 },
                 Receiver = new User
                 {
-                    Id = message.ReceiverId,
+                    Id = message.Receiver.Id,
                     Email = message.Receiver.Email,
                     FullName = message.Receiver.FullName
                 }
             })
             .Where(message => message.Sender.Id == senderId
+                              && !message.HasBeenDeleted
                               && message.Receiver.Id == receiverId)
-            .OrderBy(message => message.TimeStamp);
+            .OrderBy(message => message.TimeStampUtc);
 
         return await PagedList<UserMessage>.ToPagedListAsync(query, pageNumber, pageSize);
     }
@@ -83,7 +66,9 @@ public class UserMessageRepository : GenericRepository<UserMessage>, IUserMessag
     public async Task ReadAllAsync(Guid senderId, Guid receiverId)
     {
         await _dbContext.UserMessages
-            .Where(message => message.Sender.Id == senderId && message.Receiver.Id == receiverId)
+            .Where(message => message.Sender.Id == senderId 
+                              && message.Receiver.Id == receiverId 
+                              && !message.HasBeenDeleted)
             .UpdateAsync(message => new UserMessage()
             {
                 HasBeenRead = true

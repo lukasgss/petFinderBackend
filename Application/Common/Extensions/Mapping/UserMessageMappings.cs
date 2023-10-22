@@ -11,8 +11,10 @@ public static class UserMessageMappings
         {
             Id = userMessage.Id,
             Content = userMessage.Content,
-            TimeStamp = userMessage.TimeStamp,
+            TimeStampUtc = userMessage.TimeStampUtc,
             HasBeenRead = userMessage.HasBeenRead,
+            HasBeenEdited = userMessage.HasBeenEdited,
+            HasBeenDeleted = userMessage.HasBeenDeleted,
             Sender = userMessage.Sender.ToUserDataResponse(),
             Receiver = userMessage.Receiver.ToUserDataResponse()
         };

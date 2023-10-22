@@ -14,8 +14,27 @@ public static class UserMessageGenerator
         {
             Id = Constants.UserMessageData.Id,
             Content = Constants.UserMessageData.Content,
-            TimeStamp = Constants.UserMessageData.TimeStamp,
+            TimeStampUtc = Constants.UserMessageData.TimeStamp,
             HasBeenRead = Constants.UserMessageData.HasBeenRead,
+            HasBeenEdited = Constants.UserMessageData.HasBeenEdited,
+            HasBeenDeleted = Constants.UserMessageData.HasBeenDeleted,
+            Sender = Constants.UserMessageData.Sender,
+            SenderId = Constants.UserMessageData.SenderId,
+            Receiver = Constants.UserMessageData.Receiver,
+            ReceiverId = Constants.UserMessageData.ReceiverId
+        };
+    }
+    
+    public static UserMessage GenerateEditedUserMessage()
+    {
+        return new UserMessage()
+        {
+            Id = Constants.UserMessageData.Id,
+            Content = Constants.UserMessageData.Content,
+            TimeStampUtc = Constants.UserMessageData.TimeStamp,
+            HasBeenRead = Constants.UserMessageData.HasBeenRead,
+            HasBeenEdited = true,
+            HasBeenDeleted = Constants.UserMessageData.HasBeenDeleted,
             Sender = Constants.UserMessageData.Sender,
             SenderId = Constants.UserMessageData.SenderId,
             Receiver = Constants.UserMessageData.Receiver,
@@ -42,6 +61,15 @@ public static class UserMessageGenerator
             ReceiverId = Constants.UserMessageData.ReceiverId
         };
     }
+
+    public static EditUserMessageRequest GenerateEditUserMessageRequest()
+    {
+        return new EditUserMessageRequest()
+        {
+            Id = Constants.UserMessageData.Id,
+            Content = Constants.UserMessageData.Content
+        };
+    }
         
     public static List<UserMessageResponse> GenerateListOfUserMessageResponses()
     {
@@ -60,8 +88,25 @@ public static class UserMessageGenerator
         {
             Id = Constants.UserMessageData.Id,
             Content = Constants.UserMessageData.Content,
-            TimeStamp = Constants.UserMessageData.TimeStamp,
+            TimeStampUtc = Constants.UserMessageData.TimeStamp,
             HasBeenRead = Constants.UserMessageData.HasBeenRead,
+            HasBeenEdited = Constants.UserMessageData.HasBeenEdited,
+            HasBeenDeleted = Constants.UserMessageData.HasBeenDeleted,
+            Sender = Constants.UserMessageData.Sender.ToUserDataResponse(),
+            Receiver = Constants.UserMessageData.Receiver.ToUserDataResponse(),
+        };
+    }
+    
+    public static UserMessageResponse GenerateEditedUserMessageResponse()
+    {
+        return new UserMessageResponse()
+        {
+            Id = Constants.UserMessageData.Id,
+            Content = Constants.UserMessageData.Content,
+            TimeStampUtc = Constants.UserMessageData.TimeStamp,
+            HasBeenRead = Constants.UserMessageData.HasBeenRead,
+            HasBeenEdited = true,
+            HasBeenDeleted = Constants.UserMessageData.HasBeenDeleted,
             Sender = Constants.UserMessageData.Sender.ToUserDataResponse(),
             Receiver = Constants.UserMessageData.Receiver.ToUserDataResponse(),
         };

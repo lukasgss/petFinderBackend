@@ -9,5 +9,10 @@ public interface IUserMessageService
 
     Task<PaginatedEntity<UserMessageResponse>> GetMessagesAsync(
         Guid senderId, Guid receiverId, Guid currentUserId, int pageNumber, int pageSize);
+
+    Task<UserMessageResponse> EditAsync(
+        long messageId, EditUserMessageRequest editUserMessageRequest, Guid userId, long routeId);
+
+    Task DeleteAsync(long messageId, Guid userId);
     Task<UserMessageResponse> SendAsync(SendUserMessageRequest messageRequest, Guid senderId);
 }

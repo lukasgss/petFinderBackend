@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("/user-messages")]
 public class UserMessageController : ControllerBase
@@ -23,7 +24,6 @@ public class UserMessageController : ControllerBase
         _userAuthorizationService = userAuthorizationService ?? throw new ArgumentNullException(nameof(userAuthorizationService));
     }
 
-    [Authorize]
     [HttpGet]
     public async Task<ActionResult<PaginatedEntity<UserMessageResponse>>> GetAllMessages(
         [Required] Guid senderId, [Required] Guid receiverId, int pageNumber = 1, int pageSize = PagedList<UserMessage>.MaxPageSize)
@@ -34,7 +34,6 @@ public class UserMessageController : ControllerBase
             senderId, receiverId, currentUserId, pageNumber, pageSize);
     }
 
-    [Authorize]
     [HttpPost("send")]
     public async Task<ActionResult<UserMessageResponse>> SendAsync(SendUserMessageRequest messageRequest)
     {
@@ -46,5 +45,23 @@ public class UserMessageController : ControllerBase
         {
             StatusCode = StatusCodes.Status201Created
         };
+    }
+
+    [HttpPut("{messageId:long}")]
+    public async Task<ActionResult<UserMessageResponse>> EditAsync(
+        long messageId, EditUserMessageRequest editUserMessageRequest)
+    {
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+        return await _userMessageService.EditAsync(messageId, editUserMessageRequest, userId, messageId);
+    }
+
+    [HttpDelete("{messageId:long}")]
+    public async Task<ActionResult> DeleteAsync(long messageId)
+    {
+        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+        await _userMessageService.DeleteAsync(messageId, userId);
+        return Ok();
     }
 }

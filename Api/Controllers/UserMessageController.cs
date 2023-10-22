@@ -4,9 +4,12 @@ using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.UserMessages.DTOs;
 using Application.Common.Pagination;
+using Application.Common.Validations.Errors;
+using Application.Common.Validations.UserMessages;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace Api.Controllers;
 
@@ -37,6 +40,15 @@ public class UserMessageController : ControllerBase
     [HttpPost("send")]
     public async Task<ActionResult<UserMessageResponse>> SendAsync(SendUserMessageRequest messageRequest)
     {
+        SendUserMessageValidator requestValidator = new();
+        ValidationResult validationResult = requestValidator.Validate(messageRequest);
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.Errors.Select(e =>
+                new ValidationError(e.PropertyName, e.ErrorMessage));
+            return BadRequest(errors);
+        }
+        
         Guid senderId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         UserMessageResponse message = await _userMessageService.SendAsync(messageRequest, senderId);
@@ -49,11 +61,20 @@ public class UserMessageController : ControllerBase
 
     [HttpPut("{messageId:long}")]
     public async Task<ActionResult<UserMessageResponse>> EditAsync(
-        long messageId, EditUserMessageRequest editUserMessageRequest)
+        long messageId, EditUserMessageRequest userMessage)
     {
+        EditUserMessageValidator requestValidator = new();
+        ValidationResult validationResult = requestValidator.Validate(userMessage);
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.Errors.Select(e =>
+                new ValidationError(e.PropertyName, e.ErrorMessage));
+            return BadRequest(errors);
+        }
+        
         Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-        return await _userMessageService.EditAsync(messageId, editUserMessageRequest, userId, messageId);
+        return await _userMessageService.EditAsync(messageId, userMessage, userId, messageId);
     }
 
     [HttpDelete("{messageId:long}")]

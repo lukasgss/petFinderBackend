@@ -31,7 +31,7 @@ public class PetController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<PetResponse>> CreatePet(CreatePetRequest createPetRequest)
+    public async Task<ActionResult<PetResponse>> CreatePet([FromForm] CreatePetRequest createPetRequest)
     {
         CreatePetValidator requestValidator = new();
         ValidationResult validationResult = requestValidator.Validate(createPetRequest);
@@ -51,7 +51,7 @@ public class PetController : ControllerBase
 
     [Authorize]
     [HttpPut("{petId:guid}")]
-    public async Task<ActionResult<PetResponse>> EditPet(EditPetRequest editPetRequest, Guid petId)
+    public async Task<ActionResult<PetResponse>> EditPet([FromForm] EditPetRequest editPetRequest, Guid petId)
     {
         EditPetValidator requestValidator = new();
         ValidationResult validationResult = requestValidator.Validate(editPetRequest);

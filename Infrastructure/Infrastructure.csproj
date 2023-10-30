@@ -1,27 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Application\Application.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Application\Application.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="EFCore.CheckConstraints" Version="6.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6" />
-    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="6.100.0.2" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.7"/>
+        <PackageReference Include="AWSSDK.S3" Version="3.7.205.19"/>
+        <PackageReference Include="EFCore.CheckConstraints" Version="6.0.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6"/>
+        <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="6.100.0.2"/>
+    </ItemGroup>
 
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
 </Project>

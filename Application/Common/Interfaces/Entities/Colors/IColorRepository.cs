@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.GenericRepository;
-using Domain.Entities;
+using Color = Domain.Entities.Color;
 
 namespace Application.Common.Interfaces.Entities.Colors;
 

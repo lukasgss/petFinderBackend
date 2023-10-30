@@ -6,6 +6,10 @@ using Application.Common.Interfaces.Entities.Colors;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
+using Application.Common.Interfaces.ExternalServices.AWS;
+using Infrastructure.DependencyInjections;
+using Infrastructure.ExternalServices.AWS;
+using Infrastructure.ExternalServices.Configs;
 using Infrastructure.Persistence.DataContext;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +31,10 @@ public static class DependencyInjection
         services.AddScoped<ISpeciesRepository, SpeciesRepository>();
         services.AddScoped<IAdoptionAlertRepository, AdoptionAlertRepository>();
         services.AddScoped<IUserMessageRepository, UserMessageRepository>();
+
+        services.AddScoped<IAwsS3Client, AwsS3Client>();
+        services.Configure<AwsData>(configuration.GetSection("AWS"));
+        services.ConfigureAws(configuration);
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))

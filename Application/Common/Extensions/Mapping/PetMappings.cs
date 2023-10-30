@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Domain.Entities;
+using Color = Domain.Entities.Color;
 
 namespace Application.Common.Extensions.Mapping;
 
@@ -16,6 +17,7 @@ public static class PetMappings
             Name = pet.Name,
             Observations = pet.Observations,
             AgeInMonths = pet.AgeInMonths,
+            Image = pet.Image,
             Gender = pet.Gender.ToString(),
             Owner = owner?.ToOwnerResponse(),
             Breed = breed.ToBreedResponse(),
@@ -33,6 +35,7 @@ public static class PetMappings
             Name = pet.Name,
             Observations = pet.Observations,
             AgeInMonths = pet.AgeInMonths,
+            Image = pet.Image,
             Gender = pet.Gender.ToString(),
             Breed = breed.ToBreedResponse(),
             Colors = colors.ToListOfColorResponse()

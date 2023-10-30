@@ -6,8 +6,12 @@ using Application.Common.Interfaces.Entities.Colors;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Application.Common.Interfaces.Entities.Users;
+using Application.Common.Interfaces.ExternalServices;
+using Application.Common.Interfaces.ExternalServices.AWS;
+using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
+using Color = Domain.Entities.Color;
 
 namespace Application.Services.Entities;
 
@@ -19,13 +23,18 @@ public class PetService : IPetService
     private readonly IColorRepository _colorRepository;
     private readonly IGuidProvider _guidProvider;
     private readonly IUserRepository _userRepository;
+    private readonly IAwsS3Client _awsS3Client;
+    private readonly IImageService _imageService;
 
-    public PetService(IPetRepository petRepository,
+    public PetService(
+        IPetRepository petRepository,
         IBreedRepository breedRepository,
         ISpeciesRepository speciesRepository,
         IColorRepository colorRepository,
         IGuidProvider guidProvider,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IAwsS3Client awsS3Client,
+        IImageService imageService)
     {
         _petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
         _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
@@ -33,6 +42,8 @@ public class PetService : IPetService
         _colorRepository = colorRepository ?? throw new ArgumentNullException(nameof(colorRepository));
         _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _awsS3Client = awsS3Client ?? throw new ArgumentNullException(nameof(awsS3Client));
+        _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
     }
 
     public async Task<PetResponse> GetPetBydIdAsync(Guid petId)
@@ -47,16 +58,32 @@ public class PetService : IPetService
         Breed breed = await ValidateAndAssignBreedAsync(createPetRequest.BreedId);
         Species species = await ValidateAndAssignSpeciesAsync(createPetRequest.SpeciesId);
         List<Color> colors = await ValidateAndAssignColorsAsync(createPetRequest.ColorIds);
-
         User petOwner = await ValidateAndAssignUserAsync(userId);
+
+        Guid petId = _guidProvider.NewGuid();
+
+        await using MemoryStream compressedImage =
+            await _imageService.CompressImageAsync(createPetRequest.Image.OpenReadStream());
+
+        AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadPetImageAsync(
+            imageStream: compressedImage,
+            imageFile: createPetRequest.Image,
+            petId);
+
+        if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
+        {
+            throw new InternalServerErrorException(
+                "Não foi possível fazer upload da imagem, tente novamente mais tarde.");
+        }
 
         Pet petToBeCreated = new()
         {
-            Id = _guidProvider.NewGuid(),
+            Id = petId,
             Name = createPetRequest.Name,
             Observations = createPetRequest.Observations,
             Gender = createPetRequest.Gender,
             AgeInMonths = createPetRequest.AgeInMonths,
+            Image = uploadedImage.PublicUrl,
             Owner = petOwner,
             Breed = breed,
             Species = species,
@@ -74,6 +101,7 @@ public class PetService : IPetService
         {
             throw new BadRequestException("Id da rota não coincide com o id especificado.");
         }
+
         Pet dbPet = await ValidateAndAssignPetAsync(editPetRequest.Id);
 
         Breed breed = await ValidateAndAssignBreedAsync(editPetRequest.BreedId);
@@ -81,21 +109,36 @@ public class PetService : IPetService
         List<Color> colors = await ValidateAndAssignColorsAsync(editPetRequest.ColorIds);
         User petOwner = await ValidateAndAssignUserAsync(userId);
 
-        if (dbPet.Owner?.Id != userId)
+        if (dbPet.Owner.Id != userId)
         {
             throw new UnauthorizedException("Você não possui permissão para editar dados desse animal.");
         }
 
+        await using MemoryStream compressedImage =
+            await _imageService.CompressImageAsync(editPetRequest.Image.OpenReadStream());
+
+        AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadPetImageAsync(
+            imageStream: compressedImage,
+            imageFile: editPetRequest.Image,
+            dbPet.Id);
+
+        if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
+        {
+            throw new InternalServerErrorException(
+                "Não foi possível fazer upload da imagem, tente novamente mais tarde.");
+        }
+
         dbPet.Id = editPetRequest.Id;
         dbPet.Name = editPetRequest.Name;
-        dbPet.Observations= editPetRequest.Observations;
+        dbPet.Observations = editPetRequest.Observations;
         dbPet.Gender = editPetRequest.Gender;
         dbPet.AgeInMonths = editPetRequest.AgeInMonths;
+        dbPet.Image = uploadedImage.PublicUrl;
         dbPet.Owner = petOwner;
         dbPet.Breed = breed;
         dbPet.Colors = colors;
         dbPet.Species = species;
-        
+
         await _petRepository.CommitAsync();
 
         return dbPet.ToPetResponse(petOwner, colors, breed);
@@ -108,11 +151,17 @@ public class PetService : IPetService
         {
             throw new UnauthorizedException("Você não possui permissão para excluir o animal.");
         }
-        
+
+        AwsS3ImageResponse response = await _awsS3Client.DeletePetImageAsync(petToDelete.Id);
+        if (!response.Success)
+        {
+            throw new InternalServerErrorException("Não foi possível excluir o animal, tente novamente mais tarde.");
+        }
+
         _petRepository.Delete(petToDelete);
         await _petRepository.CommitAsync();
     }
-    
+
     private async Task<User> ValidateAndAssignUserAsync(Guid userId)
     {
         User? user = await _userRepository.GetUserByIdAsync(userId);

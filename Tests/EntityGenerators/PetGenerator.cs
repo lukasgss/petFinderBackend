@@ -13,9 +13,10 @@ public static class PetGenerator
         {
             Id = Constants.PetData.Id,
             Name = Constants.PetData.Name,
-            Observations= Constants.PetData.Observations,
+            Observations = Constants.PetData.Observations,
             Gender = Constants.PetData.Gender,
             AgeInMonths = Constants.PetData.AgeInMonths,
+            Image = Constants.PetData.ImageUrl,
             Owner = Constants.PetData.User,
             UserId = Constants.UserData.Id,
             Breed = BreedGenerator.GenerateBreed(),
@@ -35,6 +36,7 @@ public static class PetGenerator
             Observations = Constants.PetData.Observations,
             Gender = Constants.PetData.Gender,
             AgeInMonths = Constants.PetData.AgeInMonths,
+            Image = Constants.PetData.ImageUrl,
             Owner = UserGenerator.GenerateUserWithRandomId(),
             UserId = UserGenerator.GenerateUserWithRandomId().Id,
             Breed = BreedGenerator.GenerateBreed(),
@@ -61,6 +63,7 @@ public static class PetGenerator
             Observations = Constants.PetData.Observations,
             Gender = Constants.PetData.Gender,
             AgeInMonths = Constants.PetData.AgeInMonths,
+            Image = Constants.PetData.ImageFile,
             BreedId = Constants.PetData.BreedId,
             SpeciesId = Constants.PetData.SpeciesId,
             ColorIds = Constants.PetData.ColorIds
@@ -76,6 +79,7 @@ public static class PetGenerator
             Observations = Constants.PetData.Observations,
             Gender = Constants.PetData.Gender,
             AgeInMonths = Constants.PetData.AgeInMonths,
+            Image = Constants.PetData.ImageFile,
             BreedId = Constants.PetData.BreedId,
             SpeciesId = Constants.PetData.SpeciesId,
             ColorIds = Constants.PetData.ColorIds

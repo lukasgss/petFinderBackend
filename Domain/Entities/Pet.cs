@@ -19,6 +19,9 @@ public class Pet
     
     public int? AgeInMonths { get; set; }
 
+    [MaxLength(100)]
+    public string Image { get; set; } = null!;
+
     [Required, ForeignKey("UserId")] 
     public virtual User Owner { get; set; } = null!;
     public Guid UserId { get; set; }

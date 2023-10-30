@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
@@ -7,6 +8,9 @@ using Application.Common.Interfaces.Entities.Colors;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Application.Common.Interfaces.Entities.Users;
+using Application.Common.Interfaces.ExternalServices;
+using Application.Common.Interfaces.ExternalServices.AWS;
+using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
 using Domain.Entities;
@@ -25,6 +29,7 @@ public class PetServiceTests
     private readonly IColorRepository _colorRepositoryMock;
     private readonly IGuidProvider _guidProviderMock;
     private readonly IUserRepository _userRepositoryMock;
+    private readonly IAwsS3Client _awsS3ClientMock;
     private readonly IPetService _sut;
 
     private static readonly Pet Pet = PetGenerator.GeneratePet();
@@ -36,6 +41,12 @@ public class PetServiceTests
     private static readonly CreatePetRequest CreatePetRequest = PetGenerator.GenerateCreatePetRequest();
     private static readonly EditPetRequest EditPetRequest = PetGenerator.GenerateEditPetRequest();
 
+    private static readonly AwsS3ImageResponse S3SuccessImageResponse =
+        AwsS3ImageGenerator.GenerateSuccessS3ImageResponse();
+
+    private static readonly AwsS3ImageResponse S3FailImageResponse =
+        AwsS3ImageGenerator.GenerateFailS3ImageResponse();
+
     public PetServiceTests()
     {
         _petRepositoryMock = Substitute.For<IPetRepository>();
@@ -44,6 +55,8 @@ public class PetServiceTests
         _colorRepositoryMock = Substitute.For<IColorRepository>();
         _guidProviderMock = Substitute.For<IGuidProvider>();
         _userRepositoryMock = Substitute.For<IUserRepository>();
+        _awsS3ClientMock = Substitute.For<IAwsS3Client>();
+        IImageService imageServiceMock = Substitute.For<IImageService>();
 
         _sut = new PetService(
             _petRepositoryMock,
@@ -51,7 +64,9 @@ public class PetServiceTests
             _speciesRepositoryMock,
             _colorRepositoryMock,
             _guidProviderMock,
-            _userRepositoryMock);
+            _userRepositoryMock,
+            _awsS3ClientMock,
+            imageServiceMock);
     }
 
     [Fact]
@@ -113,13 +128,32 @@ public class PetServiceTests
     }
 
     [Fact]
-    public async Task Create_Pet_While_Authenticated_Returns_Pet_Response_With_Logged_In_User_As_owner()
+    public async Task Create_Pet_With_Aws_S3_Error_Throws_InternalServerErrorException()
     {
         _breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
         _speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).Returns(Species);
         _colorRepositoryMock.GetMultipleColorsByIdsAsync(CreatePetRequest.ColorIds).Returns(Colors);
         _userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
         _guidProviderMock.NewGuid().Returns(Pet.Id);
+        _awsS3ClientMock.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Image, Pet.Id)
+            .Returns(S3FailImageResponse);
+
+        async Task Result() => await _sut.CreatePetAsync(CreatePetRequest, User.Id);
+
+        var exception = await Assert.ThrowsAsync<InternalServerErrorException>(Result);
+        Assert.Equal("Não foi possível fazer upload da imagem, tente novamente mais tarde.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Create_Pet_While_Authenticated_Returns_Pet_Response_With_Logged_In_User_As_Owner()
+    {
+        _breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
+        _speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).Returns(Species);
+        _colorRepositoryMock.GetMultipleColorsByIdsAsync(CreatePetRequest.ColorIds).Returns(Colors);
+        _userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
+        _guidProviderMock.NewGuid().Returns(Pet.Id);
+        _awsS3ClientMock.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Image, Pet.Id)
+            .Returns(S3SuccessImageResponse);
 
         PetResponse petResponse = await _sut.CreatePetAsync(CreatePetRequest, userId: User.Id);
 
@@ -202,6 +236,41 @@ public class PetServiceTests
 
         var exception = await Assert.ThrowsAsync<UnauthorizedException>(Result);
         Assert.Equal("Você não possui permissão para editar dados desse animal.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Edit_Pet_With_Aws_S3_Error_Throws_InternalServerErrorException()
+    {
+        _petRepositoryMock.GetPetByIdAsync(EditPetRequest.Id).Returns(Pet);
+        _breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
+        _speciesRepositoryMock.GetSpeciesByIdAsync(Species.Id).Returns(Species);
+        _colorRepositoryMock.GetMultipleColorsByIdsAsync(EditPetRequest.ColorIds).Returns(Colors);
+        _userRepositoryMock.GetUserByIdAsync(Constants.UserData.Id).Returns(User);
+        _userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
+        _awsS3ClientMock.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Image, Pet.Id)
+            .Returns(S3FailImageResponse);
+
+        async Task Result() => await _sut.EditPetAsync(EditPetRequest, User.Id, EditPetRequest.Id);
+
+        var exception = await Assert.ThrowsAsync<InternalServerErrorException>(Result);
+        Assert.Equal("Não foi possível fazer upload da imagem, tente novamente mais tarde.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Edit_Pet_Returns_Edited_Pet_Response()
+    {
+        _petRepositoryMock.GetPetByIdAsync(EditPetRequest.Id).Returns(Pet);
+        _breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
+        _speciesRepositoryMock.GetSpeciesByIdAsync(Species.Id).Returns(Species);
+        _colorRepositoryMock.GetMultipleColorsByIdsAsync(EditPetRequest.ColorIds).Returns(Colors);
+        _userRepositoryMock.GetUserByIdAsync(Constants.UserData.Id).Returns(User);
+        _userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
+        _awsS3ClientMock.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Image, Pet.Id)
+            .Returns(S3SuccessImageResponse);
+
+        PetResponse editedPetResponse = await _sut.EditPetAsync(EditPetRequest, User.Id, EditPetRequest.Id);
+
+        Assert.Equivalent(ExpectedPetResponse, editedPetResponse);
     }
 
     [Fact]

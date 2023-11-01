@@ -10,6 +10,7 @@ public static class UserMappings
         return new OwnerResponse()
         {
             FullName = user.FullName,
+            Image = user.Image,
             PhoneNumber = user.PhoneNumber,
             Email = user.Email
         };
@@ -21,6 +22,7 @@ public static class UserMappings
         {
             Id = user.Id,
             FullName = user.FullName,
+            Image = user.Image,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
         };
@@ -33,6 +35,7 @@ public static class UserMappings
             Id = user.Id,
             FullName = user.FullName,
             Email = user.Email,
+            Image = user.Image,
             PhoneNumber = user.PhoneNumber,
             Token = jwtToken
         };

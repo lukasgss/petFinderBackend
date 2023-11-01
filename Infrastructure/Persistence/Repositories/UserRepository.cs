@@ -40,6 +40,16 @@ public class UserRepository : GenericRepository<User>, IUserRepository
         return await _userManager.SetLockoutEnabledAsync(user, enabled);
     }
 
+    public async Task<string> GenerateEmailConfirmationTokenAsync(User user)
+    {
+        return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+    }
+
+    public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
+    {
+        return await _userManager.ConfirmEmailAsync(user, token);
+    }
+
     public async Task<User?> GetUserByIdAsync(Guid userId)
     {
         return await _dbContext.Users.SingleOrDefaultAsync(user => user.Id == userId);

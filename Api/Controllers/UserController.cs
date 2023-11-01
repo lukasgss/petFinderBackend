@@ -15,7 +15,7 @@ public class UserController : ControllerBase
 
     public UserController(IUserService userService)
     {
-        _userService = userService ??  throw new ArgumentNullException(nameof(userService));
+        _userService = userService ?? throw new ArgumentNullException(nameof(userService));
     }
 
     [HttpGet("{userId:guid}", Name = "GetUserById")]
@@ -52,8 +52,17 @@ public class UserController : ControllerBase
                 .Select(e => new ValidationError(e.PropertyName, e.ErrorMessage));
             return BadRequest(errors);
         }
+
         UserResponse loggedInUser = await _userService.LoginAsync(loginUserRequest);
 
         return Ok(loggedInUser);
+    }
+
+    [HttpPost("confirm-email")]
+    public async Task<ActionResult> ConfirmEmail(string userId, string token)
+    {
+        await _userService.ConfirmEmailAsync(userId, token);
+
+        return Ok();
     }
 }

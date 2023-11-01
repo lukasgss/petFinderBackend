@@ -9,6 +9,7 @@ using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.General.Images;
+using Application.Common.Interfaces.Messaging;
 using Application.Common.Interfaces.Providers;
 using Application.Common.Providers;
 using Application.Marker;
@@ -45,6 +46,8 @@ public static class DependencyInjection
 
         services.Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+
+        services.Configure<MessagingSettings>(configuration.GetSection("MessagingSettings"));
 
         return services;
     }

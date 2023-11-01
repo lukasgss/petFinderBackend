@@ -7,4 +7,5 @@ public interface IUserService
     Task<UserDataResponse> GetUserByIdAsync(Guid userId);
     Task<UserResponse> RegisterAsync(CreateUserRequest createUserRequest);
     Task<UserResponse> LoginAsync(LoginUserRequest loginUserRequest);
+    Task ConfirmEmailAsync(string hashedUserId, string token);
 }

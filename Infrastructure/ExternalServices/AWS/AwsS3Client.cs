@@ -1,6 +1,5 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.ExternalServices;
 using Application.Common.Interfaces.ExternalServices.AWS;
 using Infrastructure.ExternalServices.Configs;
@@ -14,27 +13,23 @@ public class AwsS3Client : IAwsS3Client
 {
     private readonly IAmazonS3 _s3Client;
     private readonly AwsData _awsData;
-    private readonly IIdConverterService _idConverterService;
     private readonly ILogger<AwsS3Client> _logger;
 
     public AwsS3Client(
         IAmazonS3 s3Client,
         IOptions<AwsData> awsData,
-        IIdConverterService idConverterService,
         ILogger<AwsS3Client> logger)
     {
-        _s3Client = s3Client;
-        _logger = logger;
-        _idConverterService = idConverterService;
-        _awsData = awsData.Value;
+        _s3Client = s3Client ?? throw new ArgumentNullException(nameof(s3Client));
+        _awsData = awsData.Value ?? throw new ArgumentNullException(nameof(awsData));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<AwsS3ImageResponse> UploadPetImageAsync(MemoryStream imageStream, IFormFile imageFile, Guid petId)
+    public async Task<AwsS3ImageResponse> UploadPetImageAsync(
+        MemoryStream imageStream, IFormFile imageFile, string hashedPetId)
     {
         try
         {
-            string hashedPetId = _idConverterService.ConvertGuidToShortId(petId);
-
             PutObjectRequest putObjectRequest = new()
             {
                 BucketName = _awsData.BucketName,
@@ -69,12 +64,10 @@ public class AwsS3Client : IAwsS3Client
     }
 
     public async Task<AwsS3ImageResponse> UploadUserImageAsync(
-        MemoryStream imageStream, IFormFile imageFile, Guid userId)
+        MemoryStream imageStream, IFormFile imageFile, string hashedUserId)
     {
         try
         {
-            string hashedUserId = _idConverterService.ConvertGuidToShortId(userId);
-
             PutObjectRequest putObjectRequest = new()
             {
                 BucketName = _awsData.BucketName,
@@ -108,12 +101,10 @@ public class AwsS3Client : IAwsS3Client
         }
     }
 
-    public async Task<AwsS3ImageResponse> DeletePetImageAsync(Guid petId)
+    public async Task<AwsS3ImageResponse> DeletePetImageAsync(string hashedPetId)
     {
         try
         {
-            string hashedPetId = _idConverterService.ConvertGuidToShortId(petId);
-
             DeleteObjectRequest deleteObjectRequest = new()
             {
                 BucketName = _awsData.BucketName,

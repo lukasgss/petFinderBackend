@@ -37,7 +37,8 @@ public static class DependencyInjection
         services.AddScoped<IAdoptionAlertService, AdoptionAlertService>();
         services.AddScoped<IUserMessageService, UserMessageService>();
         services.AddScoped<IIdConverterService, IdConverterService>();
-        services.AddScoped<IImageService, ImageService>();
+        services.AddScoped<IImageProcessingService, ImageProcessingService>();
+        services.AddScoped<IImageSubmissionService, ImageSubmissionService>();
 
         services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

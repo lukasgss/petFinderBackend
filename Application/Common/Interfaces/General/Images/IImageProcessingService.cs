@@ -1,6 +1,6 @@
 namespace Application.Common.Interfaces.General.Images;
 
-public interface IImageService
+public interface IImageProcessingService
 {
     Task<MemoryStream> CompressImageAsync(Stream image);
 }

@@ -1,9 +1,12 @@
+using System.IO;
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Entities.Users.DTOs;
+using Application.Common.Interfaces.ExternalServices;
+using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Messaging;
 using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
@@ -16,6 +19,7 @@ using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
 using Tests.Fakes.Identity;
 using Constants = Tests.TestUtils.Constants.Constants;
+using IAwsS3Client = Application.Common.Interfaces.ExternalServices.AWS.IAwsS3Client;
 
 namespace Tests.UnitTests;
 
@@ -24,6 +28,7 @@ public class UserServiceTests
     private readonly IUserRepository _userRepositoryMock;
     private readonly IGuidProvider _guidProviderMock;
     private readonly IJwtTokenGenerator _jwtTokenGeneratorMock;
+    private readonly IAwsS3Client _awsS3ClientMock;
     private readonly IIdConverterService _idConverterServiceMock;
     private readonly IUserService _sut;
 
@@ -33,11 +38,19 @@ public class UserServiceTests
     private static readonly CreateUserRequest CreateUserRequest = UserGenerator.GenerateCreateUserRequest();
     private static readonly LoginUserRequest LoginUserRequest = UserGenerator.GenerateLoginUserRequest();
 
+    private static readonly AwsS3ImageResponse S3SuccessImageResponse =
+        AwsS3ImageGenerator.GenerateSuccessS3ImageResponse();
+
+    private static readonly AwsS3ImageResponse S3FailImageResponse =
+        AwsS3ImageGenerator.GenerateFailS3ImageResponse();
+
     public UserServiceTests()
     {
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _guidProviderMock = Substitute.For<IGuidProvider>();
         _jwtTokenGeneratorMock = Substitute.For<IJwtTokenGenerator>();
+        _awsS3ClientMock = Substitute.For<IAwsS3Client>();
+        IImageService imageServiceMock = Substitute.For<IImageService>();
         IHttpContextAccessor httpRequestMock = Substitute.For<IHttpContextAccessor>();
         IMessagingService messagingServiceMock = Substitute.For<IMessagingService>();
         LinkGenerator linkGeneratorMock = Substitute.For<LinkGenerator>();
@@ -47,6 +60,8 @@ public class UserServiceTests
             _userRepositoryMock,
             _guidProviderMock,
             _jwtTokenGeneratorMock,
+            _awsS3ClientMock,
+            imageServiceMock,
             httpRequestMock,
             messagingServiceMock,
             linkGeneratorMock,
@@ -75,10 +90,25 @@ public class UserServiceTests
     }
 
     [Fact]
+    public async Task Register_User_With_Aws_Upload_Error_Throws_InternalServerErrorException()
+    {
+        _guidProviderMock.NewGuid().Returns(User.Id);
+        _awsS3ClientMock.UploadUserImageAsync(Arg.Any<MemoryStream>(), CreateUserRequest.Image, User.Id)
+            .Returns(S3FailImageResponse);
+
+        async Task Result() => await _sut.RegisterAsync(CreateUserRequest);
+
+        var exception = await Assert.ThrowsAsync<InternalServerErrorException>(Result);
+        Assert.Equal("Não foi possível fazer upload da imagem, tente novamente mais tarde.", exception.Message);
+    }
+
+    [Fact]
     public async Task Register_Attempt_With_Already_Existing_Email_Throws_ConflictException()
     {
         _guidProviderMock.NewGuid().Returns(User.Id);
         _userRepositoryMock.GetUserByEmailAsync(CreateUserRequest.Email).Returns(User);
+        _awsS3ClientMock.UploadUserImageAsync(Arg.Any<MemoryStream>(), CreateUserRequest.Image, User.Id)
+            .Returns(S3SuccessImageResponse);
 
         async Task Result() => await _sut.RegisterAsync(CreateUserRequest);
 
@@ -90,6 +120,8 @@ public class UserServiceTests
     public async Task Register_Attempt_With_Any_Registration_Error_Throws_InternalServerErrorException()
     {
         _guidProviderMock.NewGuid().Returns(Constants.UserData.Id);
+        _awsS3ClientMock.UploadUserImageAsync(Arg.Any<MemoryStream>(), CreateUserRequest.Image, User.Id)
+            .Returns(S3SuccessImageResponse);
         _userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
         IdentityResult expectedIdentityResult = new FakeIdentityResult(succeeded: false);
         _userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), CreateUserRequest.Password)
@@ -106,6 +138,8 @@ public class UserServiceTests
     {
         // Arrange
         _guidProviderMock.NewGuid().Returns(Constants.UserData.Id);
+        _awsS3ClientMock.UploadUserImageAsync(Arg.Any<MemoryStream>(), CreateUserRequest.Image, User.Id)
+            .Returns(S3SuccessImageResponse);
         _userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
 
         IdentityResult expectedIdentityResult = new FakeIdentityResult(succeeded: true);

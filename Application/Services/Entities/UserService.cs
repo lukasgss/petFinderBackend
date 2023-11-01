@@ -4,6 +4,9 @@ using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Entities.Users.DTOs;
+using Application.Common.Interfaces.ExternalServices;
+using Application.Common.Interfaces.ExternalServices.AWS;
+using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Messaging;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
@@ -19,6 +22,8 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepository;
     private readonly IGuidProvider _guidProvider;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IAwsS3Client _awsS3Client;
+    private readonly IImageService _imageService;
     private readonly IHttpContextAccessor _httpRequest;
     private readonly IMessagingService _messagingService;
     private readonly LinkGenerator _linkGenerator;
@@ -28,6 +33,8 @@ public class UserService : IUserService
         IUserRepository userRepository,
         IGuidProvider guidProvider,
         IJwtTokenGenerator jwtTokenGenerator,
+        IAwsS3Client awsS3Client,
+        IImageService imageService,
         IHttpContextAccessor httpRequest,
         IMessagingService messagingService,
         LinkGenerator linkGenerator,
@@ -36,10 +43,13 @@ public class UserService : IUserService
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
         _jwtTokenGenerator = jwtTokenGenerator ?? throw new ArgumentNullException(nameof(jwtTokenGenerator));
+        _awsS3Client = awsS3Client ?? throw new ArgumentNullException(nameof(awsS3Client));
+        _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
         _httpRequest = httpRequest ?? throw new ArgumentNullException(nameof(httpRequest));
         _messagingService = messagingService ?? throw new ArgumentNullException(nameof(messagingService));
         _linkGenerator = linkGenerator ?? throw new ArgumentNullException(nameof(linkGenerator));
         _idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
+        _awsS3Client = awsS3Client ?? throw new ArgumentNullException(nameof(awsS3Client));
     }
 
     public async Task<UserDataResponse> GetUserByIdAsync(Guid userId)
@@ -56,12 +66,29 @@ public class UserService : IUserService
 
     public async Task<UserResponse> RegisterAsync(CreateUserRequest createUserRequest)
     {
+        await using MemoryStream compressedImage =
+            await _imageService.CompressImageAsync(createUserRequest.Image.OpenReadStream());
+
+        Guid userId = _guidProvider.NewGuid();
+
+        AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadUserImageAsync(
+            imageStream: compressedImage,
+            imageFile: createUserRequest.Image,
+            userId);
+
+        if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
+        {
+            throw new InternalServerErrorException(
+                "Não foi possível fazer upload da imagem, tente novamente mais tarde.");
+        }
+
         User userToCreate = new()
         {
-            Id = _guidProvider.NewGuid(),
+            Id = userId,
             FullName = createUserRequest.FullName,
             UserName = createUserRequest.Email,
             PhoneNumber = createUserRequest.PhoneNumber,
+            Image = uploadedImage.PublicUrl,
             Email = createUserRequest.Email,
             EmailConfirmed = false
         };

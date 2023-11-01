@@ -25,7 +25,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<UserResponse>> Register(CreateUserRequest createUserRequest)
+    public async Task<ActionResult<UserResponse>> Register([FromForm] CreateUserRequest createUserRequest)
     {
         RegisterUserValidator requestValidator = new();
         ValidationResult validationResult = requestValidator.Validate(createUserRequest);

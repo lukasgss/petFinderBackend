@@ -13,6 +13,7 @@ public static class UserGenerator
             Id = Constants.UserData.Id,
             FullName = Constants.UserData.FullName,
             PhoneNumber = Constants.UserData.PhoneNumber,
+            Image = Constants.UserData.ImageUrl,
             UserName = Constants.UserData.UserName,
             Email = Constants.UserData.Email,
             EmailConfirmed = Constants.UserData.EmailConfirmed
@@ -27,20 +28,21 @@ public static class UserGenerator
             FullName = Constants.UserData.FullName,
             PhoneNumber = Constants.UserData.PhoneNumber,
             UserName = Constants.UserData.UserName,
+            Image = Constants.UserData.ImageUrl,
             Email = Constants.UserData.Email,
             EmailConfirmed = Constants.UserData.EmailConfirmed
         };
     }
-    
+
     public static LoginUserRequest GenerateLoginUserRequest()
     {
         return new LoginUserRequest()
         {
             Email = Constants.UserData.Email,
-            Password= Constants.UserData.Password,
+            Password = Constants.UserData.Password,
         };
     }
-    
+
     public static CreateUserRequest GenerateCreateUserRequest()
     {
         return new CreateUserRequest()
@@ -48,7 +50,8 @@ public static class UserGenerator
             Email = Constants.UserData.Email,
             FullName = Constants.UserData.FullName,
             PhoneNumber = Constants.UserData.PhoneNumber,
-            Password= Constants.UserData.Password,
+            Image = Constants.UserData.ImageFile,
+            Password = Constants.UserData.Password,
             ConfirmPassword = Constants.UserData.Password,
         };
     }

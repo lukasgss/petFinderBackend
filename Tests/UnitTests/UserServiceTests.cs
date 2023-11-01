@@ -1,12 +1,16 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Authentication;
+using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Entities.Users.DTOs;
+using Application.Common.Interfaces.Messaging;
 using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -20,6 +24,7 @@ public class UserServiceTests
     private readonly IUserRepository _userRepositoryMock;
     private readonly IGuidProvider _guidProviderMock;
     private readonly IJwtTokenGenerator _jwtTokenGeneratorMock;
+    private readonly IIdConverterService _idConverterServiceMock;
     private readonly IUserService _sut;
 
     private static readonly User User = UserGenerator.GenerateUser();
@@ -33,8 +38,19 @@ public class UserServiceTests
         _userRepositoryMock = Substitute.For<IUserRepository>();
         _guidProviderMock = Substitute.For<IGuidProvider>();
         _jwtTokenGeneratorMock = Substitute.For<IJwtTokenGenerator>();
+        IHttpContextAccessor httpRequestMock = Substitute.For<IHttpContextAccessor>();
+        IMessagingService messagingServiceMock = Substitute.For<IMessagingService>();
+        LinkGenerator linkGeneratorMock = Substitute.For<LinkGenerator>();
+        _idConverterServiceMock = Substitute.For<IIdConverterService>();
 
-        _sut = new UserService(_userRepositoryMock, _guidProviderMock, _jwtTokenGeneratorMock);
+        _sut = new UserService(
+            _userRepositoryMock,
+            _guidProviderMock,
+            _jwtTokenGeneratorMock,
+            httpRequestMock,
+            messagingServiceMock,
+            linkGeneratorMock,
+            _idConverterServiceMock);
     }
 
     [Fact]
@@ -76,7 +92,8 @@ public class UserServiceTests
         _guidProviderMock.NewGuid().Returns(Constants.UserData.Id);
         _userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
         IdentityResult expectedIdentityResult = new FakeIdentityResult(succeeded: false);
-        _userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), CreateUserRequest.Password).Returns(expectedIdentityResult);
+        _userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), CreateUserRequest.Password)
+            .Returns(expectedIdentityResult);
         _userRepositoryMock.SetLockoutEnabledAsync(Arg.Any<User>(), false).Returns(expectedIdentityResult);
 
         async Task Result() => await _sut.RegisterAsync(CreateUserRequest);
@@ -146,5 +163,33 @@ public class UserServiceTests
         UserResponse userResponse = await _sut.LoginAsync(LoginUserRequest);
 
         Assert.Equivalent(UserResponse, userResponse);
+    }
+
+    [Fact]
+    public async Task Confirm_Email_With_Invalid_User_Id_Throws_BadRequestException()
+    {
+        Guid decodedUserId = Guid.NewGuid();
+        _idConverterServiceMock.DecodeShortIdToGuid(Arg.Any<string>()).Returns(decodedUserId);
+        _userRepositoryMock.GetUserByIdAsync(decodedUserId).ReturnsNull();
+
+        async Task Result() => await _sut.ConfirmEmailAsync("hashedUserId", "token");
+
+        var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+        Assert.Equal("Não foi possível ativar o email com os dados informados.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Confirm_Email_With_Confirmation_Fail_Throws_BadRequestException()
+    {
+        Guid decodedUserId = Guid.NewGuid();
+        _idConverterServiceMock.DecodeShortIdToGuid(Arg.Any<string>()).Returns(decodedUserId);
+        _userRepositoryMock.GetUserByIdAsync(decodedUserId).Returns(User);
+        FakeIdentityResult fakeIdentityResult = new(succeeded: false);
+        _userRepositoryMock.ConfirmEmailAsync(User, "token").Returns(fakeIdentityResult);
+
+        async Task Result() => await _sut.ConfirmEmailAsync("hashedUserId", "token");
+
+        var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+        Assert.Equal("Não foi possível ativar o email com os dados informados.", exception.Message);
     }
 }

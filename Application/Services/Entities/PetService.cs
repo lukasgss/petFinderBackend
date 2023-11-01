@@ -6,8 +6,6 @@ using Application.Common.Interfaces.Entities.Colors;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Application.Common.Interfaces.Entities.Users;
-using Application.Common.Interfaces.ExternalServices;
-using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
@@ -23,8 +21,7 @@ public class PetService : IPetService
     private readonly IColorRepository _colorRepository;
     private readonly IGuidProvider _guidProvider;
     private readonly IUserRepository _userRepository;
-    private readonly IAwsS3Client _awsS3Client;
-    private readonly IImageService _imageService;
+    private readonly IImageSubmissionService _imageSubmissionService;
 
     public PetService(
         IPetRepository petRepository,
@@ -33,8 +30,7 @@ public class PetService : IPetService
         IColorRepository colorRepository,
         IGuidProvider guidProvider,
         IUserRepository userRepository,
-        IAwsS3Client awsS3Client,
-        IImageService imageService)
+        IImageSubmissionService imageSubmissionService)
     {
         _petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
         _breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
@@ -42,8 +38,8 @@ public class PetService : IPetService
         _colorRepository = colorRepository ?? throw new ArgumentNullException(nameof(colorRepository));
         _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _awsS3Client = awsS3Client ?? throw new ArgumentNullException(nameof(awsS3Client));
-        _imageService = imageService ?? throw new ArgumentNullException(nameof(imageService));
+        _imageSubmissionService =
+            imageSubmissionService ?? throw new ArgumentNullException(nameof(imageSubmissionService));
     }
 
     public async Task<PetResponse> GetPetBydIdAsync(Guid petId)
@@ -62,19 +58,7 @@ public class PetService : IPetService
 
         Guid petId = _guidProvider.NewGuid();
 
-        await using MemoryStream compressedImage =
-            await _imageService.CompressImageAsync(createPetRequest.Image.OpenReadStream());
-
-        AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadPetImageAsync(
-            imageStream: compressedImage,
-            imageFile: createPetRequest.Image,
-            petId);
-
-        if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
-        {
-            throw new InternalServerErrorException(
-                "Não foi possível fazer upload da imagem, tente novamente mais tarde.");
-        }
+        string uploadedImageUrl = await _imageSubmissionService.UploadPetImageAsync(petId, createPetRequest.Image);
 
         Pet petToBeCreated = new()
         {
@@ -83,7 +67,7 @@ public class PetService : IPetService
             Observations = createPetRequest.Observations,
             Gender = createPetRequest.Gender,
             AgeInMonths = createPetRequest.AgeInMonths,
-            Image = uploadedImage.PublicUrl,
+            Image = uploadedImageUrl,
             Owner = petOwner,
             Breed = breed,
             Species = species,
@@ -114,26 +98,14 @@ public class PetService : IPetService
             throw new UnauthorizedException("Você não possui permissão para editar dados desse animal.");
         }
 
-        await using MemoryStream compressedImage =
-            await _imageService.CompressImageAsync(editPetRequest.Image.OpenReadStream());
-
-        AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadPetImageAsync(
-            imageStream: compressedImage,
-            imageFile: editPetRequest.Image,
-            dbPet.Id);
-
-        if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
-        {
-            throw new InternalServerErrorException(
-                "Não foi possível fazer upload da imagem, tente novamente mais tarde.");
-        }
+        string uploadedImageUrl = await _imageSubmissionService.UploadPetImageAsync(dbPet.Id, editPetRequest.Image);
 
         dbPet.Id = editPetRequest.Id;
         dbPet.Name = editPetRequest.Name;
         dbPet.Observations = editPetRequest.Observations;
         dbPet.Gender = editPetRequest.Gender;
         dbPet.AgeInMonths = editPetRequest.AgeInMonths;
-        dbPet.Image = uploadedImage.PublicUrl;
+        dbPet.Image = uploadedImageUrl;
         dbPet.Owner = petOwner;
         dbPet.Breed = breed;
         dbPet.Colors = colors;
@@ -152,11 +124,7 @@ public class PetService : IPetService
             throw new UnauthorizedException("Você não possui permissão para excluir o animal.");
         }
 
-        AwsS3ImageResponse response = await _awsS3Client.DeletePetImageAsync(petToDelete.Id);
-        if (!response.Success)
-        {
-            throw new InternalServerErrorException("Não foi possível excluir o animal, tente novamente mais tarde.");
-        }
+        await _imageSubmissionService.DeletePetImageAsync(petToDelete.Id);
 
         _petRepository.Delete(petToDelete);
         await _petRepository.CommitAsync();

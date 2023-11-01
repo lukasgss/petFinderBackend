@@ -1,18 +1,16 @@
 using Application.Common.Interfaces.General.Images;
-using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Formats.Webp;
-using SixLabors.ImageSharp.Processing.Processors.Transforms;
 
 namespace Application.Services.General.Images;
 
-public class ImageService : IImageService
+public class ImageProcessingService : IImageProcessingService
 {
     // This method returns a MemoryStream, so it's important to note that
     // the caller is responsible for ensuring the correct disposal of the
     // stream when done with it.
     public async Task<MemoryStream> CompressImageAsync(Stream imageStream)
     {
-        MemoryStream outStream = new MemoryStream();
+        MemoryStream outStream = new();
 
         using (Image image = await Image.LoadAsync(imageStream))
         {

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("/adoption-alerts")]
+[Route("/api/adoption-alerts")]
 public class AdoptionAlertController : ControllerBase
 {
     private readonly IAdoptionAlertService _adoptionAlertService;
@@ -21,7 +21,8 @@ public class AdoptionAlertController : ControllerBase
         IUserAuthorizationService userAuthorizationService)
     {
         _adoptionAlertService = adoptionAlertService ?? throw new ArgumentNullException(nameof(adoptionAlertService));
-        _userAuthorizationService = userAuthorizationService ?? throw new ArgumentNullException(nameof(userAuthorizationService));
+        _userAuthorizationService = userAuthorizationService ??
+                                    throw new ArgumentNullException(nameof(userAuthorizationService));
     }
 
     [HttpGet("{alertId:guid}", Name = "GetAdoptionAlertById")]
@@ -71,7 +72,7 @@ public class AdoptionAlertController : ControllerBase
             var errors = validationResult.Errors.Select(e => new ValidationError(e.PropertyName, e.ErrorMessage));
             return BadRequest(errors);
         }
-        
+
         Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         return await _adoptionAlertService.EditAsync(editAlertRequest, userId, alertId);

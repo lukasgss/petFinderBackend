@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
-[Route("/pets")]
+[Route("/api/pets")]
 [ApiController]
 public class PetController : ControllerBase
 {

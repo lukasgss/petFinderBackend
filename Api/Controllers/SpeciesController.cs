@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("/species")]
+[Route("/api/species")]
 public class SpeciesController : ControllerBase
 {
     private readonly ISpeciesService _speciesService;

@@ -9,10 +9,10 @@ public class RegisterUserValidator : AbstractValidator<CreateUserRequest>
     {
         RuleFor(user => user.FullName)
             .NotEmpty()
-            .WithMessage("Campo de e-mail é obrigatório.")
+            .WithMessage("Campo de nome completo é obrigatório.")
             .MaximumLength(255)
             .WithMessage("Máximo de 255 caracteres permitidos.");
-        
+
         RuleFor(user => user.Email)
             .NotEmpty()
             .WithMessage("Campo de e-mail é obrigatório.")
@@ -20,13 +20,13 @@ public class RegisterUserValidator : AbstractValidator<CreateUserRequest>
             .WithMessage("Endereço de e-mail inválido.")
             .MaximumLength(255)
             .WithMessage("Máximo de 255 caracteres permitidos.");
-        
+
         RuleFor(user => user.PhoneNumber)
             .NotEmpty()
             .WithMessage("Campo de telefone é obrigatório.")
             .MaximumLength(255)
             .WithMessage("Máximo de 255 caracteres permitidos.");
-        
+
         RuleFor(user => user.Password)
             .NotEmpty()
             .WithMessage("Campo de senha é obrigatório.")
@@ -38,6 +38,5 @@ public class RegisterUserValidator : AbstractValidator<CreateUserRequest>
             .WithMessage("Campo de confirmar senha é obrigatório.")
             .Equal(user => user.Password)
             .WithMessage("Campo de senha e confirmar senha devem ser iguais.");
-
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("/breeds")]
+[Route("/api/breeds")]
 public class BreedController : ControllerBase
 {
     private readonly IBreedService _breedService;

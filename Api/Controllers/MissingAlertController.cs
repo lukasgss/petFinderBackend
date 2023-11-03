@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("/missing-alerts")]
+[Route("/api/missing-alerts")]
 public class MissingAlertController : ControllerBase
 {
     private readonly IMissingAlertService _missingAlertService;
@@ -30,7 +30,7 @@ public class MissingAlertController : ControllerBase
         MissingAlertResponse missingAlert = await _missingAlertService.GetByIdAsync(alertId);
         return Ok(missingAlert);
     }
-    
+
     [Authorize]
     [HttpPost]
     public async Task<ActionResult<MissingAlertResponse>> Create(
@@ -75,7 +75,7 @@ public class MissingAlertController : ControllerBase
 
         return Ok(editedAlert);
     }
-    
+
     [Authorize]
     [HttpPost("resolve/{alertId:guid}")]
     public async Task<ActionResult<MissingAlertResponse>> MarkAsResolved(Guid alertId)

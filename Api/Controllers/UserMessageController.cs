@@ -15,21 +15,24 @@ namespace Api.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("/user-messages")]
+[Route("/api/user-messages")]
 public class UserMessageController : ControllerBase
 {
     private readonly IUserMessageService _userMessageService;
     private readonly IUserAuthorizationService _userAuthorizationService;
 
-    public UserMessageController(IUserMessageService userMessageService, IUserAuthorizationService userAuthorizationService)
+    public UserMessageController(IUserMessageService userMessageService,
+        IUserAuthorizationService userAuthorizationService)
     {
         _userMessageService = userMessageService ?? throw new ArgumentNullException(nameof(userMessageService));
-        _userAuthorizationService = userAuthorizationService ?? throw new ArgumentNullException(nameof(userAuthorizationService));
+        _userAuthorizationService = userAuthorizationService ??
+                                    throw new ArgumentNullException(nameof(userAuthorizationService));
     }
 
     [HttpGet]
     public async Task<ActionResult<PaginatedEntity<UserMessageResponse>>> GetAllMessages(
-        [Required] Guid senderId, [Required] Guid receiverId, int pageNumber = 1, int pageSize = PagedList<UserMessage>.MaxPageSize)
+        [Required] Guid senderId, [Required] Guid receiverId, int pageNumber = 1,
+        int pageSize = PagedList<UserMessage>.MaxPageSize)
     {
         Guid currentUserId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
@@ -48,7 +51,7 @@ public class UserMessageController : ControllerBase
                 new ValidationError(e.PropertyName, e.ErrorMessage));
             return BadRequest(errors);
         }
-        
+
         Guid senderId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         UserMessageResponse message = await _userMessageService.SendAsync(messageRequest, senderId);
@@ -71,7 +74,7 @@ public class UserMessageController : ControllerBase
                 new ValidationError(e.PropertyName, e.ErrorMessage));
             return BadRequest(errors);
         }
-        
+
         Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
         return await _userMessageService.EditAsync(messageId, userMessage, userId, messageId);

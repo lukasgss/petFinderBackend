@@ -1,3 +1,4 @@
+using Api.ActionFilters;
 using Api.Converters;
 using Api.Extensions;
 using Application;
@@ -8,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options => { options.Filters.Add<CustomModelValidationAttribute>(); })
+    .ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = true; })
     .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter()); });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

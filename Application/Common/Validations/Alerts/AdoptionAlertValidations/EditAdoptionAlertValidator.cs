@@ -10,17 +10,17 @@ public class EditAdoptionAlertValidator : AbstractValidator<EditAdoptionAlertReq
         RuleFor(alert => alert.Id)
             .NotEmpty()
             .WithMessage("Campo de id é obrigatório.");
-        
+
         RuleFor(alert => alert.OnlyForScreenedProperties)
             .NotNull()
             .WithMessage("Campo de apenas imóveis telados é obrigatório.");
-        
+
         RuleFor(alert => alert.LocationLatitude)
             .NotNull()
             .WithMessage("Campo de latitude é obrigatório.")
             .Must(latitude => latitude is >= -90 and <= 90)
             .WithMessage("Campo de latitude deve ser entre -90 e 90.");
-        
+
         RuleFor(alert => alert.LocationLongitude)
             .NotNull()
             .WithMessage("Campo de longitude é obrigatório.")
@@ -33,6 +33,6 @@ public class EditAdoptionAlertValidator : AbstractValidator<EditAdoptionAlertReq
 
         RuleFor(alert => alert.PetId)
             .NotEmpty()
-            .WithMessage("Campo de id do animal é obrigatório.");
+            .WithMessage("Campo do pet é obrigatório.");
     }
 }

@@ -8,6 +8,7 @@ using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.Messaging;
+using Application.Services.General.Notifications;
 using Infrastructure.DependencyInjections;
 using Infrastructure.ExternalServices.AWS;
 using Infrastructure.ExternalServices.Configs;
@@ -34,6 +35,7 @@ public static class DependencyInjection
         services.AddScoped<IAdoptionAlertRepository, AdoptionAlertRepository>();
         services.AddScoped<IUserMessageRepository, UserMessageRepository>();
         services.AddScoped<IMessagingService, MessagingService>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
 
         services.AddScoped<IAwsS3Client, AwsS3Client>();
         services.Configure<AwsData>(configuration.GetSection("AWS"));

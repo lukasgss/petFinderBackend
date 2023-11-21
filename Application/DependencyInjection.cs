@@ -9,6 +9,7 @@ using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.General.Images;
+using Application.Common.Interfaces.General.Notifications;
 using Application.Common.Interfaces.Messaging;
 using Application.Common.Interfaces.Providers;
 using Application.Common.Providers;
@@ -18,6 +19,7 @@ using Application.Services.Authorization;
 using Application.Services.Converters;
 using Application.Services.Entities;
 using Application.Services.General.Images;
+using Application.Services.General.Notifications;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
@@ -39,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IIdConverterService, IdConverterService>();
         services.AddScoped<IImageProcessingService, ImageProcessingService>();
         services.AddScoped<IImageSubmissionService, ImageSubmissionService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

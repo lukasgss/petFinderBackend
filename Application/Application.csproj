@@ -1,37 +1,37 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Domain\Domain.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Domain\Domain.csproj"/>
+    </ItemGroup>
 
 
+    <ItemGroup>
+        <Compile Remove="Common\Extensions\Mappings\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Common\Extensions\Mappings\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Remove="Common\Extensions\Mappings\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Remove="Common\Extensions\Mappings\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="Common\Extensions\Mappings\**"/>
 
-  <ItemGroup>
-    <None Remove="Common\Extensions\Mappings\**" />
+    </ItemGroup>
 
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="11.7.1"/>
+        <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0"/>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.7.1"/>
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.32.2"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.0.2"/>
+        <PackageReference Include="System.Device.Location.Portable" Version="1.0.0"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.2"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="11.7.1" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.7.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.32.2" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.32.2" />
-  </ItemGroup>
-  
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
 </Project>

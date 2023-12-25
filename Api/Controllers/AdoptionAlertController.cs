@@ -1,6 +1,8 @@
+using Application.ApplicationConstants;
 using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
+using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Validations.Alerts.AdoptionAlertValidations;
 using Application.Common.Validations.Errors;
 using FluentValidation.Results;
@@ -29,6 +31,15 @@ public class AdoptionAlertController : ControllerBase
     public async Task<ActionResult<AdoptionAlertResponse>> GetAdoptionAlertById(Guid alertId)
     {
         return await _adoptionAlertService.GetByIdAsync(alertId);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<PaginatedEntity<AdoptionAlertResponse>>> ListAdoptionAlerts(
+        [FromQuery] AdoptionAlertFilters adoptionAlertFilters,
+        int page = 1,
+        int pageSize = Constants.DefaultPageSize)
+    {
+        return await _adoptionAlertService.ListAdoptionAlerts(adoptionAlertFilters, page, pageSize);
     }
 
     [Authorize]

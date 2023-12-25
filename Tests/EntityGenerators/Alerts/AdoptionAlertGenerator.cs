@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
 using Domain.Entities.Alerts;
@@ -24,7 +25,7 @@ public static class AdoptionAlertGenerator
             UserId = Constants.AdoptionAlertData.UserId
         };
     }
-    
+
     public static AdoptionAlert GenerateNonAdoptedAdoptionAlert()
     {
         return new AdoptionAlert()
@@ -85,7 +86,7 @@ public static class AdoptionAlertGenerator
             PetId = Constants.AdoptionAlertData.PetId,
         };
     }
-    
+
     public static AdoptionAlertResponse GenerateAdoptedAdoptionAlertResponse()
     {
         return new AdoptionAlertResponse()
@@ -119,6 +120,38 @@ public static class AdoptionAlertGenerator
                 Constants.PetData.Colors,
                 Constants.PetData.Breed),
             Owner = Constants.AdoptionAlertData.User.ToUserDataResponse(),
+        };
+    }
+
+    public static List<AdoptionAlertResponse> GenerateListOfAlertsResponse()
+    {
+        List<AdoptionAlertResponse> adoptionAlerts = new(3);
+        for (int i = 0; i < 3; i++)
+        {
+            adoptionAlerts.Add(GenerateAdoptedAdoptionAlertResponse());
+        }
+
+        return adoptionAlerts;
+    }
+
+    public static List<AdoptionAlert> GenerateListOfAlerts()
+    {
+        List<AdoptionAlert> adoptionAlerts = new(3);
+        for (int i = 0; i < 3; i++)
+        {
+            adoptionAlerts.Add(GenerateAdoptedAdoptionAlert());
+        }
+
+        return adoptionAlerts;
+    }
+
+    public static AdoptionAlertFilters GenerateAdotionAlertFilters()
+    {
+        return new AdoptionAlertFilters()
+        {
+            Latitude = 29.977329046788345,
+            Longitude = 31.132637435581703,
+            RadiusDistanceInKm = 5
         };
     }
 }

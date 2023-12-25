@@ -24,7 +24,7 @@ public static class UserMessageGenerator
             ReceiverId = Constants.UserMessageData.ReceiverId
         };
     }
-    
+
     public static UserMessage GenerateEditedUserMessage()
     {
         return new UserMessage()
@@ -70,10 +70,10 @@ public static class UserMessageGenerator
             Content = Constants.UserMessageData.Content
         };
     }
-        
+
     public static List<UserMessageResponse> GenerateListOfUserMessageResponses()
     {
-        List<UserMessageResponse> userMessageResponses = new();
+        List<UserMessageResponse> userMessageResponses = new(3);
         for (int i = 0; i < 3; i++)
         {
             userMessageResponses.Add(GenerateUserMessageResponse());
@@ -96,7 +96,7 @@ public static class UserMessageGenerator
             Receiver = Constants.UserMessageData.Receiver.ToUserDataResponse(),
         };
     }
-    
+
     public static UserMessageResponse GenerateEditedUserMessageResponse()
     {
         return new UserMessageResponse()

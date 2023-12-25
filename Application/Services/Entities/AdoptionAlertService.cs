@@ -1,7 +1,9 @@
 using Application.Common.Exceptions;
+using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
+using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
@@ -25,7 +27,8 @@ public class AdoptionAlertService : IAdoptionAlertService
         IDateTimeProvider dateTimeProvider,
         IGuidProvider guidProvider)
     {
-        _adoptionAlertRepository = adoptionAlertRepository ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
+        _adoptionAlertRepository =
+            adoptionAlertRepository ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
         _petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
@@ -37,6 +40,27 @@ public class AdoptionAlertService : IAdoptionAlertService
         AdoptionAlert adoptionAlert = await ValidateAndAssignAdoptionAlertAsync(alertId);
 
         return adoptionAlert.ToAdoptionAlertResponse();
+    }
+
+    public async Task<PaginatedEntity<AdoptionAlertResponse>> ListAdoptionAlerts(
+        AdoptionAlertFilters filters, int page = 1, int pageSize = 30)
+    {
+        if (page < 1 || pageSize < 1)
+        {
+            throw new BadRequestException("Insira um número e tamanho de página maior ou igual a 1.");
+        }
+
+        if (filters is not { Latitude: 0, Longitude: 0, RadiusDistanceInKm: 0 })
+        {
+            var filteredAdoptionAlerts = await _adoptionAlertRepository.ListAdoptionAlertsWithFilters(
+                filters, page, pageSize);
+
+            return filteredAdoptionAlerts.ToAdoptionAlertResponsePagedList();
+        }
+
+        var adoptionAlerts = await _adoptionAlertRepository.ListAdoptionAlerts(page, pageSize);
+
+        return adoptionAlerts.ToAdoptionAlertResponsePagedList();
     }
 
     public async Task<AdoptionAlertResponse> CreateAsync(CreateAdoptionAlertRequest createAlertRequest,

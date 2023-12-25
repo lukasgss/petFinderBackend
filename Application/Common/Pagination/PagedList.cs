@@ -6,8 +6,8 @@ public class PagedList<T> : List<T>
 {
     public const int MaxPageSize = 50;
     public int CurrentPage { get; private set; }
+    public int CurrentPageCount { get; private set; }
     public int TotalPages { get; private set; }
-    public int TotalCount { get; private set; }
     private int _pageSize;
 
     public int PageSize
@@ -16,13 +16,23 @@ public class PagedList<T> : List<T>
         private set => _pageSize = Math.Min(value, MaxPageSize);
     }
 
-    public PagedList(IEnumerable<T> items, int count, int pageNumber, int pageSize)
+    public PagedList(IReadOnlyCollection<T> items, int currentPageCount, int pageNumber, int pageSize)
     {
-        TotalCount = count;
-        PageSize = pageSize;
         CurrentPage = pageNumber;
-        TotalPages = (int)Math.Ceiling(count / (double)pageSize);
-        AddRange(items);
+
+        if (items.Count == 0)
+        {
+            CurrentPageCount = 0;
+            PageSize = 0;
+            TotalPages = (int)Math.Ceiling(currentPageCount / (double)MaxPageSize);
+        }
+        else
+        {
+            CurrentPageCount = currentPageCount;
+            PageSize = pageSize;
+            TotalPages = (int)Math.Ceiling(currentPageCount / (double)pageSize);
+            AddRange(items);
+        }
     }
 
     public static async Task<PagedList<T>> ToPagedListAsync(IQueryable<T> source, int pageNumber, int pageSize)
@@ -32,8 +42,8 @@ public class PagedList<T> : List<T>
             pageSize = MaxPageSize;
         }
 
+        int count = await source.CountAsync();
         List<T> items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-        int count = items.Count;
 
         return new PagedList<T>(items, count, pageNumber, pageSize);
     }

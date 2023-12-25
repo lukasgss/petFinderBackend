@@ -24,7 +24,12 @@ public class AdoptionAlertServiceTests
     private readonly IGuidProvider _guidProviderMock;
     private readonly IAdoptionAlertService _sut;
 
-    private static readonly AdoptionAlert NonAdoptedAdoptionAlert = AdoptionAlertGenerator.GenerateNonAdoptedAdoptionAlert();
+    private const int Page = 1;
+    private const int PageSize = 25;
+
+    private static readonly AdoptionAlert NonAdoptedAdoptionAlert =
+        AdoptionAlertGenerator.GenerateNonAdoptedAdoptionAlert();
+
     private static readonly AdoptionAlert AdoptedAdoptionAlert = AdoptionAlertGenerator.GenerateAdoptedAdoptionAlert();
     private static readonly Pet Pet = PetGenerator.GeneratePet();
     private static readonly User User = UserGenerator.GenerateUser();
@@ -34,12 +39,15 @@ public class AdoptionAlertServiceTests
 
     private static readonly EditAdoptionAlertRequest EditAlertRequest =
         AdoptionAlertGenerator.GenerateEditAdoptionAlertRequest();
-    
+
     private static readonly AdoptionAlertResponse
         AdoptedAdoptionAlertResponse = AdoptionAlertGenerator.GenerateAdoptedAdoptionAlertResponse();
 
     private static readonly AdoptionAlertResponse
         NonAdoptedAdoptionAlertResponse = AdoptionAlertGenerator.GenerateNonAdoptedAdoptionAlertResponse();
+
+    private static readonly AdoptionAlertFilters AdoptionAlertFilters =
+        AdoptionAlertGenerator.GenerateAdotionAlertFilters();
 
     public AdoptionAlertServiceTests()
     {
@@ -76,6 +84,51 @@ public class AdoptionAlertServiceTests
         AdoptionAlertResponse adoptionAlertResponse = await _sut.GetByIdAsync(NonAdoptedAdoptionAlert.Id);
 
         Assert.Equivalent(NonAdoptedAdoptionAlertResponse, adoptionAlertResponse);
+    }
+
+    [Fact]
+    public async Task Get_Adoption_Alerts_With_Page_Less_Than_1_Throws_BadRequestException()
+    {
+        async Task Result() => await _sut.ListAdoptionAlerts(AdoptionAlertFilters, 0, 25);
+
+        var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+        Assert.Equal("Insira um número e tamanho de página maior ou igual a 1.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Get_Adoption_Alerts_With_Page_Size_Less_Than_1_Throws_BadRequestException()
+    {
+        async Task Result() => await _sut.ListAdoptionAlerts(new AdoptionAlertFilters(), page: 1, pageSize: 0);
+
+        var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+        Assert.Equal("Insira um número e tamanho de página maior ou igual a 1.", exception.Message);
+    }
+
+    [Fact]
+    public async Task Get_Adoption_Alert_With_Filters_Returns_Filtered_Records()
+    {
+        var pagedAdoptionAlerts = PagedListGenerator.GeneratePagedAdoptionAlerts();
+        _adoptionAlertRepositoryMock.ListAdoptionAlertsWithFilters(AdoptionAlertFilters, Page, PageSize)
+            .Returns(pagedAdoptionAlerts);
+        var expectedAlerts = PaginatedEntityGenerator.GeneratePaginatedAdoptionAlertResponse();
+
+        var adoptionAlertsResponse = await _sut.ListAdoptionAlerts(AdoptionAlertFilters, Page, PageSize);
+
+        Assert.Equivalent(expectedAlerts, adoptionAlertsResponse);
+    }
+
+    [Fact]
+    public async Task Get_Adoption_Alert_Without_Filters_Returns_Unfiltered_Adoption_Alerts()
+    {
+        AdoptionAlertFilters emptyFilters = new();
+        var pagedAdoptionAlerts = PagedListGenerator.GeneratePagedAdoptionAlerts();
+        _adoptionAlertRepositoryMock.ListAdoptionAlerts(Page, PageSize)
+            .Returns(pagedAdoptionAlerts);
+        var expectedAlerts = PaginatedEntityGenerator.GeneratePaginatedAdoptionAlertResponse();
+
+        var adoptionAlertsResponse = await _sut.ListAdoptionAlerts(emptyFilters, Page, PageSize);
+
+        Assert.Equivalent(expectedAlerts, adoptionAlertsResponse);
     }
 
     [Fact]
@@ -134,7 +187,7 @@ public class AdoptionAlertServiceTests
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
         Assert.Equal("Alerta de adoção com o id especificado não existe.", exception.Message);
     }
-    
+
     [Fact]
     public async Task Edit_Adoption_Alert_Without_Being_Owner_Of_Alert_Throws_NotFoundException()
     {
@@ -224,8 +277,9 @@ public class AdoptionAlertServiceTests
         _adoptionAlertRepositoryMock.GetByIdAsync(NonAdoptedAdoptionAlert.Id).Returns(NonAdoptedAdoptionAlert);
         _dateTimeProviderMock.DateOnlyNow().Returns(Constants.AdoptionAlertData.AdoptedAdoptionDate);
 
-        AdoptionAlertResponse adoptionAlertResponse = await _sut.ToggleAdoptionAsync(NonAdoptedAdoptionAlert.Id, User.Id);
-        
+        AdoptionAlertResponse adoptionAlertResponse =
+            await _sut.ToggleAdoptionAsync(NonAdoptedAdoptionAlert.Id, User.Id);
+
         Assert.Equivalent(AdoptedAdoptionAlertResponse, adoptionAlertResponse);
     }
 
@@ -235,7 +289,7 @@ public class AdoptionAlertServiceTests
         _adoptionAlertRepositoryMock.GetByIdAsync(AdoptedAdoptionAlert.Id).Returns(AdoptedAdoptionAlert);
 
         AdoptionAlertResponse adoptionAlertResponse = await _sut.ToggleAdoptionAsync(AdoptedAdoptionAlert.Id, User.Id);
-        
+
         Assert.Equivalent(NonAdoptedAdoptionAlertResponse, adoptionAlertResponse);
     }
 }

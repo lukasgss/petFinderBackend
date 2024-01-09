@@ -151,7 +151,18 @@ public static class AdoptionAlertGenerator
         {
             Latitude = 29.977329046788345,
             Longitude = 31.132637435581703,
-            RadiusDistanceInKm = 5
+            RadiusDistanceInKm = 5,
+            Adopted = false,
+            NotAdopted = true
+        };
+    }
+
+    public static AdoptionAlertFilters GenerateAdotionAlertFiltersWithoutGeo()
+    {
+        return new AdoptionAlertFilters()
+        {
+            Adopted = false,
+            NotAdopted = true
         };
     }
 }

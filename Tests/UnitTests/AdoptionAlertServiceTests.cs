@@ -49,6 +49,9 @@ public class AdoptionAlertServiceTests
     private static readonly AdoptionAlertFilters AdoptionAlertFilters =
         AdoptionAlertGenerator.GenerateAdotionAlertFilters();
 
+    private static readonly AdoptionAlertFilters AdoptionAlertFiltersWithoutGeo =
+        AdoptionAlertGenerator.GenerateAdotionAlertFiltersWithoutGeo();
+
     public AdoptionAlertServiceTests()
     {
         _adoptionAlertRepositoryMock = Substitute.For<IAdoptionAlertRepository>();
@@ -105,10 +108,10 @@ public class AdoptionAlertServiceTests
     }
 
     [Fact]
-    public async Task Get_Adoption_Alert_With_Filters_Returns_Filtered_Records()
+    public async Task Get_Adoption_Alert_With_Geo_Filters_Returns_Filtered_Records()
     {
         var pagedAdoptionAlerts = PagedListGenerator.GeneratePagedAdoptionAlerts();
-        _adoptionAlertRepositoryMock.ListAdoptionAlertsWithFilters(AdoptionAlertFilters, Page, PageSize)
+        _adoptionAlertRepositoryMock.ListAdoptionAlertsWithGeoFilters(AdoptionAlertFilters, Page, PageSize)
             .Returns(pagedAdoptionAlerts);
         var expectedAlerts = PaginatedEntityGenerator.GeneratePaginatedAdoptionAlertResponse();
 
@@ -118,15 +121,14 @@ public class AdoptionAlertServiceTests
     }
 
     [Fact]
-    public async Task Get_Adoption_Alert_Without_Filters_Returns_Unfiltered_Adoption_Alerts()
+    public async Task Get_Adoption_Alert_Without_Geo_Filters_Returns_Unfiltered_Records()
     {
-        AdoptionAlertFilters emptyFilters = new();
         var pagedAdoptionAlerts = PagedListGenerator.GeneratePagedAdoptionAlerts();
-        _adoptionAlertRepositoryMock.ListAdoptionAlerts(Page, PageSize)
+        _adoptionAlertRepositoryMock.ListAdoptionAlertsWithStatusFilters(AdoptionAlertFiltersWithoutGeo, Page, PageSize)
             .Returns(pagedAdoptionAlerts);
         var expectedAlerts = PaginatedEntityGenerator.GeneratePaginatedAdoptionAlertResponse();
 
-        var adoptionAlertsResponse = await _sut.ListAdoptionAlerts(emptyFilters, Page, PageSize);
+        var adoptionAlertsResponse = await _sut.ListAdoptionAlerts(AdoptionAlertFiltersWithoutGeo, Page, PageSize);
 
         Assert.Equivalent(expectedAlerts, adoptionAlertsResponse);
     }

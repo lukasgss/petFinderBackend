@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
+using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.UserMessages.DTOs;
 using Tests.EntityGenerators.Alerts;
@@ -27,6 +28,18 @@ public static class PaginatedEntityGenerator
             Data = adoptionAlertResponses,
             CurrentPage = 1,
             CurrentPageCount = adoptionAlertResponses.Count,
+            TotalPages = 1
+        };
+    }
+
+    public static PaginatedEntity<MissingAlertResponse> GeneratePaginatedMissingAlertResponse()
+    {
+        var missingAlertResponses = MissingAlertGenerator.GenerateListOfAlertsResponse();
+        return new PaginatedEntity<MissingAlertResponse>()
+        {
+            Data = missingAlertResponses,
+            CurrentPage = 1,
+            CurrentPageCount = missingAlertResponses.Count,
             TotalPages = 1
         };
     }

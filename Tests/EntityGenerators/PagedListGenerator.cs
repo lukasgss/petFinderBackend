@@ -19,4 +19,10 @@ public static class PagedListGenerator
         List<AdoptionAlert> adoptionAlerts = AdoptionAlertGenerator.GenerateListOfAlerts();
         return new PagedList<AdoptionAlert>(adoptionAlerts, adoptionAlerts.Count, pageNumber: 1, pageSize: 50);
     }
+
+    public static PagedList<MissingAlert> GeneratePagedMissingAlerts()
+    {
+        List<MissingAlert> missingAlerts = MissingAlertGenerator.GenerateListOfAlerts();
+        return new PagedList<MissingAlert>(missingAlerts, missingAlerts.Count, pageNumber: 1, pageSize: 50);
+    }
 }

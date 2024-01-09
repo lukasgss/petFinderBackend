@@ -4,20 +4,6 @@
         <ProjectReference Include="..\Domain\Domain.csproj"/>
     </ItemGroup>
 
-
-    <ItemGroup>
-        <Compile Remove="Common\Extensions\Mappings\**"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Remove="Common\Extensions\Mappings\**"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Remove="Common\Extensions\Mappings\**"/>
-
-    </ItemGroup>
-
     <ItemGroup>
         <PackageReference Include="FluentValidation" Version="11.7.1"/>
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0"/>

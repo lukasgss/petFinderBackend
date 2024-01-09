@@ -25,6 +25,9 @@ public class MissingAlertServiceTests
     private readonly IDateTimeProvider _dateTimeProviderMock;
     private readonly IMissingAlertService _sut;
 
+    private const int Page = 1;
+    private const int PageSize = 25;
+
     private static readonly MissingAlert MissingAlert = MissingAlertGenerator.GenerateMissingAlert();
     private static readonly MissingAlertResponse ExpectedMissingAlert = MissingAlert.ToMissingAlertResponse();
 
@@ -37,6 +40,12 @@ public class MissingAlertServiceTests
         MissingAlertGenerator.GenerateEditMissingAlertRequest();
 
     private static readonly User User = UserGenerator.GenerateUser();
+
+    private static readonly MissingAlertFilters MissingAlertFilters =
+        MissingAlertGenerator.GenerateMissingAlertFilters();
+
+    private static readonly MissingAlertFilters MissingAlertFiltersWithoutGeo =
+        MissingAlertGenerator.GenerateMissingAlertFiltersWithoutGeo();
 
     public MissingAlertServiceTests()
     {
@@ -63,6 +72,43 @@ public class MissingAlertServiceTests
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
         Assert.Equal("Alerta com o id especificado não existe.", exception.Message);
+    }
+
+    [Fact]
+    public async Task List_Missing_Alerts_With_Page_Less_Than_1_Throws_BadRequestException()
+    {
+        const int invalidPageNumber = -1;
+
+        async Task Result() => await _sut.ListMissingAlerts(MissingAlertFilters, invalidPageNumber, 20);
+
+        var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+        Assert.Equal("Insira um número e tamanho de página maior ou igual a 1.", exception.Message);
+    }
+
+    [Fact]
+    public async Task List_Missing_Alerts_With_Geo_Filters_Returns_Filtered_Alerts()
+    {
+        var pagedAlerts = PagedListGenerator.GeneratePagedMissingAlerts();
+        _missingAlertRepositoryMock.ListMissingAlertsWithGeoFilters(MissingAlertFilters, Page, PageSize)
+            .Returns(pagedAlerts);
+        var expectedAlerts = PaginatedEntityGenerator.GeneratePaginatedMissingAlertResponse();
+
+        var alertsResponse = await _sut.ListMissingAlerts(MissingAlertFilters, Page, PageSize);
+
+        Assert.Equivalent(expectedAlerts, alertsResponse);
+    }
+
+    [Fact]
+    public async Task List_Missing_Alerts_Without_Geo_Filters_Returns_Unfiltered_Alerts()
+    {
+        var pagedAlerts = PagedListGenerator.GeneratePagedMissingAlerts();
+        _missingAlertRepositoryMock.ListMissingAlertsWithStatusFilters(MissingAlertFiltersWithoutGeo, Page, PageSize)
+            .Returns(pagedAlerts);
+        var expectedAlerts = PaginatedEntityGenerator.GeneratePaginatedMissingAlertResponse();
+
+        var alertsResponse = await _sut.ListMissingAlerts(MissingAlertFiltersWithoutGeo, Page, PageSize);
+
+        Assert.Equivalent(expectedAlerts, alertsResponse);
     }
 
     [Fact]
@@ -227,7 +273,7 @@ public class MissingAlertServiceTests
     {
         _missingAlertRepositoryMock.GetByIdAsync(Constants.MissingAlertData.Id).ReturnsNull();
 
-        async Task Result() => await _sut.MarkAsResolvedAsync(Constants.MissingAlertData.Id, Constants.UserData.Id);
+        async Task Result() => await _sut.ToggleFoundStatusAsync(Constants.MissingAlertData.Id, Constants.UserData.Id);
 
         var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
         Assert.Equal("Alerta com o id especificado não existe.", exception.Message);
@@ -238,7 +284,7 @@ public class MissingAlertServiceTests
     {
         _missingAlertRepositoryMock.GetByIdAsync(MissingAlert.Id).Returns(MissingAlert);
 
-        async Task Result() => await _sut.MarkAsResolvedAsync(MissingAlert.Id, Guid.NewGuid());
+        async Task Result() => await _sut.ToggleFoundStatusAsync(MissingAlert.Id, Guid.NewGuid());
 
         var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
         Assert.Equal("Não é possível marcar alertas de outros usuários como encontrado.", exception.Message);
@@ -252,7 +298,7 @@ public class MissingAlertServiceTests
         _dateTimeProviderMock.DateOnlyNow().Returns(Constants.MissingAlertData.RecoveryDate);
 
         MissingAlertResponse missingAlertResponse =
-            await _sut.MarkAsResolvedAsync(MissingAlert.Id, MissingAlert.User.Id);
+            await _sut.ToggleFoundStatusAsync(MissingAlert.Id, MissingAlert.User.Id);
 
         Assert.Equivalent(expectedMissingAlert, missingAlertResponse);
     }

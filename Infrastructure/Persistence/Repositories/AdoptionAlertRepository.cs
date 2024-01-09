@@ -29,19 +29,7 @@ public class AdoptionAlertRepository : GenericRepository<AdoptionAlert>, IAdopti
             .SingleOrDefaultAsync(alert => alert.Id == alertId);
     }
 
-    public async Task<PagedList<AdoptionAlert>> ListAdoptionAlerts(int pageNumber, int pageSize)
-    {
-        var query = _dbContext.AdoptionAlerts
-            .Include(alert => alert.Pet)
-            .ThenInclude(pet => pet.Colors)
-            .Include(alert => alert.Pet)
-            .ThenInclude(pet => pet.Breed)
-            .Include(alert => alert.User);
-
-        return await PagedList<AdoptionAlert>.ToPagedListAsync(query, pageNumber, pageSize);
-    }
-
-    public async Task<PagedList<AdoptionAlert>> ListAdoptionAlertsWithFilters(
+    public async Task<PagedList<AdoptionAlert>> ListAdoptionAlertsWithGeoFilters(
         AdoptionAlertFilters filters, int pageNumber, int pageSize)
     {
         var query = _dbContext.AdoptionAlerts
@@ -50,9 +38,34 @@ public class AdoptionAlertRepository : GenericRepository<AdoptionAlert>, IAdopti
             .Include(alert => alert.Pet)
             .ThenInclude(pet => pet.Breed)
             .Include(alert => alert.User)
-            .Where(CoordinatesCalculator.IsWithinRadiusDistance(
+            .Where(CoordinatesCalculator.AdoptionAlertIsWithinRadiusDistance(
                 new GeoCoordinate(filters.Latitude, filters.Longitude),
-                filters.RadiusDistanceInKm));
+                filters.RadiusDistanceInKm))
+            // filters records based if it should show only adopted alerts
+            // (AdoptionDate != null), show only non adopted alerts
+            // (AdoptionDate == null) or both, if both filters.NotAdopted
+            // or filters.Adopted are true
+            .Where(alert => alert.AdoptionDate == null == filters.NotAdopted ||
+                            alert.AdoptionDate != null == filters.Adopted);
+
+        return await PagedList<AdoptionAlert>.ToPagedListAsync(query, pageNumber, pageSize);
+    }
+
+    public async Task<PagedList<AdoptionAlert>> ListAdoptionAlertsWithStatusFilters(AdoptionAlertFilters filters,
+        int pageNumber, int pageSize)
+    {
+        var query = _dbContext.AdoptionAlerts
+            .Include(alert => alert.Pet)
+            .ThenInclude(pet => pet.Colors)
+            .Include(alert => alert.Pet)
+            .ThenInclude(pet => pet.Breed)
+            .Include(alert => alert.User)
+            // filters records based if it should show only adopted alerts
+            // (AdoptionDate != null), show only non adopted alerts
+            // (AdoptionDate == null) or both, if both filters.NotAdopted
+            // or filters.Adopted are true
+            .Where(alert => alert.AdoptionDate == null == filters.NotAdopted ||
+                            alert.AdoptionDate != null == filters.Adopted);
 
         return await PagedList<AdoptionAlert>.ToPagedListAsync(query, pageNumber, pageSize);
     }

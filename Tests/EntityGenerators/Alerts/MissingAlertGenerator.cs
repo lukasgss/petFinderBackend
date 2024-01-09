@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Domain.Entities.Alerts;
@@ -21,6 +22,17 @@ public static class MissingAlertGenerator
         };
     }
 
+    public static List<MissingAlert> GenerateListOfAlerts()
+    {
+        List<MissingAlert> missingAlerts = new();
+        for (int i = 0; i < 3; i++)
+        {
+            missingAlerts.Add(GenerateMissingAlert());
+        }
+
+        return missingAlerts;
+    }
+
     public static MissingAlertResponse GenerateMissingAlertResponse()
     {
         return new MissingAlertResponse()
@@ -35,6 +47,17 @@ public static class MissingAlertGenerator
                 BreedGenerator.GenerateBreed()),
             Owner = Constants.MissingAlertData.User.ToOwnerResponse()
         };
+    }
+
+    public static List<MissingAlertResponse> GenerateListOfAlertsResponse()
+    {
+        List<MissingAlertResponse> alertResponses = new();
+        for (int i = 0; i < 3; i++)
+        {
+            alertResponses.Add(GenerateMissingAlertResponse());
+        }
+
+        return alertResponses;
     }
 
     public static MissingAlertResponse GenerateRecoveredMissingAlertResponse()
@@ -70,6 +93,27 @@ public static class MissingAlertGenerator
             LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
             LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
             PetId = Constants.MissingAlertData.PetId
+        };
+    }
+
+    public static MissingAlertFilters GenerateMissingAlertFilters()
+    {
+        return new MissingAlertFilters()
+        {
+            Latitude = 29.977329046788345,
+            Longitude = 31.132637435581703,
+            RadiusDistanceInKm = 5,
+            Missing = true,
+            NotMissing = false
+        };
+    }
+
+    public static MissingAlertFilters GenerateMissingAlertFiltersWithoutGeo()
+    {
+        return new MissingAlertFilters()
+        {
+            Missing = true,
+            NotMissing = false
         };
     }
 }

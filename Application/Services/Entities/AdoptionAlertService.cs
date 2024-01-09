@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
+using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Paginated;
@@ -50,17 +51,18 @@ public class AdoptionAlertService : IAdoptionAlertService
             throw new BadRequestException("Insira um número e tamanho de página maior ou igual a 1.");
         }
 
-        if (filters is not { Latitude: 0, Longitude: 0, RadiusDistanceInKm: 0 })
+        if (AlertFilters.HasGeoFilters(filters))
         {
-            var filteredAdoptionAlerts = await _adoptionAlertRepository.ListAdoptionAlertsWithFilters(
+            var geoFilteredAdoptionAlerts = await _adoptionAlertRepository.ListAdoptionAlertsWithGeoFilters(
                 filters, page, pageSize);
 
-            return filteredAdoptionAlerts.ToAdoptionAlertResponsePagedList();
+            return geoFilteredAdoptionAlerts.ToAdoptionAlertResponsePagedList();
         }
 
-        var adoptionAlerts = await _adoptionAlertRepository.ListAdoptionAlerts(page, pageSize);
+        var statusFilteredAdoptionAlerts = await _adoptionAlertRepository.ListAdoptionAlertsWithStatusFilters(
+            filters, page, pageSize);
 
-        return adoptionAlerts.ToAdoptionAlertResponsePagedList();
+        return statusFilteredAdoptionAlerts.ToAdoptionAlertResponsePagedList();
     }
 
     public async Task<AdoptionAlertResponse> CreateAsync(CreateAdoptionAlertRequest createAlertRequest,
@@ -154,7 +156,6 @@ public class AdoptionAlertService : IAdoptionAlertService
             throw new UnauthorizedException("Não é possível alterar alertas de adoção de outros usuários.");
         }
     }
-
 
     private static void ValidateIfUserIsOwnerOfPet(Guid actualPetOwnerId, Guid userId)
     {

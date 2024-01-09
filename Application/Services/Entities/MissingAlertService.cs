@@ -1,7 +1,10 @@
 using Application.Common.Exceptions;
+using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
+using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
+using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
@@ -39,13 +42,35 @@ public class MissingAlertService : IMissingAlertService
         return missingAlert.ToMissingAlertResponse();
     }
 
+    public async Task<PaginatedEntity<MissingAlertResponse>> ListMissingAlerts(
+        MissingAlertFilters filters, int page, int pageSize)
+    {
+        if (page < 1 || pageSize < 1)
+        {
+            throw new BadRequestException("Insira um número e tamanho de página maior ou igual a 1.");
+        }
+
+        if (AlertFilters.HasGeoFilters(filters))
+        {
+            var geoFilteredAlerts = await _missingAlertRepository.ListMissingAlertsWithGeoFilters(
+                filters, page, pageSize);
+
+            return geoFilteredAlerts.ToMissingAlertResponsePagedList();
+        }
+
+        var statusFilteredAlerts = await _missingAlertRepository.ListMissingAlertsWithStatusFilters(
+            filters, page, pageSize);
+
+        return statusFilteredAlerts.ToMissingAlertResponsePagedList();
+    }
+
     public async Task<MissingAlertResponse> CreateAsync(CreateMissingAlertRequest createMissingAlertRequest,
         Guid userId)
     {
         Pet missingPet = await ValidateAndAssignPetAsync(createMissingAlertRequest.PetId);
 
         CheckUserPermissionToCreate(missingPet.Owner.Id, userId);
-        
+
         User petOwner = await ValidateAndAssignUserAsync(userId);
 
         MissingAlert missingAlertToCreate = new()
@@ -104,7 +129,7 @@ public class MissingAlertService : IMissingAlertService
         await _missingAlertRepository.CommitAsync();
     }
 
-    public async Task<MissingAlertResponse> MarkAsResolvedAsync(Guid alertId, Guid userId)
+    public async Task<MissingAlertResponse> ToggleFoundStatusAsync(Guid alertId, Guid userId)
     {
         MissingAlert missingAlert = await ValidateAndAssignMissingAlertAsync(alertId);
 
@@ -113,7 +138,15 @@ public class MissingAlertService : IMissingAlertService
             throw new ForbiddenException("Não é possível marcar alertas de outros usuários como encontrado.");
         }
 
-        missingAlert.RecoveryDate = _dateTimeProvider.DateOnlyNow();
+        if (missingAlert.RecoveryDate is null)
+        {
+            missingAlert.RecoveryDate = _dateTimeProvider.DateOnlyNow();
+        }
+        else
+        {
+            missingAlert.RecoveryDate = null;
+        }
+
         await _missingAlertRepository.CommitAsync();
 
         return missingAlert.ToMissingAlertResponse();
@@ -134,7 +167,7 @@ public class MissingAlertService : IMissingAlertService
             throw new ForbiddenException("Não é possível editar alertas de outros usuários.");
         }
     }
-    
+
     private async Task<MissingAlert> ValidateAndAssignMissingAlertAsync(Guid missingAlertId)
     {
         MissingAlert? dbMissingAlert = await _missingAlertRepository.GetByIdAsync(missingAlertId);
@@ -164,7 +197,7 @@ public class MissingAlertService : IMissingAlertService
         {
             throw new NotFoundException("Animal com o id especificado não existe.");
         }
-        
+
         return pet;
     }
 }

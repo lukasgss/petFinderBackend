@@ -65,7 +65,7 @@ public class AdoptionAlertController : ControllerBase
 
     [Authorize]
     [HttpPost("adopt/{alertId:guid}")]
-    public async Task<ActionResult<AdoptionAlertResponse>> ToggleAdoption(Guid alertId)
+    public async Task<ActionResult<AdoptionAlertResponse>> MarkAsAdopted(Guid alertId)
     {
         Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 

@@ -1,6 +1,8 @@
+using Application.ApplicationConstants;
 using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
+using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Validations.Alerts.MissingAlertValidations;
 using Application.Common.Validations.Errors;
 using FluentValidation.Results;
@@ -22,6 +24,15 @@ public class MissingAlertController : ControllerBase
         _missingAlertService = missingAlertService ?? throw new ArgumentNullException(nameof(missingAlertService));
         _userAuthorizationService = userAuthorizationService ??
                                     throw new ArgumentNullException(nameof(userAuthorizationService));
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<PaginatedEntity<MissingAlertResponse>>> ListMissingAlerts(
+        [FromQuery] MissingAlertFilters missingAlertFilters,
+        int page = 1,
+        int pageSize = Constants.DefaultPageSize)
+    {
+        return await _missingAlertService.ListMissingAlerts(missingAlertFilters, page, pageSize);
     }
 
     [HttpGet("{alertId:guid}", Name = "GetMissingAlertById")]
@@ -77,11 +88,11 @@ public class MissingAlertController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("resolve/{alertId:guid}")]
-    public async Task<ActionResult<MissingAlertResponse>> MarkAsResolved(Guid alertId)
+    [HttpPost("find/{alertId:guid}")]
+    public async Task<ActionResult<MissingAlertResponse>> MarkAsFound(Guid alertId)
     {
         Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
-        MissingAlertResponse missingAlertResponse = await _missingAlertService.MarkAsResolvedAsync(alertId, userId);
+        MissingAlertResponse missingAlertResponse = await _missingAlertService.ToggleFoundStatusAsync(alertId, userId);
 
         return Ok(missingAlertResponse);
     }

@@ -15,189 +15,189 @@ namespace Application.Services.Entities;
 
 public class MissingAlertService : IMissingAlertService
 {
-    private readonly IMissingAlertRepository _missingAlertRepository;
-    private readonly IPetRepository _petRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IGuidProvider _guidProvider;
-    private readonly IDateTimeProvider _dateTimeProvider;
+	private readonly IMissingAlertRepository _missingAlertRepository;
+	private readonly IPetRepository _petRepository;
+	private readonly IUserRepository _userRepository;
+	private readonly IGuidProvider _guidProvider;
+	private readonly IDateTimeProvider _dateTimeProvider;
 
-    public MissingAlertService(IMissingAlertRepository missingAlertRepository,
-        IPetRepository petRepository,
-        IUserRepository userRepository,
-        IGuidProvider guidProvider,
-        IDateTimeProvider dateTimeProvider)
-    {
-        _missingAlertRepository =
-            missingAlertRepository ?? throw new ArgumentNullException(nameof(missingAlertRepository));
-        _petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
-        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
-        _dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
-    }
+	public MissingAlertService(IMissingAlertRepository missingAlertRepository,
+		IPetRepository petRepository,
+		IUserRepository userRepository,
+		IGuidProvider guidProvider,
+		IDateTimeProvider dateTimeProvider)
+	{
+		_missingAlertRepository =
+			missingAlertRepository ?? throw new ArgumentNullException(nameof(missingAlertRepository));
+		_petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
+		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
+		_dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
+	}
 
-    public async Task<MissingAlertResponse> GetByIdAsync(Guid missingAlertId)
-    {
-        MissingAlert missingAlert = await ValidateAndAssignMissingAlertAsync(missingAlertId);
+	public async Task<MissingAlertResponse> GetByIdAsync(Guid missingAlertId)
+	{
+		MissingAlert missingAlert = await ValidateAndAssignMissingAlertAsync(missingAlertId);
 
-        return missingAlert.ToMissingAlertResponse();
-    }
+		return missingAlert.ToMissingAlertResponse();
+	}
 
-    public async Task<PaginatedEntity<MissingAlertResponse>> ListMissingAlerts(
-        MissingAlertFilters filters, int page, int pageSize)
-    {
-        if (page < 1 || pageSize < 1)
-        {
-            throw new BadRequestException("Insira um número e tamanho de página maior ou igual a 1.");
-        }
+	public async Task<PaginatedEntity<MissingAlertResponse>> ListMissingAlerts(
+		MissingAlertFilters filters, int page, int pageSize)
+	{
+		if (page < 1 || pageSize < 1)
+		{
+			throw new BadRequestException("Insira um número e tamanho de página maior ou igual a 1.");
+		}
 
-        if (AlertFilters.HasGeoFilters(filters))
-        {
-            var geoFilteredAlerts = await _missingAlertRepository.ListMissingAlertsWithGeoFilters(
-                filters, page, pageSize);
+		if (AlertFilters.HasGeoFilters(filters))
+		{
+			var geoFilteredAlerts = await _missingAlertRepository.ListMissingAlertsWithGeoFilters(
+				filters, page, pageSize);
 
-            return geoFilteredAlerts.ToMissingAlertResponsePagedList();
-        }
+			return geoFilteredAlerts.ToMissingAlertResponsePagedList();
+		}
 
-        var statusFilteredAlerts = await _missingAlertRepository.ListMissingAlertsWithStatusFilters(
-            filters, page, pageSize);
+		var statusFilteredAlerts = await _missingAlertRepository.ListMissingAlertsWithStatusFilters(
+			filters, page, pageSize);
 
-        return statusFilteredAlerts.ToMissingAlertResponsePagedList();
-    }
+		return statusFilteredAlerts.ToMissingAlertResponsePagedList();
+	}
 
-    public async Task<MissingAlertResponse> CreateAsync(CreateMissingAlertRequest createMissingAlertRequest,
-        Guid userId)
-    {
-        Pet missingPet = await ValidateAndAssignPetAsync(createMissingAlertRequest.PetId);
+	public async Task<MissingAlertResponse> CreateAsync(CreateMissingAlertRequest createMissingAlertRequest,
+		Guid userId)
+	{
+		Pet missingPet = await ValidateAndAssignPetAsync(createMissingAlertRequest.PetId);
 
-        CheckUserPermissionToCreate(missingPet.Owner.Id, userId);
+		CheckUserPermissionToCreate(missingPet.Owner.Id, userId);
 
-        User petOwner = await ValidateAndAssignUserAsync(userId);
+		User petOwner = await ValidateAndAssignUserAsync(userId);
 
-        MissingAlert missingAlertToCreate = new()
-        {
-            Id = _guidProvider.NewGuid(),
-            RegistrationDate = _dateTimeProvider.UtcNow(),
-            LastSeenLocationLatitude = createMissingAlertRequest.LastSeenLocationLatitude,
-            LastSeenLocationLongitude = createMissingAlertRequest.LastSeenLocationLongitude,
-            RecoveryDate = null,
-            Pet = missingPet,
-            User = petOwner,
-        };
+		MissingAlert missingAlertToCreate = new()
+		{
+			Id = _guidProvider.NewGuid(),
+			RegistrationDate = _dateTimeProvider.UtcNow(),
+			LastSeenLocationLatitude = createMissingAlertRequest.LastSeenLocationLatitude,
+			LastSeenLocationLongitude = createMissingAlertRequest.LastSeenLocationLongitude,
+			RecoveryDate = null,
+			Pet = missingPet,
+			User = petOwner,
+		};
 
-        _missingAlertRepository.Add(missingAlertToCreate);
-        await _missingAlertRepository.CommitAsync();
+		_missingAlertRepository.Add(missingAlertToCreate);
+		await _missingAlertRepository.CommitAsync();
 
-        return missingAlertToCreate.ToMissingAlertResponse();
-    }
+		return missingAlertToCreate.ToMissingAlertResponse();
+	}
 
-    public async Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest,
-        Guid userId,
-        Guid routeId)
-    {
-        if (editMissingAlertRequest.Id != routeId)
-        {
-            throw new BadRequestException("Id da rota não coincide com o id especificado.");
-        }
+	public async Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest,
+		Guid userId,
+		Guid routeId)
+	{
+		if (editMissingAlertRequest.Id != routeId)
+		{
+			throw new BadRequestException("Id da rota não coincide com o id especificado.");
+		}
 
-        MissingAlert dbMissingAlert = await ValidateAndAssignMissingAlertAsync(editMissingAlertRequest.Id);
-        Pet pet = await ValidateAndAssignPetAsync(editMissingAlertRequest.PetId);
+		MissingAlert dbMissingAlert = await ValidateAndAssignMissingAlertAsync(editMissingAlertRequest.Id);
+		Pet pet = await ValidateAndAssignPetAsync(editMissingAlertRequest.PetId);
 
-        CheckUserPermissionToEdit(dbMissingAlert.User.Id, userId);
+		CheckUserPermissionToEdit(dbMissingAlert.User.Id, userId);
 
-        User user = await ValidateAndAssignUserAsync(userId);
+		User user = await ValidateAndAssignUserAsync(userId);
 
-        dbMissingAlert.LastSeenLocationLatitude = editMissingAlertRequest.LastSeenLocationLatitude;
-        dbMissingAlert.LastSeenLocationLongitude = editMissingAlertRequest.LastSeenLocationLongitude;
-        dbMissingAlert.Pet = pet;
-        dbMissingAlert.User = user;
+		dbMissingAlert.LastSeenLocationLatitude = editMissingAlertRequest.LastSeenLocationLatitude;
+		dbMissingAlert.LastSeenLocationLongitude = editMissingAlertRequest.LastSeenLocationLongitude;
+		dbMissingAlert.Pet = pet;
+		dbMissingAlert.User = user;
 
-        await _missingAlertRepository.CommitAsync();
+		await _missingAlertRepository.CommitAsync();
 
-        return dbMissingAlert.ToMissingAlertResponse();
-    }
+		return dbMissingAlert.ToMissingAlertResponse();
+	}
 
-    public async Task DeleteAsync(Guid missingAlertId, Guid userId)
-    {
-        MissingAlert alertToDelete = await ValidateAndAssignMissingAlertAsync(missingAlertId);
+	public async Task DeleteAsync(Guid missingAlertId, Guid userId)
+	{
+		MissingAlert alertToDelete = await ValidateAndAssignMissingAlertAsync(missingAlertId);
 
-        if (alertToDelete.User.Id != userId)
-        {
-            throw new ForbiddenException("Não é possível excluir alertas de outros usuários.");
-        }
+		if (alertToDelete.User.Id != userId)
+		{
+			throw new ForbiddenException("Não é possível excluir alertas de outros usuários.");
+		}
 
-        _missingAlertRepository.Delete(alertToDelete);
-        await _missingAlertRepository.CommitAsync();
-    }
+		_missingAlertRepository.Delete(alertToDelete);
+		await _missingAlertRepository.CommitAsync();
+	}
 
-    public async Task<MissingAlertResponse> ToggleFoundStatusAsync(Guid alertId, Guid userId)
-    {
-        MissingAlert missingAlert = await ValidateAndAssignMissingAlertAsync(alertId);
+	public async Task<MissingAlertResponse> ToggleFoundStatusAsync(Guid alertId, Guid userId)
+	{
+		MissingAlert missingAlert = await ValidateAndAssignMissingAlertAsync(alertId);
 
-        if (userId != missingAlert.User.Id)
-        {
-            throw new ForbiddenException("Não é possível marcar alertas de outros usuários como encontrado.");
-        }
+		if (userId != missingAlert.User.Id)
+		{
+			throw new ForbiddenException("Não é possível marcar alertas de outros usuários como encontrado.");
+		}
 
-        if (missingAlert.RecoveryDate is null)
-        {
-            missingAlert.RecoveryDate = _dateTimeProvider.DateOnlyNow();
-        }
-        else
-        {
-            missingAlert.RecoveryDate = null;
-        }
+		if (missingAlert.RecoveryDate is null)
+		{
+			missingAlert.RecoveryDate = _dateTimeProvider.DateOnlyNow();
+		}
+		else
+		{
+			missingAlert.RecoveryDate = null;
+		}
 
-        await _missingAlertRepository.CommitAsync();
+		await _missingAlertRepository.CommitAsync();
 
-        return missingAlert.ToMissingAlertResponse();
-    }
+		return missingAlert.ToMissingAlertResponse();
+	}
 
-    private static void CheckUserPermissionToCreate(Guid userId, Guid requestUserId)
-    {
-        if (userId != requestUserId)
-        {
-            throw new ForbiddenException("Não é possível criar alertas para outros usuários.");
-        }
-    }
+	private static void CheckUserPermissionToCreate(Guid userId, Guid requestUserId)
+	{
+		if (userId != requestUserId)
+		{
+			throw new ForbiddenException("Não é possível criar alertas para outros usuários.");
+		}
+	}
 
-    private static void CheckUserPermissionToEdit(Guid? userId, Guid requestUserId)
-    {
-        if (userId != requestUserId)
-        {
-            throw new ForbiddenException("Não é possível editar alertas de outros usuários.");
-        }
-    }
+	private static void CheckUserPermissionToEdit(Guid? userId, Guid requestUserId)
+	{
+		if (userId != requestUserId)
+		{
+			throw new ForbiddenException("Não é possível editar alertas de outros usuários.");
+		}
+	}
 
-    private async Task<MissingAlert> ValidateAndAssignMissingAlertAsync(Guid missingAlertId)
-    {
-        MissingAlert? dbMissingAlert = await _missingAlertRepository.GetByIdAsync(missingAlertId);
-        if (dbMissingAlert is null)
-        {
-            throw new NotFoundException("Alerta com o id especificado não existe.");
-        }
+	private async Task<MissingAlert> ValidateAndAssignMissingAlertAsync(Guid missingAlertId)
+	{
+		MissingAlert? dbMissingAlert = await _missingAlertRepository.GetByIdAsync(missingAlertId);
+		if (dbMissingAlert is null)
+		{
+			throw new NotFoundException("Alerta com o id especificado não existe.");
+		}
 
-        return dbMissingAlert;
-    }
+		return dbMissingAlert;
+	}
 
-    private async Task<User> ValidateAndAssignUserAsync(Guid userId)
-    {
-        User? user = await _userRepository.GetUserByIdAsync(userId);
-        if (user is null)
-        {
-            throw new NotFoundException("Usuário com o id especificado não existe.");
-        }
+	private async Task<User> ValidateAndAssignUserAsync(Guid userId)
+	{
+		User? user = await _userRepository.GetUserByIdAsync(userId);
+		if (user is null)
+		{
+			throw new NotFoundException("Usuário com o id especificado não existe.");
+		}
 
-        return user;
-    }
+		return user;
+	}
 
-    private async Task<Pet> ValidateAndAssignPetAsync(Guid petId)
-    {
-        Pet? pet = await _petRepository.GetPetByIdAsync(petId);
-        if (pet is null)
-        {
-            throw new NotFoundException("Animal com o id especificado não existe.");
-        }
+	private async Task<Pet> ValidateAndAssignPetAsync(Guid petId)
+	{
+		Pet? pet = await _petRepository.GetPetByIdAsync(petId);
+		if (pet is null)
+		{
+			throw new NotFoundException("Animal com o id especificado não existe.");
+		}
 
-        return pet;
-    }
+		return pet;
+	}
 }

@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
+using Application.Common.Interfaces.Entities.MissingAlertComments;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
@@ -23,28 +24,29 @@ namespace Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IPetRepository, PetRepository>();
-        services.AddScoped<IBreedRepository, BreedRepository>();
-        services.AddScoped<IColorRepository, ColorRepository>();
-        services.AddScoped<ISpeciesRepository, SpeciesRepository>();
-        services.AddScoped<IMissingAlertRepository, MissingAlertRepository>();
-        services.AddScoped<ISpeciesRepository, SpeciesRepository>();
-        services.AddScoped<IAdoptionAlertRepository, AdoptionAlertRepository>();
-        services.AddScoped<IUserMessageRepository, UserMessageRepository>();
-        services.AddScoped<IMessagingService, MessagingService>();
-        services.AddScoped<INotificationRepository, NotificationRepository>();
+	public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddScoped<IUserRepository, UserRepository>();
+		services.AddScoped<IPetRepository, PetRepository>();
+		services.AddScoped<IBreedRepository, BreedRepository>();
+		services.AddScoped<IColorRepository, ColorRepository>();
+		services.AddScoped<ISpeciesRepository, SpeciesRepository>();
+		services.AddScoped<IMissingAlertRepository, MissingAlertRepository>();
+		services.AddScoped<ISpeciesRepository, SpeciesRepository>();
+		services.AddScoped<IAdoptionAlertRepository, AdoptionAlertRepository>();
+		services.AddScoped<IUserMessageRepository, UserMessageRepository>();
+		services.AddScoped<IMessagingService, MessagingService>();
+		services.AddScoped<INotificationRepository, NotificationRepository>();
+		services.AddScoped<IMissingAlertCommentRepository, MissingAlertCommentRepository>();
 
-        services.AddScoped<IAwsS3Client, AwsS3Client>();
-        services.Configure<AwsData>(configuration.GetSection("AWS"));
-        services.ConfigureAws(configuration);
+		services.AddScoped<IAwsS3Client, AwsS3Client>();
+		services.Configure<AwsData>(configuration.GetSection("AWS"));
+		services.ConfigureAws(configuration);
 
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
-                .UseEnumCheckConstraints());
+		services.AddDbContext<AppDbContext>(options =>
+			options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+				.UseEnumCheckConstraints());
 
-        return services;
-    }
+		return services;
+	}
 }

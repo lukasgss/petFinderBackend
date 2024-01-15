@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
+using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
@@ -18,6 +19,7 @@ using Application.Services.Authentication;
 using Application.Services.Authorization;
 using Application.Services.Converters;
 using Application.Services.Entities;
+using Application.Services.Entities.Comments;
 using Application.Services.General.Images;
 using Application.Services.General.Notifications;
 using Microsoft.Extensions.Configuration;
@@ -28,31 +30,32 @@ namespace Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddScoped<IPetService, PetService>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IUserAuthorizationService, UserAuthorizationService>();
-        services.AddScoped<IBreedService, BreedService>();
-        services.AddScoped<IMissingAlertService, MissingAlertService>();
-        services.AddScoped<ISpeciesService, SpeciesService>();
-        services.AddScoped<IAdoptionAlertService, AdoptionAlertService>();
-        services.AddScoped<IUserMessageService, UserMessageService>();
-        services.AddScoped<IIdConverterService, IdConverterService>();
-        services.AddScoped<IImageProcessingService, ImageProcessingService>();
-        services.AddScoped<IImageSubmissionService, ImageSubmissionService>();
-        services.AddScoped<INotificationService, NotificationService>();
+	public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddScoped<IPetService, PetService>();
+		services.AddScoped<IUserService, UserService>();
+		services.AddScoped<IUserAuthorizationService, UserAuthorizationService>();
+		services.AddScoped<IBreedService, BreedService>();
+		services.AddScoped<IMissingAlertService, MissingAlertService>();
+		services.AddScoped<ISpeciesService, SpeciesService>();
+		services.AddScoped<IAdoptionAlertService, AdoptionAlertService>();
+		services.AddScoped<IUserMessageService, UserMessageService>();
+		services.AddScoped<IIdConverterService, IdConverterService>();
+		services.AddScoped<IImageProcessingService, ImageProcessingService>();
+		services.AddScoped<IImageSubmissionService, ImageSubmissionService>();
+		services.AddScoped<INotificationService, NotificationService>();
+		services.AddScoped<IMissingAlertCommentService, MissingAlertCommentService>();
 
-        services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
+		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 
-        services.AddSingleton<IGuidProvider, GuidProvider>();
-        services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+		services.AddSingleton<IGuidProvider, GuidProvider>();
+		services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
-        services.Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
-        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+		services.Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
+		services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
-        services.Configure<MessagingSettings>(configuration.GetSection("MessagingSettings"));
+		services.Configure<MessagingSettings>(configuration.GetSection("MessagingSettings"));
 
-        return services;
-    }
+		return services;
+	}
 }

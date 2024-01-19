@@ -8,7 +8,7 @@ public class User : IdentityUser<Guid>
 	[Required, MaxLength(255)]
 	public string FullName { get; set; } = null!;
 
-	[MaxLength(100)]
+	[MaxLength(180)]
 	public string Image { get; set; } = null!;
 
 	public ICollection<MissingAlertComment> MissingAlertComments { get; set; } = null!;

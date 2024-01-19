@@ -45,10 +45,11 @@ public class ImageSubmissionService : IImageSubmissionService
 		return uploadedImage.PublicUrl;
 	}
 
-	public async Task<string> UploadUserImageAsync(Guid userId, IFormFile userImage)
+	public async Task<string> UploadUserImageAsync(Guid userId, IFormFile? userImage)
 	{
-		await using MemoryStream compressedImage =
-			await _imageProcessingService.CompressImageAsync(userImage.OpenReadStream());
+		await using MemoryStream? compressedImage = userImage is not null
+			? await _imageProcessingService.CompressImageAsync(userImage.OpenReadStream())
+			: null;
 
 		string hashedUserId = _idConverterService.ConvertGuidToShortId(userId);
 

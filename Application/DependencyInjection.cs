@@ -45,6 +45,7 @@ public static class DependencyInjection
 		services.AddScoped<IImageSubmissionService, ImageSubmissionService>();
 		services.AddScoped<INotificationService, NotificationService>();
 		services.AddScoped<IMissingAlertCommentService, MissingAlertCommentService>();
+		services.AddScoped<IAdoptionAlertCommentService, AdoptionAlertCommentService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

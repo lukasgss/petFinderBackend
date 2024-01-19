@@ -3,7 +3,7 @@ using Application.Common.Interfaces.Entities.Paginated;
 
 namespace Application.Common.Interfaces.Entities.Alerts.Comments;
 
-public interface IMissingAlertCommentService
+public interface IAdoptionAlertCommentService
 {
 	Task<AlertCommentResponse> GetCommentByIdAsync(Guid commentId);
 	Task<PaginatedEntity<AlertCommentResponse>> ListCommentsAsync(Guid alertId, int pageNumber, int pageSize);

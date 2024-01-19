@@ -12,33 +12,32 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers.Comments;
 
 [ApiController]
-[Route("/api/comments/missing-alert")]
-public class MissingAlertCommentController : ControllerBase
+[Route("/api/comments/adoption-alert")]
+public class AdoptionAlertCommentController : ControllerBase
 {
-	private readonly IMissingAlertCommentService _missingAlertCommentService;
+	private readonly IAdoptionAlertCommentService _adoptionAlertCommentService;
 	private readonly IUserAuthorizationService _userAuthorizationService;
 
-	public MissingAlertCommentController(IMissingAlertCommentService missingAlertCommentService,
-		IUserAuthorizationService userAuthorizationService)
+	public AdoptionAlertCommentController(
+		IUserAuthorizationService userAuthorizationService,
+		IAdoptionAlertCommentService adoptionAlertCommentService)
 	{
-		_missingAlertCommentService = missingAlertCommentService ??
-		                              throw new ArgumentNullException(nameof(missingAlertCommentService));
 		_userAuthorizationService = userAuthorizationService ??
 		                            throw new ArgumentNullException(nameof(userAuthorizationService));
+		_adoptionAlertCommentService = adoptionAlertCommentService;
 	}
 
-	[HttpGet("{alertId:guid}", Name = "GetCommentById")]
-	public async Task<ActionResult<AlertCommentResponse>> GetCommentById(Guid alertId)
+	[HttpGet("{alertId:guid}", Name = "GetAlertCommentById")]
+	public async Task<ActionResult<AlertCommentResponse>> GetAlertCommentById(Guid alertId)
 	{
-		return await _missingAlertCommentService.GetCommentByIdAsync(alertId);
+		return await _adoptionAlertCommentService.GetCommentByIdAsync(alertId);
 	}
 
 	[HttpGet("list/{alertId:guid}")]
 	public async Task<ActionResult<PaginatedEntity<AlertCommentResponse>>> GetCommentsFromAlert(
 		Guid alertId, int pageNumber = 1, int pageSize = Constants.DefaultPageSize)
 	{
-		var commentsInAlert =
-			await _missingAlertCommentService.ListCommentsAsync(alertId, pageNumber, pageSize);
+		var commentsInAlert = await _adoptionAlertCommentService.ListCommentsAsync(alertId, pageNumber, pageSize);
 		return Ok(commentsInAlert);
 	}
 
@@ -57,10 +56,10 @@ public class MissingAlertCommentController : ControllerBase
 		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
 		AlertCommentResponse createdComment =
-			await _missingAlertCommentService.PostCommentAsync(alert, userId, alertId);
+			await _adoptionAlertCommentService.PostCommentAsync(alert, userId, alertId);
 
 		return new CreatedAtRouteResult(
-			nameof(GetCommentById), new { alertId = createdComment.Id }, createdComment);
+			nameof(GetAlertCommentById), new { alertId = createdComment.Id }, createdComment);
 	}
 
 	[Authorize]
@@ -68,7 +67,7 @@ public class MissingAlertCommentController : ControllerBase
 	public async Task<ActionResult> DeleteComment(Guid commentId)
 	{
 		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
-		await _missingAlertCommentService.DeleteCommentAsync(commentId, userId);
+		await _adoptionAlertCommentService.DeleteCommentAsync(commentId, userId);
 
 		return NoContent();
 	}

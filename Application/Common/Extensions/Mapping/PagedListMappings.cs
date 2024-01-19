@@ -75,4 +75,20 @@ public static class PagedListMappings
 			TotalPages = alertComments.TotalPages
 		};
 	}
+
+	public static PaginatedEntity<AlertCommentResponse> ToPaginatedAlertCommentResponse(
+		this PagedList<AdoptionAlertComment> alertComments)
+	{
+		List<AlertCommentResponse> alertCommentResponses = alertComments
+			.Select(alert => alert.ToAlertCommentResponse())
+			.ToList();
+
+		return new PaginatedEntity<AlertCommentResponse>()
+		{
+			Data = alertCommentResponses,
+			CurrentPage = alertComments.CurrentPage,
+			CurrentPageCount = alertComments.CurrentPageCount,
+			TotalPages = alertComments.TotalPages
+		};
+	}
 }

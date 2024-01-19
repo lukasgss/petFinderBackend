@@ -21,6 +21,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	public DbSet<AdoptionAlert> AdoptionAlerts { get; set; } = null!;
 	public DbSet<UserMessage> UserMessages { get; set; } = null!;
 	public DbSet<MissingAlertComment> MissingAlertComments { get; set; } = null!;
+	public DbSet<AdoptionAlertComment> AdoptionAlertComments { get; set; } = null!;
 
 	protected override void OnModelCreating(ModelBuilder builder)
 	{

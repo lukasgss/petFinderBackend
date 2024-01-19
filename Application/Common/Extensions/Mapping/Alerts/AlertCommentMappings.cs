@@ -12,8 +12,20 @@ public static class AlertCommentMappings
 			Id = missingAlertComment.Id,
 			Content = missingAlertComment.Content,
 			AlertId = missingAlertComment.MissingAlertId,
-			CommentOwnerId = missingAlertComment.UserId,
+			CommentOwner = missingAlertComment.User.ToUserDataResponse(),
 			Date = missingAlertComment.Date
+		};
+	}
+
+	public static AlertCommentResponse ToAlertCommentResponse(this AdoptionAlertComment adoptionAlertComment)
+	{
+		return new AlertCommentResponse()
+		{
+			Id = adoptionAlertComment.Id,
+			Content = adoptionAlertComment.Content,
+			AlertId = adoptionAlertComment.AdoptionAlertId,
+			CommentOwner = adoptionAlertComment.User.ToUserDataResponse(),
+			Date = adoptionAlertComment.Date
 		};
 	}
 }

@@ -2,7 +2,6 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.Comments.DTOs;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
-using Application.Common.Interfaces.Entities.MissingAlertComments;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
 using Application.Services.Entities.Comments;
@@ -61,7 +60,7 @@ public class MissingAlertCommentServiceTests
 	{
 		_missingAlertCommentRepositoryMock.GetByIdAsync(MissingAlertComment.Id).ReturnsNull();
 
-		async Task Result() => await _sut.GetAlertCommentByIdAsync(MissingAlertComment.Id);
+		async Task Result() => await _sut.GetCommentByIdAsync(MissingAlertComment.Id);
 
 		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
 		Assert.Equal("Comentário com o id especificado não existe.", exception.Message);
@@ -72,7 +71,7 @@ public class MissingAlertCommentServiceTests
 	{
 		_missingAlertCommentRepositoryMock.GetByIdAsync(MissingAlertComment.Id).Returns(MissingAlertComment);
 
-		AlertCommentResponse commentResponse = await _sut.GetAlertCommentByIdAsync(MissingAlertComment.Id);
+		AlertCommentResponse commentResponse = await _sut.GetCommentByIdAsync(MissingAlertComment.Id);
 
 		Assert.Equivalent(ExpectedAlertCommentResponse, commentResponse);
 	}
@@ -83,10 +82,10 @@ public class MissingAlertCommentServiceTests
 		var pagedComments = PagedListGenerator.GeneratePagedMissingAlertsComments();
 		_missingAlertCommentRepositoryMock.GetCommentsByAlertIdAsync(MissingAlertComment.MissingAlertId, Page, PageSize)
 			.Returns(pagedComments);
-		var expectedAlertComments = PaginatedEntityGenerator.GeneratePaginatedAlertCommentResponse();
+		var expectedAlertComments = PaginatedEntityGenerator.GeneratePaginatedMissingAlertCommentResponse();
 
 		var alertComments =
-			await _sut.ListMissingAlertCommentsAsync(MissingAlertComment.MissingAlertId, Page, PageSize);
+			await _sut.ListCommentsAsync(MissingAlertComment.MissingAlertId, Page, PageSize);
 
 		Assert.Equivalent(expectedAlertComments, alertComments);
 	}

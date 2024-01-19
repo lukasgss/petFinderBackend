@@ -1,14 +1,15 @@
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
+using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
-using Application.Common.Interfaces.Entities.MissingAlertComments;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.Messaging;
+using Application.Services.Entities.Comments;
 using Application.Services.General.Notifications;
 using Infrastructure.DependencyInjections;
 using Infrastructure.ExternalServices.AWS;
@@ -38,6 +39,7 @@ public static class DependencyInjection
 		services.AddScoped<IMessagingService, MessagingService>();
 		services.AddScoped<INotificationRepository, NotificationRepository>();
 		services.AddScoped<IMissingAlertCommentRepository, MissingAlertCommentRepository>();
+		services.AddScoped<IAdoptionAlertCommentRepository, AdoptionAlertCommentRepository>();
 
 		services.AddScoped<IAwsS3Client, AwsS3Client>();
 		services.Configure<AwsData>(configuration.GetSection("AWS"));

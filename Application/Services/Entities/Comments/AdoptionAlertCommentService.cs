@@ -1,9 +1,9 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
+using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.Comments.DTOs;
-using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
@@ -12,33 +12,33 @@ using Domain.Entities.Alerts;
 
 namespace Application.Services.Entities.Comments;
 
-public class MissingAlertCommentService : IMissingAlertCommentService
+public class AdoptionAlertCommentService : IAdoptionAlertCommentService
 {
-	private readonly IMissingAlertCommentRepository _missingAlertCommentRepository;
-	private readonly IMissingAlertRepository _missingAlertRepository;
+	private readonly IAdoptionAlertCommentRepository _adoptionAlertCommentRepository;
+	private readonly IAdoptionAlertRepository _adoptionAlertRepository;
 	private readonly IUserRepository _userRepository;
-	private readonly IGuidProvider _guidProvider;
 	private readonly IDateTimeProvider _dateTimeProvider;
+	private readonly IGuidProvider _guidProvider;
 
-	public MissingAlertCommentService(
-		IMissingAlertCommentRepository missingAlertCommentRepository,
-		IMissingAlertRepository missingAlertRepository,
+	public AdoptionAlertCommentService(
+		IAdoptionAlertCommentRepository adoptionAlertCommentRepository,
+		IAdoptionAlertRepository adoptionAlertRepository,
 		IUserRepository userRepository,
-		IGuidProvider guidProvider,
-		IDateTimeProvider dateTimeProvider)
+		IDateTimeProvider dateTimeProvider,
+		IGuidProvider guidProvider)
 	{
-		_missingAlertCommentRepository =
-			missingAlertCommentRepository ?? throw new ArgumentNullException(nameof(missingAlertCommentRepository));
-		_missingAlertRepository =
-			missingAlertRepository ?? throw new ArgumentNullException(nameof(missingAlertRepository));
+		_adoptionAlertCommentRepository = adoptionAlertCommentRepository ??
+		                                  throw new ArgumentNullException(nameof(adoptionAlertCommentRepository));
+		_adoptionAlertRepository = adoptionAlertRepository
+		                           ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
 		_dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
+		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
 	}
 
 	public async Task<AlertCommentResponse> GetCommentByIdAsync(Guid commentId)
 	{
-		MissingAlertComment? alertComment = await _missingAlertCommentRepository.GetByIdAsync(commentId);
+		AdoptionAlertComment? alertComment = await _adoptionAlertCommentRepository.GetByIdAsync(commentId);
 		if (alertComment is null)
 		{
 			throw new NotFoundException("Comentário com o id especificado não existe.");
@@ -51,7 +51,7 @@ public class MissingAlertCommentService : IMissingAlertCommentService
 		Guid alertId, int pageNumber, int pageSize)
 	{
 		var alertComments =
-			await _missingAlertCommentRepository.GetCommentsByAlertIdAsync(alertId, pageNumber, pageSize);
+			await _adoptionAlertCommentRepository.GetCommentsByAlertIdAsync(alertId, pageNumber, pageSize);
 
 		return alertComments.ToPaginatedAlertCommentResponse();
 	}
@@ -64,7 +64,7 @@ public class MissingAlertCommentService : IMissingAlertCommentService
 			throw new BadRequestException("Id da rota não coincide com o id especificado.");
 		}
 
-		MissingAlert? commentedAlert = await _missingAlertRepository.GetByIdAsync(alertRequest.AlertId);
+		AdoptionAlert? commentedAlert = await _adoptionAlertRepository.GetByIdAsync(alertRequest.AlertId);
 		if (commentedAlert is null)
 		{
 			throw new NotFoundException("Alerta com o id especificado não existe.");
@@ -72,26 +72,26 @@ public class MissingAlertCommentService : IMissingAlertCommentService
 
 		User? commentOwner = await _userRepository.GetUserByIdAsync(userId);
 
-		MissingAlertComment alertComment = new()
+		AdoptionAlertComment alertComment = new()
 		{
 			Id = _guidProvider.NewGuid(),
 			Content = alertRequest.Content,
 			User = commentOwner!,
 			UserId = commentOwner!.Id,
-			MissingAlert = commentedAlert,
-			MissingAlertId = commentedAlert.Id,
+			AdoptionAlert = commentedAlert,
+			AdoptionAlertId = commentedAlert.Id,
 			Date = _dateTimeProvider.UtcNow()
 		};
 
-		_missingAlertCommentRepository.Add(alertComment);
-		await _missingAlertRepository.CommitAsync();
+		_adoptionAlertCommentRepository.Add(alertComment);
+		await _adoptionAlertCommentRepository.CommitAsync();
 
 		return alertComment.ToAlertCommentResponse();
 	}
 
 	public async Task DeleteCommentAsync(Guid commentId, Guid userId)
 	{
-		MissingAlertComment? commentToDelete = await _missingAlertCommentRepository.GetByIdAsync(commentId);
+		AdoptionAlertComment? commentToDelete = await _adoptionAlertCommentRepository.GetByIdAsync(commentId);
 		if (commentToDelete is null)
 		{
 			throw new NotFoundException("Comentário com o id especificado não existe.");
@@ -102,7 +102,7 @@ public class MissingAlertCommentService : IMissingAlertCommentService
 			throw new UnauthorizedException("Não é possível excluir comentários de outros usuários.");
 		}
 
-		_missingAlertCommentRepository.Delete(commentToDelete);
-		await _missingAlertCommentRepository.CommitAsync();
+		_adoptionAlertCommentRepository.Delete(commentToDelete);
+		await _adoptionAlertCommentRepository.CommitAsync();
 	}
 }

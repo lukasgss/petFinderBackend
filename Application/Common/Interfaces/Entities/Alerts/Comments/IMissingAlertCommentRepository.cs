@@ -2,7 +2,7 @@ using Application.Common.Interfaces.GenericRepository;
 using Application.Common.Pagination;
 using Domain.Entities;
 
-namespace Application.Common.Interfaces.Entities.MissingAlertComments;
+namespace Application.Common.Interfaces.Entities.Alerts.Comments;
 
 public interface IMissingAlertCommentRepository : IGenericRepository<MissingAlertComment>
 {

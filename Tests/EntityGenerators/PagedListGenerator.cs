@@ -32,4 +32,10 @@ public static class PagedListGenerator
 		List<MissingAlertComment> alertComments = MissingAlertCommentGenerator.GenerateListOfMissingAlertComment();
 		return new PagedList<MissingAlertComment>(alertComments, alertComments.Count, pageNumber: 1, pageSize: 50);
 	}
+
+	public static PagedList<AdoptionAlertComment> GeneratePagedAdoptionAlertComments()
+	{
+		List<AdoptionAlertComment> alertComments = AdoptionAlertCommentGenerator.GenerateListOfAdoptionAlertComments();
+		return new PagedList<AdoptionAlertComment>(alertComments, alertComments.Count, pageNumber: 1, pageSize: 50);
+	}
 }

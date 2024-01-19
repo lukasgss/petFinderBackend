@@ -46,9 +46,21 @@ public static class PaginatedEntityGenerator
 		};
 	}
 
-	public static PaginatedEntity<AlertCommentResponse> GeneratePaginatedAlertCommentResponse()
+	public static PaginatedEntity<AlertCommentResponse> GeneratePaginatedMissingAlertCommentResponse()
 	{
 		var alertCommentResponse = GenericAlertCommentGenerator.GenerateListOfMissingAlertComment();
+		return new PaginatedEntity<AlertCommentResponse>()
+		{
+			Data = alertCommentResponse,
+			CurrentPage = 1,
+			CurrentPageCount = alertCommentResponse.Count,
+			TotalPages = 1
+		};
+	}
+
+	public static PaginatedEntity<AlertCommentResponse> GeneratePaginatedAdoptionAlertCommentResponse()
+	{
+		var alertCommentResponse = GenericAlertCommentGenerator.GenerateListOfAdoptionAlertComment();
 		return new PaginatedEntity<AlertCommentResponse>()
 		{
 			Data = alertCommentResponse,

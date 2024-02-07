@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
 using Application.Common.Pagination;
@@ -29,7 +30,7 @@ public class AdoptionAlertRepository : GenericRepository<AdoptionAlert>, IAdopti
 			.SingleOrDefaultAsync(alert => alert.Id == alertId);
 	}
 
-	public async Task<PagedList<AdoptionAlert>> ListAdoptionAlertsWithGeoFilters(
+	public async Task<PagedList<AdoptionAlert>> ListAdoptionAlerts(
 		AdoptionAlertFilters filters, int pageNumber, int pageSize)
 	{
 		var query = _dbContext.AdoptionAlerts
@@ -38,35 +39,27 @@ public class AdoptionAlertRepository : GenericRepository<AdoptionAlert>, IAdopti
 			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Breed)
 			.Include(alert => alert.User)
-			.Where(CoordinatesCalculator.AdoptionAlertIsWithinRadiusDistance(
-				new GeoCoordinate(filters.Latitude, filters.Longitude),
-				filters.RadiusDistanceInKm))
 			// filters records based if it should show only adopted alerts
 			// (AdoptionDate != null), show only non adopted alerts
 			// (AdoptionDate == null) or both, if both filters.NotAdopted
 			// or filters.Adopted are true
 			.Where(alert => alert.AdoptionDate == null == filters.NotAdopted ||
 			                alert.AdoptionDate != null == filters.Adopted);
+
+		query = ApplyFilters(query, filters);
 
 		return await PagedList<AdoptionAlert>.ToPagedListAsync(query, pageNumber, pageSize);
 	}
 
-	public async Task<PagedList<AdoptionAlert>> ListAdoptionAlertsWithStatusFilters(AdoptionAlertFilters filters,
-		int pageNumber, int pageSize)
+	private static IQueryable<AdoptionAlert> ApplyFilters(IQueryable<AdoptionAlert> query, AdoptionAlertFilters filters)
 	{
-		var query = _dbContext.AdoptionAlerts
-			.Include(alert => alert.Pet)
-			.ThenInclude(pet => pet.Colors)
-			.Include(alert => alert.Pet)
-			.ThenInclude(pet => pet.Breed)
-			.Include(alert => alert.User)
-			// filters records based if it should show only adopted alerts
-			// (AdoptionDate != null), show only non adopted alerts
-			// (AdoptionDate == null) or both, if both filters.NotAdopted
-			// or filters.Adopted are true
-			.Where(alert => alert.AdoptionDate == null == filters.NotAdopted ||
-			                alert.AdoptionDate != null == filters.Adopted);
+		if (AlertFilters.HasGeoFilters(filters))
+		{
+			query = query.Where(CoordinatesCalculator.AdoptionAlertIsWithinRadiusDistance(
+				new GeoCoordinate((double)filters.Latitude!, (double)filters.Longitude!),
+				(double)filters.RadiusDistanceInKm!));
+		}
 
-		return await PagedList<AdoptionAlert>.ToPagedListAsync(query, pageNumber, pageSize);
+		return query;
 	}
 }

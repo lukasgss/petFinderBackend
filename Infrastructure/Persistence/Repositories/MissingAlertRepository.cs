@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Application.Common.Pagination;
@@ -29,7 +30,7 @@ public class MissingAlertRepository : GenericRepository<MissingAlert>, IMissingA
 			.SingleOrDefaultAsync(alert => alert.Id == id);
 	}
 
-	public async Task<PagedList<MissingAlert>> ListMissingAlertsWithGeoFilters(
+	public async Task<PagedList<MissingAlert>> ListMissingAlerts(
 		MissingAlertFilters filters, int pageNumber, int pageSize)
 	{
 		var query = _dbContext.MissingAlerts
@@ -38,35 +39,47 @@ public class MissingAlertRepository : GenericRepository<MissingAlert>, IMissingA
 			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Breed)
 			.Include(alert => alert.User)
-			.Where(CoordinatesCalculator.MissingAlertIsWithinRadiusDistance(
-				new GeoCoordinate(filters.Latitude, filters.Longitude),
-				filters.RadiusDistanceInKm))
-			// filters records based if it should show only adopted alerts
-			// (AdoptionDate != null), show only non adopted alerts
-			// (AdoptionDate == null) or both, if both filters.NotAdopted
-			// or filters.Adopted are true
-			.Where(alert => alert.RecoveryDate == null == filters.NotMissing ||
-			                alert.RecoveryDate != null == filters.Missing);
+			// filters records based if it should show only missing alerts
+			// (RecoveryDate != null), show only non recovered alerts
+			// (RecoveryDate == null) or both, if both filters.Missing
+			// or filters.NotMissing are true
+			.Where(alert => alert.RecoveryDate == null == filters.Missing ||
+			                alert.RecoveryDate != null == filters.NotMissing);
+
+		query = ApplyFilters(query, filters);
 
 		return await PagedList<MissingAlert>.ToPagedListAsync(query, pageNumber, pageSize);
 	}
 
-	public async Task<PagedList<MissingAlert>> ListMissingAlertsWithStatusFilters(
-		MissingAlertFilters filters, int pageNumber, int pageSize)
+	private static IQueryable<MissingAlert> ApplyFilters(IQueryable<MissingAlert> query, MissingAlertFilters filters)
 	{
-		var query = _dbContext.MissingAlerts
-			.Include(alert => alert.Pet)
-			.ThenInclude(pet => pet.Colors)
-			.Include(alert => alert.Pet)
-			.ThenInclude(pet => pet.Breed)
-			.Include(alert => alert.User)
-			// filters records based if it should show only adopted alerts
-			// (AdoptionDate != null), show only non adopted alerts
-			// (AdoptionDate == null) or both, if both filters.NotAdopted
-			// or filters.Adopted are true
-			.Where(alert => alert.RecoveryDate == null == filters.Missing ||
-			                alert.RecoveryDate != null == filters.NotMissing);
+		if (AlertFilters.HasGeoFilters(filters))
+		{
+			query = query.Where(CoordinatesCalculator.MissingAlertIsWithinRadiusDistance(
+				new GeoCoordinate((double)filters.Latitude!, (double)filters.Longitude!),
+				(double)filters.RadiusDistanceInKm!));
+		}
 
-		return await PagedList<MissingAlert>.ToPagedListAsync(query, pageNumber, pageSize);
+		if (filters.BreedId is not null)
+		{
+			query = query.Where(alert => alert.Pet.Breed.Id == filters.BreedId);
+		}
+
+		if (filters.GenderId is not null)
+		{
+			query = query.Where(alert => alert.Pet.Gender == filters.GenderId);
+		}
+
+		if (filters.SpeciesId is not null)
+		{
+			query = query.Where(alert => alert.Pet.Species.Id == filters.SpeciesId);
+		}
+
+		if (filters.ColorId is not null)
+		{
+			query = query.Where(alert => alert.Pet.Colors.Any(color => color.Id == filters.ColorId));
+		}
+
+		return query;
 	}
 }

@@ -15,187 +15,179 @@ namespace Application.Services.Entities;
 
 public class AdoptionAlertService : IAdoptionAlertService
 {
-    private readonly IAdoptionAlertRepository _adoptionAlertRepository;
-    private readonly IPetRepository _petRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly IGuidProvider _guidProvider;
+	private readonly IAdoptionAlertRepository _adoptionAlertRepository;
+	private readonly IPetRepository _petRepository;
+	private readonly IUserRepository _userRepository;
+	private readonly IDateTimeProvider _dateTimeProvider;
+	private readonly IGuidProvider _guidProvider;
 
-    public AdoptionAlertService(
-        IAdoptionAlertRepository adoptionAlertRepository,
-        IPetRepository petRepository,
-        IUserRepository userRepository,
-        IDateTimeProvider dateTimeProvider,
-        IGuidProvider guidProvider)
-    {
-        _adoptionAlertRepository =
-            adoptionAlertRepository ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
-        _petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
-        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
-        _guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
-    }
+	public AdoptionAlertService(
+		IAdoptionAlertRepository adoptionAlertRepository,
+		IPetRepository petRepository,
+		IUserRepository userRepository,
+		IDateTimeProvider dateTimeProvider,
+		IGuidProvider guidProvider)
+	{
+		_adoptionAlertRepository =
+			adoptionAlertRepository ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
+		_petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
+		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+		_dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
+		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
+	}
 
-    public async Task<AdoptionAlertResponse> GetByIdAsync(Guid alertId)
-    {
-        AdoptionAlert adoptionAlert = await ValidateAndAssignAdoptionAlertAsync(alertId);
+	public async Task<AdoptionAlertResponse> GetByIdAsync(Guid alertId)
+	{
+		AdoptionAlert adoptionAlert = await ValidateAndAssignAdoptionAlertAsync(alertId);
 
-        return adoptionAlert.ToAdoptionAlertResponse();
-    }
+		return adoptionAlert.ToAdoptionAlertResponse();
+	}
 
-    public async Task<PaginatedEntity<AdoptionAlertResponse>> ListAdoptionAlerts(
-        AdoptionAlertFilters filters, int page = 1, int pageSize = 30)
-    {
-        if (page < 1 || pageSize < 1)
-        {
-            throw new BadRequestException("Insira um número e tamanho de página maior ou igual a 1.");
-        }
+	public async Task<PaginatedEntity<AdoptionAlertResponse>> ListAdoptionAlerts(
+		AdoptionAlertFilters filters, int page = 1, int pageSize = 30)
+	{
+		if (page < 1 || pageSize < 1)
+		{
+			throw new BadRequestException("Insira um número e tamanho de página maior ou igual a 1.");
+		}
 
-        if (AlertFilters.HasGeoFilters(filters))
-        {
-            var geoFilteredAdoptionAlerts = await _adoptionAlertRepository.ListAdoptionAlertsWithGeoFilters(
-                filters, page, pageSize);
+		var filteredAlerts =
+			await _adoptionAlertRepository.ListAdoptionAlerts(filters, page, pageSize);
 
-            return geoFilteredAdoptionAlerts.ToAdoptionAlertResponsePagedList();
-        }
+		return filteredAlerts.ToAdoptionAlertResponsePagedList();
+	}
 
-        var statusFilteredAdoptionAlerts = await _adoptionAlertRepository.ListAdoptionAlertsWithStatusFilters(
-            filters, page, pageSize);
+	public async Task<AdoptionAlertResponse> CreateAsync(CreateAdoptionAlertRequest createAlertRequest,
+		Guid userId)
+	{
+		Pet pet = await ValidateAndAssignPetAsync(createAlertRequest.PetId);
+		ValidateIfUserIsOwnerOfPet(pet.Owner.Id, userId);
 
-        return statusFilteredAdoptionAlerts.ToAdoptionAlertResponsePagedList();
-    }
+		User alertOwner = await ValidateAndAssignUserAsync(userId);
 
-    public async Task<AdoptionAlertResponse> CreateAsync(CreateAdoptionAlertRequest createAlertRequest,
-        Guid userId)
-    {
-        Pet pet = await ValidateAndAssignPetAsync(createAlertRequest.PetId);
-        ValidateIfUserIsOwnerOfPet(pet.Owner.Id, userId);
+		AdoptionAlert adoptionAlertToCreate = new()
+		{
+			Id = _guidProvider.NewGuid(),
+			OnlyForScreenedProperties = createAlertRequest.OnlyForScreenedProperties,
+			LocationLatitude = createAlertRequest.LocationLatitude,
+			LocationLongitude = createAlertRequest.LocationLongitude,
+			Description = createAlertRequest.Description,
+			RegistrationDate = _dateTimeProvider.UtcNow(),
+			AdoptionDate = null,
+			Pet = pet,
+			User = alertOwner,
+		};
 
-        User alertOwner = await ValidateAndAssignUserAsync(userId);
+		_adoptionAlertRepository.Add(adoptionAlertToCreate);
+		await _adoptionAlertRepository.CommitAsync();
 
-        AdoptionAlert adoptionAlertToCreate = new()
-        {
-            Id = _guidProvider.NewGuid(),
-            OnlyForScreenedProperties = createAlertRequest.OnlyForScreenedProperties,
-            LocationLatitude = createAlertRequest.LocationLatitude,
-            LocationLongitude = createAlertRequest.LocationLongitude,
-            Description = createAlertRequest.Description,
-            RegistrationDate = _dateTimeProvider.UtcNow(),
-            AdoptionDate = null,
-            Pet = pet,
-            User = alertOwner,
-        };
+		return adoptionAlertToCreate.ToAdoptionAlertResponse();
+	}
 
-        _adoptionAlertRepository.Add(adoptionAlertToCreate);
-        await _adoptionAlertRepository.CommitAsync();
+	public async Task<AdoptionAlertResponse> EditAsync(EditAdoptionAlertRequest editAlertRequest, Guid userId,
+		Guid routeId)
+	{
+		if (routeId != editAlertRequest.Id)
+		{
+			throw new BadRequestException("Id da rota não coincide com o id especificado.");
+		}
 
-        return adoptionAlertToCreate.ToAdoptionAlertResponse();
-    }
+		AdoptionAlert adoptionAlertDb = await ValidateAndAssignAdoptionAlertAsync(editAlertRequest.Id);
+		ValidateIfUserIsOwnerOfAlert(adoptionAlertDb.User.Id, userId);
 
-    public async Task<AdoptionAlertResponse> EditAsync(EditAdoptionAlertRequest editAlertRequest, Guid userId,
-        Guid routeId)
-    {
-        if (routeId != editAlertRequest.Id)
-        {
-            throw new BadRequestException("Id da rota não coincide com o id especificado.");
-        }
+		Pet pet = await ValidateAndAssignPetAsync(editAlertRequest.PetId);
+		ValidateIfUserIsOwnerOfPet(pet.Owner.Id, userId);
 
-        AdoptionAlert adoptionAlertDb = await ValidateAndAssignAdoptionAlertAsync(editAlertRequest.Id);
-        ValidateIfUserIsOwnerOfAlert(adoptionAlertDb.User.Id, userId);
+		adoptionAlertDb.OnlyForScreenedProperties = editAlertRequest.OnlyForScreenedProperties;
+		adoptionAlertDb.LocationLatitude = editAlertRequest.LocationLatitude;
+		adoptionAlertDb.LocationLongitude = editAlertRequest.LocationLongitude;
+		adoptionAlertDb.Description = editAlertRequest.Description;
+		adoptionAlertDb.Pet = adoptionAlertDb.Pet;
 
-        Pet pet = await ValidateAndAssignPetAsync(editAlertRequest.PetId);
-        ValidateIfUserIsOwnerOfPet(pet.Owner.Id, userId);
+		await _adoptionAlertRepository.CommitAsync();
 
-        adoptionAlertDb.OnlyForScreenedProperties = editAlertRequest.OnlyForScreenedProperties;
-        adoptionAlertDb.LocationLatitude = editAlertRequest.LocationLatitude;
-        adoptionAlertDb.LocationLongitude = editAlertRequest.LocationLongitude;
-        adoptionAlertDb.Description = editAlertRequest.Description;
-        adoptionAlertDb.Pet = adoptionAlertDb.Pet;
+		return adoptionAlertDb.ToAdoptionAlertResponse();
+	}
 
-        await _adoptionAlertRepository.CommitAsync();
+	public async Task DeleteAsync(Guid alertId, Guid userId)
+	{
+		AdoptionAlert adoptionAlertDb = await ValidateAndAssignAdoptionAlertAsync(alertId);
+		ValidateIfUserIsOwnerOfAlert(adoptionAlertDb.User.Id, userId);
 
-        return adoptionAlertDb.ToAdoptionAlertResponse();
-    }
+		_adoptionAlertRepository.Delete(adoptionAlertDb);
+		await _adoptionAlertRepository.CommitAsync();
+	}
 
-    public async Task DeleteAsync(Guid alertId, Guid userId)
-    {
-        AdoptionAlert adoptionAlertDb = await ValidateAndAssignAdoptionAlertAsync(alertId);
-        ValidateIfUserIsOwnerOfAlert(adoptionAlertDb.User.Id, userId);
+	public async Task<AdoptionAlertResponse> ToggleAdoptionAsync(Guid alertId, Guid userId)
+	{
+		AdoptionAlert adoptionAlert = await ValidateAndAssignAdoptionAlertAsync(alertId);
 
-        _adoptionAlertRepository.Delete(adoptionAlertDb);
-        await _adoptionAlertRepository.CommitAsync();
-    }
+		if (userId != adoptionAlert.User.Id)
+		{
+			throw new ForbiddenException("Não é possível alterar o status de alertas em que não é dono.");
+		}
 
-    public async Task<AdoptionAlertResponse> ToggleAdoptionAsync(Guid alertId, Guid userId)
-    {
-        AdoptionAlert adoptionAlert = await ValidateAndAssignAdoptionAlertAsync(alertId);
+		if (adoptionAlert.AdoptionDate is null)
+		{
+			adoptionAlert.AdoptionDate = _dateTimeProvider.DateOnlyNow();
+		}
+		else
+		{
+			adoptionAlert.AdoptionDate = null;
+		}
 
-        if (userId != adoptionAlert.User.Id)
-        {
-            throw new ForbiddenException("Não é possível alterar o status de alertas em que não é dono.");
-        }
+		await _adoptionAlertRepository.CommitAsync();
 
-        if (adoptionAlert.AdoptionDate is null)
-        {
-            adoptionAlert.AdoptionDate = _dateTimeProvider.DateOnlyNow();
-        }
-        else
-        {
-            adoptionAlert.AdoptionDate = null;
-        }
+		return adoptionAlert.ToAdoptionAlertResponse();
+	}
 
-        await _adoptionAlertRepository.CommitAsync();
+	private static void ValidateIfUserIsOwnerOfAlert(Guid actualOwnerId, Guid userId)
+	{
+		if (actualOwnerId != userId)
+		{
+			throw new UnauthorizedException("Não é possível alterar alertas de adoção de outros usuários.");
+		}
+	}
 
-        return adoptionAlert.ToAdoptionAlertResponse();
-    }
+	private static void ValidateIfUserIsOwnerOfPet(Guid actualPetOwnerId, Guid userId)
+	{
+		if (actualPetOwnerId != userId)
+		{
+			throw new UnauthorizedException(
+				"Não é possível cadastrar ou editar adoções para animais em que não é dono.");
+		}
+	}
 
-    private static void ValidateIfUserIsOwnerOfAlert(Guid actualOwnerId, Guid userId)
-    {
-        if (actualOwnerId != userId)
-        {
-            throw new UnauthorizedException("Não é possível alterar alertas de adoção de outros usuários.");
-        }
-    }
+	private async Task<User> ValidateAndAssignUserAsync(Guid userId)
+	{
+		User? user = await _userRepository.GetUserByIdAsync(userId);
+		if (user is null)
+		{
+			throw new NotFoundException("Usuário com o id especificado não existe.");
+		}
 
-    private static void ValidateIfUserIsOwnerOfPet(Guid actualPetOwnerId, Guid userId)
-    {
-        if (actualPetOwnerId != userId)
-        {
-            throw new UnauthorizedException(
-                "Não é possível cadastrar ou editar adoções para animais em que não é dono.");
-        }
-    }
+		return user;
+	}
 
-    private async Task<User> ValidateAndAssignUserAsync(Guid userId)
-    {
-        User? user = await _userRepository.GetUserByIdAsync(userId);
-        if (user is null)
-        {
-            throw new NotFoundException("Usuário com o id especificado não existe.");
-        }
+	private async Task<Pet> ValidateAndAssignPetAsync(Guid petId)
+	{
+		Pet? pet = await _petRepository.GetPetByIdAsync(petId);
+		if (pet is null)
+		{
+			throw new NotFoundException("Animal com o id especificado não existe.");
+		}
 
-        return user;
-    }
+		return pet;
+	}
 
-    private async Task<Pet> ValidateAndAssignPetAsync(Guid petId)
-    {
-        Pet? pet = await _petRepository.GetPetByIdAsync(petId);
-        if (pet is null)
-        {
-            throw new NotFoundException("Animal com o id especificado não existe.");
-        }
+	private async Task<AdoptionAlert> ValidateAndAssignAdoptionAlertAsync(Guid alertId)
+	{
+		AdoptionAlert? adoptionAlert = await _adoptionAlertRepository.GetByIdAsync(alertId);
+		if (adoptionAlert is null)
+		{
+			throw new NotFoundException("Alerta de adoção com o id especificado não existe.");
+		}
 
-        return pet;
-    }
-
-    private async Task<AdoptionAlert> ValidateAndAssignAdoptionAlertAsync(Guid alertId)
-    {
-        AdoptionAlert? adoptionAlert = await _adoptionAlertRepository.GetByIdAsync(alertId);
-        if (adoptionAlert is null)
-        {
-            throw new NotFoundException("Alerta de adoção com o id especificado não existe.");
-        }
-
-        return adoptionAlert;
-    }
+		return adoptionAlert;
+	}
 }

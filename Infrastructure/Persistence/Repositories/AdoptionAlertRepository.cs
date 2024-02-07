@@ -60,6 +60,26 @@ public class AdoptionAlertRepository : GenericRepository<AdoptionAlert>, IAdopti
 				(double)filters.RadiusDistanceInKm!));
 		}
 
+		if (filters.BreedId is not null)
+		{
+			query = query.Where(alert => alert.Pet.Breed.Id == filters.BreedId);
+		}
+
+		if (filters.GenderId is not null)
+		{
+			query = query.Where(alert => alert.Pet.Gender == filters.GenderId);
+		}
+
+		if (filters.SpeciesId is not null)
+		{
+			query = query.Where(alert => alert.Pet.Species.Id == filters.SpeciesId);
+		}
+
+		if (filters.ColorId is not null)
+		{
+			query = query.Where(alert => alert.Pet.Colors.Any(color => color.Id == filters.ColorId));
+		}
+
 		return query;
 	}
 }

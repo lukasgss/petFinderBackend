@@ -1,7 +1,6 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
-using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Paginated;
@@ -50,18 +49,9 @@ public class MissingAlertService : IMissingAlertService
 			throw new BadRequestException("Insira um número e tamanho de página maior ou igual a 1.");
 		}
 
-		if (AlertFilters.HasGeoFilters(filters))
-		{
-			var geoFilteredAlerts = await _missingAlertRepository.ListMissingAlertsWithGeoFilters(
-				filters, page, pageSize);
+		var filteredAlerts = await _missingAlertRepository.ListMissingAlerts(filters, page, pageSize);
 
-			return geoFilteredAlerts.ToMissingAlertResponsePagedList();
-		}
-
-		var statusFilteredAlerts = await _missingAlertRepository.ListMissingAlertsWithStatusFilters(
-			filters, page, pageSize);
-
-		return statusFilteredAlerts.ToMissingAlertResponsePagedList();
+		return filteredAlerts.ToMissingAlertResponsePagedList();
 	}
 
 	public async Task<MissingAlertResponse> CreateAsync(CreateMissingAlertRequest createMissingAlertRequest,

@@ -109,13 +109,4 @@ public static class MissingAlertGenerator
 			NotMissing = false
 		};
 	}
-
-	public static MissingAlertFilters GenerateMissingAlertFiltersWithoutGeo()
-	{
-		return new MissingAlertFilters()
-		{
-			Missing = true,
-			NotMissing = false
-		};
-	}
 }

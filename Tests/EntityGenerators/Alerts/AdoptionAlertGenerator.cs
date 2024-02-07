@@ -156,13 +156,4 @@ public static class AdoptionAlertGenerator
 			NotAdopted = true
 		};
 	}
-
-	public static AdoptionAlertFilters GenerateAdotionAlertFiltersWithoutGeo()
-	{
-		return new AdoptionAlertFilters()
-		{
-			Adopted = false,
-			NotAdopted = true
-		};
-	}
 }

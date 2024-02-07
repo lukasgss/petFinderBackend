@@ -7,11 +7,8 @@ namespace Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 
 public interface IMissingAlertRepository : IGenericRepository<MissingAlert>
 {
-    Task<MissingAlert?> GetByIdAsync(Guid id);
+	Task<MissingAlert?> GetByIdAsync(Guid id);
 
-    Task<PagedList<MissingAlert>> ListMissingAlertsWithGeoFilters(
-        MissingAlertFilters filters, int pageNumber, int pageSize);
-
-    Task<PagedList<MissingAlert>> ListMissingAlertsWithStatusFilters(
-        MissingAlertFilters filters, int pageNumber, int pageSize);
+	Task<PagedList<MissingAlert>> ListMissingAlerts(
+		MissingAlertFilters filters, int pageNumber, int pageSize);
 }

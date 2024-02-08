@@ -19,6 +19,7 @@ public class Pet
     
     public int? AgeInMonths { get; set; }
 
+    // TODO: Add the functionality of adding multiple images
     [MaxLength(100)]
     public string Image { get; set; } = null!;
 

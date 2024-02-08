@@ -67,6 +67,26 @@ public class ImageSubmissionService : IImageSubmissionService
 		return uploadedImage.PublicUrl;
 	}
 
+	public async Task<string> UploadFoundAlertImageAsync(Guid foundAlertId, IFormFile alertImage)
+	{
+		MemoryStream compressedImage = await _imageProcessingService.CompressImageAsync(alertImage.OpenReadStream());
+
+		string hashedAlertId = _idConverterService.ConvertGuidToShortId(foundAlertId);
+
+		AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadUserImageAsync(
+			imageStream: compressedImage,
+			imageFile: alertImage,
+			hashedAlertId);
+
+		if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
+		{
+			throw new InternalServerErrorException(
+				"Não foi possível fazer upload da imagem, tente novamente mais tarde.");
+		}
+
+		return uploadedImage.PublicUrl;
+	}
+
 	public async Task DeletePetImageAsync(Guid petId)
 	{
 		string hashedPetId = _idConverterService.ConvertGuidToShortId(petId);

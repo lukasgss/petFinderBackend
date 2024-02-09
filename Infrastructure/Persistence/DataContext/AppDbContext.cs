@@ -19,8 +19,9 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	public DbSet<Species> Species { get; set; } = null!;
 	public DbSet<MissingAlert> MissingAlerts { get; set; } = null!;
 	public DbSet<AdoptionAlert> AdoptionAlerts { get; set; } = null!;
-	public DbSet<UserMessage> UserMessages { get; set; } = null!;
 	public DbSet<MissingAlertComment> MissingAlertComments { get; set; } = null!;
+	public DbSet<FoundAnimalAlert> FoundAnimalAlerts { get; set; } = null!;
+	public DbSet<UserMessage> UserMessages { get; set; } = null!;
 	public DbSet<AdoptionAlertComment> AdoptionAlertComments { get; set; } = null!;
 
 	protected override void OnModelCreating(ModelBuilder builder)

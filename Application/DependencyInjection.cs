@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
+using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
@@ -46,6 +47,7 @@ public static class DependencyInjection
 		services.AddScoped<INotificationService, NotificationService>();
 		services.AddScoped<IMissingAlertCommentService, MissingAlertCommentService>();
 		services.AddScoped<IAdoptionAlertCommentService, AdoptionAlertCommentService>();
+		services.AddScoped<IFoundAnimalAlertService, FoundAnimalAlertService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

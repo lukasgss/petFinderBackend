@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Domain.Entities.Alerts;
 
 namespace Domain.Entities;
 
@@ -13,4 +14,6 @@ public class Color
     public string HexCode { get; set; } = null!;
     
     public virtual ICollection<Pet> Pets { get; set; } = null!;
+    
+    public virtual ICollection<FoundAnimalAlert> FoundAnimalAlerts { get; set; } = null!;
 }

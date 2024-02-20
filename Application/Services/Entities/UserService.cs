@@ -18,26 +18,25 @@ namespace Application.Services.Entities;
 public class UserService : IUserService
 {
 	private readonly IUserRepository _userRepository;
-	private readonly IGuidProvider _guidProvider;
 	private readonly IJwtTokenGenerator _jwtTokenGenerator;
 	private readonly IHttpContextAccessor _httpRequest;
 	private readonly IMessagingService _messagingService;
 	private readonly LinkGenerator _linkGenerator;
 	private readonly IIdConverterService _idConverterService;
 	private readonly IImageSubmissionService _imageSubmissionService;
+	private readonly IValueProvider _valueProvider;
 
 	public UserService(
 		IUserRepository userRepository,
-		IGuidProvider guidProvider,
 		IJwtTokenGenerator jwtTokenGenerator,
 		IHttpContextAccessor httpRequest,
 		IMessagingService messagingService,
 		LinkGenerator linkGenerator,
 		IIdConverterService idConverterService,
-		IImageSubmissionService imageSubmissionService)
+		IImageSubmissionService imageSubmissionService,
+		IValueProvider valueProvider)
 	{
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
 		_jwtTokenGenerator = jwtTokenGenerator ?? throw new ArgumentNullException(nameof(jwtTokenGenerator));
 		_httpRequest = httpRequest ?? throw new ArgumentNullException(nameof(httpRequest));
 		_messagingService = messagingService ?? throw new ArgumentNullException(nameof(messagingService));
@@ -45,6 +44,7 @@ public class UserService : IUserService
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
 		_imageSubmissionService =
 			imageSubmissionService ?? throw new ArgumentNullException(nameof(imageSubmissionService));
+		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
 	public async Task<UserDataResponse> GetUserByIdAsync(Guid userId)
@@ -61,7 +61,7 @@ public class UserService : IUserService
 
 	public async Task<UserResponse> RegisterAsync(CreateUserRequest createUserRequest)
 	{
-		Guid userId = _guidProvider.NewGuid();
+		Guid userId = _valueProvider.NewGuid();
 
 		string userImageUrl = await _imageSubmissionService.UploadUserImageAsync(userId, createUserRequest.Image);
 

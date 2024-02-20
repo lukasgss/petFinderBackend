@@ -20,8 +20,7 @@ public class MissingAlertCommentServiceTests
 	private readonly IMissingAlertCommentRepository _missingAlertCommentRepositoryMock;
 	private readonly IMissingAlertRepository _missingAlertRepositoryMock;
 	private readonly IUserRepository _userRepositoryMock;
-	private readonly IGuidProvider _guidProviderMock;
-	private readonly IDateTimeProvider _dateTimeProviderMock;
+	private readonly IValueProvider _valueProviderMock;
 	private readonly IMissingAlertCommentService _sut;
 
 	private const int Page = 1;
@@ -44,15 +43,13 @@ public class MissingAlertCommentServiceTests
 		_missingAlertCommentRepositoryMock = Substitute.For<IMissingAlertCommentRepository>();
 		_missingAlertRepositoryMock = Substitute.For<IMissingAlertRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
-		_guidProviderMock = Substitute.For<IGuidProvider>();
-		_dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
+		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new MissingAlertCommentService(
 			_missingAlertCommentRepositoryMock,
 			_missingAlertRepositoryMock,
 			_userRepositoryMock,
-			_guidProviderMock,
-			_dateTimeProviderMock);
+			_valueProviderMock);
 	}
 
 	[Fact]
@@ -119,8 +116,8 @@ public class MissingAlertCommentServiceTests
 	{
 		_missingAlertRepositoryMock.GetByIdAsync(CreateAlertCommentRequest.AlertId).Returns(MissingAlert);
 		_userRepositoryMock.GetUserByIdAsync(MissingAlertComment.UserId).Returns(User);
-		_guidProviderMock.NewGuid().Returns(MissingAlertComment.Id);
-		_dateTimeProviderMock.UtcNow().Returns(MissingAlertComment.Date);
+		_valueProviderMock.NewGuid().Returns(MissingAlertComment.Id);
+		_valueProviderMock.UtcNow().Returns(MissingAlertComment.Date);
 
 		var alertCommentResponse = await _sut.PostCommentAsync(
 			CreateAlertCommentRequest, MissingAlertComment.UserId, CreateAlertCommentRequest.AlertId);

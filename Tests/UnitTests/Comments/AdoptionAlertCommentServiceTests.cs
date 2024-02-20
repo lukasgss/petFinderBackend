@@ -20,8 +20,7 @@ public class AdoptionAlertCommentServiceTests
 	private readonly IAdoptionAlertCommentRepository _adoptionAlertCommentRepositoryMock;
 	private readonly IAdoptionAlertRepository _adoptionAlertRepositoryMock;
 	private readonly IUserRepository _userRepositoryMock;
-	private readonly IDateTimeProvider _dateTimeProviderMock;
-	private readonly IGuidProvider _guidProviderMock;
+	private readonly IValueProvider _valueProviderMock;
 	private readonly IAdoptionAlertCommentService _sut;
 
 	private const int Page = 1;
@@ -45,15 +44,13 @@ public class AdoptionAlertCommentServiceTests
 		_adoptionAlertCommentRepositoryMock = Substitute.For<IAdoptionAlertCommentRepository>();
 		_adoptionAlertRepositoryMock = Substitute.For<IAdoptionAlertRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
-		_dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
-		_guidProviderMock = Substitute.For<IGuidProvider>();
+		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new AdoptionAlertCommentService(
 			_adoptionAlertCommentRepositoryMock,
 			_adoptionAlertRepositoryMock,
 			_userRepositoryMock,
-			_dateTimeProviderMock,
-			_guidProviderMock);
+			_valueProviderMock);
 	}
 
 	[Fact]
@@ -118,10 +115,10 @@ public class AdoptionAlertCommentServiceTests
 	{
 		_adoptionAlertRepositoryMock.GetByIdAsync(CreateAlertCommentRequest.AlertId).Returns(AdoptionAlert);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
-		_guidProviderMock.NewGuid().Returns(AdoptionAlertComment.Id);
-		_dateTimeProviderMock.UtcNow().Returns(AdoptionAlertComment.Date);
+		_valueProviderMock.NewGuid().Returns(AdoptionAlertComment.Id);
+		_valueProviderMock.UtcNow().Returns(AdoptionAlertComment.Date);
 
-		var commentResponse =
+		AlertCommentResponse commentResponse =
 			await _sut.PostCommentAsync(CreateAlertCommentRequest, User.Id, CreateAlertCommentRequest.AlertId);
 
 		Assert.Equivalent(ExpectedAlertCommentResponse, commentResponse);

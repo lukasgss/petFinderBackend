@@ -17,23 +17,20 @@ public class MissingAlertCommentService : IMissingAlertCommentService
 	private readonly IMissingAlertCommentRepository _missingAlertCommentRepository;
 	private readonly IMissingAlertRepository _missingAlertRepository;
 	private readonly IUserRepository _userRepository;
-	private readonly IGuidProvider _guidProvider;
-	private readonly IDateTimeProvider _dateTimeProvider;
+	private readonly IValueProvider _valueProvider;
 
 	public MissingAlertCommentService(
 		IMissingAlertCommentRepository missingAlertCommentRepository,
 		IMissingAlertRepository missingAlertRepository,
 		IUserRepository userRepository,
-		IGuidProvider guidProvider,
-		IDateTimeProvider dateTimeProvider)
+		IValueProvider valueProvider)
 	{
 		_missingAlertCommentRepository =
 			missingAlertCommentRepository ?? throw new ArgumentNullException(nameof(missingAlertCommentRepository));
 		_missingAlertRepository =
 			missingAlertRepository ?? throw new ArgumentNullException(nameof(missingAlertRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
-		_dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
+		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
 	public async Task<AlertCommentResponse> GetCommentByIdAsync(Guid commentId)
@@ -74,13 +71,13 @@ public class MissingAlertCommentService : IMissingAlertCommentService
 
 		MissingAlertComment alertComment = new()
 		{
-			Id = _guidProvider.NewGuid(),
+			Id = _valueProvider.NewGuid(),
 			Content = alertRequest.Content,
 			User = commentOwner!,
 			UserId = commentOwner!.Id,
 			MissingAlert = commentedAlert,
 			MissingAlertId = commentedAlert.Id,
-			Date = _dateTimeProvider.UtcNow()
+			Date = _valueProvider.UtcNow()
 		};
 
 		_missingAlertCommentRepository.Add(alertComment);

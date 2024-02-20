@@ -51,8 +51,7 @@ public static class DependencyInjection
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 
-		services.AddSingleton<IGuidProvider, GuidProvider>();
-		services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+		services.AddSingleton<IValueProvider, ValueProvider>();
 
 		services.Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
 		services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();

@@ -10,35 +10,35 @@ namespace Application.Services.Authentication;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
-    private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly JwtConfig _jwtConfig;
+	private readonly IValueProvider _valueProvider;
+	private readonly JwtConfig _jwtConfig;
 
-    public JwtTokenGenerator(IDateTimeProvider dateTimeProvider, IOptions<JwtConfig> jwtConfig)
-    {
-        _dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
-        _jwtConfig = jwtConfig.Value ?? throw new ArgumentNullException(nameof(jwtConfig));
-    }
+	public JwtTokenGenerator(IValueProvider valueProvider, IOptions<JwtConfig> jwtConfig)
+	{
+		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_jwtConfig = jwtConfig.Value ?? throw new ArgumentNullException(nameof(jwtConfig));
+	}
 
-    public string GenerateToken(Guid userId, string fullName)
-    {
-        SigningCredentials signingCredentials = new(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.SecretKey)),
-            SecurityAlgorithms.HmacSha256);
+	public string GenerateToken(Guid userId, string fullName)
+	{
+		SigningCredentials signingCredentials = new(
+			new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.SecretKey)),
+			SecurityAlgorithms.HmacSha256);
 
-        Claim[] claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-            new Claim(JwtRegisteredClaimNames.Name, fullName)
-        };
+		Claim[] claims = new[]
+		{
+			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+			new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+			new Claim(JwtRegisteredClaimNames.Name, fullName)
+		};
 
-        JwtSecurityToken jwtSecurityToken = new(
-            issuer: _jwtConfig.Issuer,
-            audience: _jwtConfig.Audience,
-            claims: claims,
-            expires: _dateTimeProvider.Now().AddMinutes(_jwtConfig.ExpiryTimeInMin),
-            signingCredentials: signingCredentials);
+		JwtSecurityToken jwtSecurityToken = new(
+			issuer: _jwtConfig.Issuer,
+			audience: _jwtConfig.Audience,
+			claims: claims,
+			expires: _valueProvider.Now().AddMinutes(_jwtConfig.ExpiryTimeInMin),
+			signingCredentials: signingCredentials);
 
-        return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-    }
+		return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+	}
 }

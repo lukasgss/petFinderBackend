@@ -18,22 +18,19 @@ public class AdoptionAlertService : IAdoptionAlertService
 	private readonly IAdoptionAlertRepository _adoptionAlertRepository;
 	private readonly IPetRepository _petRepository;
 	private readonly IUserRepository _userRepository;
-	private readonly IDateTimeProvider _dateTimeProvider;
-	private readonly IGuidProvider _guidProvider;
+	private readonly IValueProvider _valueProvider;
 
 	public AdoptionAlertService(
 		IAdoptionAlertRepository adoptionAlertRepository,
 		IPetRepository petRepository,
 		IUserRepository userRepository,
-		IDateTimeProvider dateTimeProvider,
-		IGuidProvider guidProvider)
+		IValueProvider valueProvider)
 	{
 		_adoptionAlertRepository =
 			adoptionAlertRepository ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
 		_petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-		_dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
-		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
+		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
 	public async Task<AdoptionAlertResponse> GetByIdAsync(Guid alertId)
@@ -67,12 +64,12 @@ public class AdoptionAlertService : IAdoptionAlertService
 
 		AdoptionAlert adoptionAlertToCreate = new()
 		{
-			Id = _guidProvider.NewGuid(),
+			Id = _valueProvider.NewGuid(),
 			OnlyForScreenedProperties = createAlertRequest.OnlyForScreenedProperties,
 			LocationLatitude = createAlertRequest.LocationLatitude,
 			LocationLongitude = createAlertRequest.LocationLongitude,
 			Description = createAlertRequest.Description,
-			RegistrationDate = _dateTimeProvider.UtcNow(),
+			RegistrationDate = _valueProvider.UtcNow(),
 			AdoptionDate = null,
 			Pet = pet,
 			User = alertOwner,
@@ -129,7 +126,7 @@ public class AdoptionAlertService : IAdoptionAlertService
 
 		if (adoptionAlert.AdoptionDate is null)
 		{
-			adoptionAlert.AdoptionDate = _dateTimeProvider.DateOnlyNow();
+			adoptionAlert.AdoptionDate = _valueProvider.DateOnlyNow();
 		}
 		else
 		{

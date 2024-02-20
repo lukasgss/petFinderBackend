@@ -23,10 +23,10 @@ namespace Tests.UnitTests;
 public class UserServiceTests
 {
 	private readonly IUserRepository _userRepositoryMock;
-	private readonly IGuidProvider _guidProviderMock;
 	private readonly IJwtTokenGenerator _jwtTokenGeneratorMock;
 	private readonly IIdConverterService _idConverterServiceMock;
 	private readonly IImageSubmissionService _imageSubmissionServiceMock;
+	private readonly IValueProvider _valueProviderMock;
 	private readonly IUserService _sut;
 
 	private static readonly User User = UserGenerator.GenerateUser();
@@ -38,23 +38,23 @@ public class UserServiceTests
 	public UserServiceTests()
 	{
 		_userRepositoryMock = Substitute.For<IUserRepository>();
-		_guidProviderMock = Substitute.For<IGuidProvider>();
 		_jwtTokenGeneratorMock = Substitute.For<IJwtTokenGenerator>();
 		IHttpContextAccessor httpRequestMock = Substitute.For<IHttpContextAccessor>();
 		IMessagingService messagingServiceMock = Substitute.For<IMessagingService>();
 		LinkGenerator linkGeneratorMock = Substitute.For<LinkGenerator>();
 		_idConverterServiceMock = Substitute.For<IIdConverterService>();
 		_imageSubmissionServiceMock = Substitute.For<IImageSubmissionService>();
+		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new UserService(
 			_userRepositoryMock,
-			_guidProviderMock,
 			_jwtTokenGeneratorMock,
 			httpRequestMock,
 			messagingServiceMock,
 			linkGeneratorMock,
 			_idConverterServiceMock,
-			_imageSubmissionServiceMock);
+			_imageSubmissionServiceMock,
+			_valueProviderMock);
 	}
 
 	[Fact]
@@ -81,7 +81,7 @@ public class UserServiceTests
 	[Fact]
 	public async Task Register_Attempt_With_Already_Existing_Email_Throws_ConflictException()
 	{
-		_guidProviderMock.NewGuid().Returns(User.Id);
+		_valueProviderMock.NewGuid().Returns(User.Id);
 		_userRepositoryMock.GetUserByEmailAsync(CreateUserRequest.Email).Returns(User);
 		_imageSubmissionServiceMock.UploadUserImageAsync(User.Id, CreateUserRequest.Image).Returns(User.Image);
 
@@ -94,7 +94,7 @@ public class UserServiceTests
 	[Fact]
 	public async Task Register_Attempt_With_Any_Registration_Error_Throws_InternalServerErrorException()
 	{
-		_guidProviderMock.NewGuid().Returns(Constants.UserData.Id);
+		_valueProviderMock.NewGuid().Returns(Constants.UserData.Id);
 		_imageSubmissionServiceMock.UploadUserImageAsync(User.Id, CreateUserRequest.Image).Returns(User.Image);
 		_userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
 		IdentityResult expectedIdentityResult = new FakeIdentityResult(succeeded: false);
@@ -111,7 +111,7 @@ public class UserServiceTests
 	public async Task Registration_Returns_User_Response()
 	{
 		// Arrange
-		_guidProviderMock.NewGuid().Returns(Constants.UserData.Id);
+		_valueProviderMock.NewGuid().Returns(Constants.UserData.Id);
 		_imageSubmissionServiceMock.UploadUserImageAsync(User.Id, CreateUserRequest.Image).Returns(User.Image);
 		_userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
 

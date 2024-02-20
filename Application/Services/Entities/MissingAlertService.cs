@@ -17,21 +17,18 @@ public class MissingAlertService : IMissingAlertService
 	private readonly IMissingAlertRepository _missingAlertRepository;
 	private readonly IPetRepository _petRepository;
 	private readonly IUserRepository _userRepository;
-	private readonly IGuidProvider _guidProvider;
-	private readonly IDateTimeProvider _dateTimeProvider;
+	private readonly IValueProvider _valueProvider;
 
 	public MissingAlertService(IMissingAlertRepository missingAlertRepository,
 		IPetRepository petRepository,
 		IUserRepository userRepository,
-		IGuidProvider guidProvider,
-		IDateTimeProvider dateTimeProvider)
+		IValueProvider valueProvider)
 	{
 		_missingAlertRepository =
 			missingAlertRepository ?? throw new ArgumentNullException(nameof(missingAlertRepository));
 		_petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
-		_dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
+		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
 	public async Task<MissingAlertResponse> GetByIdAsync(Guid missingAlertId)
@@ -65,8 +62,8 @@ public class MissingAlertService : IMissingAlertService
 
 		MissingAlert missingAlertToCreate = new()
 		{
-			Id = _guidProvider.NewGuid(),
-			RegistrationDate = _dateTimeProvider.UtcNow(),
+			Id = _valueProvider.NewGuid(),
+			RegistrationDate = _valueProvider.UtcNow(),
 			LastSeenLocationLatitude = createMissingAlertRequest.LastSeenLocationLatitude,
 			LastSeenLocationLongitude = createMissingAlertRequest.LastSeenLocationLongitude,
 			RecoveryDate = null,
@@ -130,7 +127,7 @@ public class MissingAlertService : IMissingAlertService
 
 		if (missingAlert.RecoveryDate is null)
 		{
-			missingAlert.RecoveryDate = _dateTimeProvider.DateOnlyNow();
+			missingAlert.RecoveryDate = _valueProvider.DateOnlyNow();
 		}
 		else
 		{

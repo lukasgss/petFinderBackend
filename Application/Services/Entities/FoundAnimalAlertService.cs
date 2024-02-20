@@ -20,9 +20,8 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 	private readonly IBreedRepository _breedRepository;
 	private readonly IUserRepository _userRepository;
 	private readonly IColorRepository _colorRepository;
-	private readonly IGuidProvider _guidProvider;
-	private readonly IDateTimeProvider _dateTimeProvider;
 	private readonly IImageSubmissionService _imageSubmissionService;
+	private readonly IValueProvider _valueProvider;
 
 	public FoundAnimalAlertService(
 		IFoundAnimalAlertRepository foundAnimalAlertRepository,
@@ -30,20 +29,18 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		IBreedRepository breedRepository,
 		IUserRepository userRepository,
 		IColorRepository colorRepository,
-		IGuidProvider guidProvider,
-		IDateTimeProvider dateTimeProvider,
-		IImageSubmissionService imageSubmissionService)
+		IImageSubmissionService imageSubmissionService,
+		IValueProvider valueProvider)
 	{
 		_foundAnimalAlertRepository = foundAnimalAlertRepository ??
 		                              throw new ArgumentNullException(nameof(foundAnimalAlertRepository));
-		_speciesRepository = speciesRepository ?? throw new ArgumentNullException(nameof(speciesRepository));
-		_breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
-		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
-		_dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
 		_imageSubmissionService = imageSubmissionService ??
 		                          throw new ArgumentNullException(nameof(imageSubmissionService));
 		_colorRepository = colorRepository ?? throw new ArgumentNullException(nameof(colorRepository));
+		_speciesRepository = speciesRepository ?? throw new ArgumentNullException(nameof(speciesRepository));
+		_breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
+		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
 	public async Task<FoundAnimalAlertResponse> GetByIdAsync(Guid alertId)
@@ -69,7 +66,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		List<Color> colors = await ValidateAndAssignColorsAsync(createAlertRequest.ColorIds);
 		Breed? breed = await ValidateAndQueryBreed(createAlertRequest.BreedId);
 		User? userCreating = await _userRepository.GetUserByIdAsync(userId);
-		Guid foundAlertId = _guidProvider.NewGuid();
+		Guid foundAlertId = _valueProvider.NewGuid();
 
 		string uploadedImageUrl =
 			await _imageSubmissionService.UploadFoundAlertImageAsync(foundAlertId, createAlertRequest.Image);
@@ -81,7 +78,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 			Description = createAlertRequest.Description,
 			FoundLocationLatitude = createAlertRequest.FoundLocationLatitude,
 			FoundLocationLongitude = createAlertRequest.FoundLocationLongitude,
-			RegistrationDate = _dateTimeProvider.UtcNow(),
+			RegistrationDate = _valueProvider.UtcNow(),
 			HasBeenRecovered = false,
 			Image = uploadedImageUrl,
 			Gender = createAlertRequest.Gender,

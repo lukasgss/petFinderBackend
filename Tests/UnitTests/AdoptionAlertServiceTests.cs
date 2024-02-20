@@ -20,8 +20,7 @@ public class AdoptionAlertServiceTests
 	private readonly IAdoptionAlertRepository _adoptionAlertRepositoryMock;
 	private readonly IPetRepository _petRepositoryMock;
 	private readonly IUserRepository _userRepositoryMock;
-	private readonly IDateTimeProvider _dateTimeProviderMock;
-	private readonly IGuidProvider _guidProviderMock;
+	private readonly IValueProvider _valueProviderMock;
 	private readonly IAdoptionAlertService _sut;
 
 	private const int Page = 1;
@@ -54,15 +53,13 @@ public class AdoptionAlertServiceTests
 		_adoptionAlertRepositoryMock = Substitute.For<IAdoptionAlertRepository>();
 		_petRepositoryMock = Substitute.For<IPetRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
-		_dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
-		_guidProviderMock = Substitute.For<IGuidProvider>();
+		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new AdoptionAlertService(
 			_adoptionAlertRepositoryMock,
 			_petRepositoryMock,
 			_userRepositoryMock,
-			_dateTimeProviderMock,
-			_guidProviderMock);
+			_valueProviderMock);
 	}
 
 	[Fact]
@@ -145,8 +142,8 @@ public class AdoptionAlertServiceTests
 	{
 		_petRepositoryMock.GetPetByIdAsync(Constants.PetData.Id).Returns(Pet);
 		_userRepositoryMock.GetUserByIdAsync(Constants.UserData.Id).Returns(User);
-		_guidProviderMock.NewGuid().Returns(Constants.AdoptionAlertData.Id);
-		_dateTimeProviderMock.UtcNow().Returns(Constants.AdoptionAlertData.RegistrationDate);
+		_valueProviderMock.NewGuid().Returns(Constants.AdoptionAlertData.Id);
+		_valueProviderMock.UtcNow().Returns(Constants.AdoptionAlertData.RegistrationDate);
 
 		AdoptionAlertResponse adoptionAlertResponse = await _sut.CreateAsync(CreateAlertRequest, Constants.UserData.Id);
 
@@ -261,7 +258,7 @@ public class AdoptionAlertServiceTests
 	public async Task Toggle_Adoption_Alert_Not_Adopted_Before_Returns_Adopted_Response()
 	{
 		_adoptionAlertRepositoryMock.GetByIdAsync(NonAdoptedAdoptionAlert.Id).Returns(NonAdoptedAdoptionAlert);
-		_dateTimeProviderMock.DateOnlyNow().Returns(Constants.AdoptionAlertData.AdoptedAdoptionDate);
+		_valueProviderMock.DateOnlyNow().Returns(Constants.AdoptionAlertData.AdoptedAdoptionDate);
 
 		AdoptionAlertResponse adoptionAlertResponse =
 			await _sut.ToggleAdoptionAsync(NonAdoptedAdoptionAlert.Id, User.Id);

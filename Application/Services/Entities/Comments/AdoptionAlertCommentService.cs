@@ -17,23 +17,20 @@ public class AdoptionAlertCommentService : IAdoptionAlertCommentService
 	private readonly IAdoptionAlertCommentRepository _adoptionAlertCommentRepository;
 	private readonly IAdoptionAlertRepository _adoptionAlertRepository;
 	private readonly IUserRepository _userRepository;
-	private readonly IDateTimeProvider _dateTimeProvider;
-	private readonly IGuidProvider _guidProvider;
+	private readonly IValueProvider _valueProvider;
 
 	public AdoptionAlertCommentService(
 		IAdoptionAlertCommentRepository adoptionAlertCommentRepository,
 		IAdoptionAlertRepository adoptionAlertRepository,
 		IUserRepository userRepository,
-		IDateTimeProvider dateTimeProvider,
-		IGuidProvider guidProvider)
+		IValueProvider valueProvider)
 	{
 		_adoptionAlertCommentRepository = adoptionAlertCommentRepository ??
 		                                  throw new ArgumentNullException(nameof(adoptionAlertCommentRepository));
 		_adoptionAlertRepository = adoptionAlertRepository
 		                           ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-		_dateTimeProvider = dateTimeProvider ?? throw new ArgumentNullException(nameof(dateTimeProvider));
-		_guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
+		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
 	public async Task<AlertCommentResponse> GetCommentByIdAsync(Guid commentId)
@@ -74,13 +71,13 @@ public class AdoptionAlertCommentService : IAdoptionAlertCommentService
 
 		AdoptionAlertComment alertComment = new()
 		{
-			Id = _guidProvider.NewGuid(),
+			Id = _valueProvider.NewGuid(),
 			Content = alertRequest.Content,
 			User = commentOwner!,
 			UserId = commentOwner!.Id,
 			AdoptionAlert = commentedAlert,
 			AdoptionAlertId = commentedAlert.Id,
-			Date = _dateTimeProvider.UtcNow()
+			Date = _valueProvider.UtcNow()
 		};
 
 		_adoptionAlertCommentRepository.Add(alertComment);

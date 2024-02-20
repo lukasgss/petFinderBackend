@@ -21,8 +21,7 @@ public class MissingAlertServiceTests
 	private readonly IMissingAlertRepository _missingAlertRepositoryMock;
 	private readonly IPetRepository _petRepositoryMock;
 	private readonly IUserRepository _userRepositoryMock;
-	private readonly IGuidProvider _guidProviderMock;
-	private readonly IDateTimeProvider _dateTimeProviderMock;
+	private readonly IValueProvider _valueProviderMock;
 	private readonly IMissingAlertService _sut;
 
 	private const int Page = 1;
@@ -49,15 +48,13 @@ public class MissingAlertServiceTests
 		_missingAlertRepositoryMock = Substitute.For<IMissingAlertRepository>();
 		_petRepositoryMock = Substitute.For<IPetRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
-		_guidProviderMock = Substitute.For<IGuidProvider>();
-		_dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
+		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new MissingAlertService(
 			_missingAlertRepositoryMock,
 			_petRepositoryMock,
 			_userRepositoryMock,
-			_guidProviderMock,
-			_dateTimeProviderMock);
+			_valueProviderMock);
 	}
 
 	[Fact]
@@ -134,8 +131,8 @@ public class MissingAlertServiceTests
 	{
 		_petRepositoryMock.GetPetByIdAsync(CreateMissingAlertRequest.PetId).Returns(Pet);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
-		_dateTimeProviderMock.UtcNow().Returns(ExpectedMissingAlert.RegistrationDate);
-		_guidProviderMock.NewGuid().Returns(ExpectedMissingAlert.Id);
+		_valueProviderMock.UtcNow().Returns(ExpectedMissingAlert.RegistrationDate);
+		_valueProviderMock.NewGuid().Returns(ExpectedMissingAlert.Id);
 
 		MissingAlertResponse missingAlertResponse =
 			await _sut.CreateAsync(CreateMissingAlertRequest, userId: User.Id);
@@ -279,7 +276,7 @@ public class MissingAlertServiceTests
 	{
 		_missingAlertRepositoryMock.GetByIdAsync(MissingAlert.Id).Returns(MissingAlert);
 		MissingAlertResponse expectedMissingAlert = MissingAlertGenerator.GenerateRecoveredMissingAlertResponse();
-		_dateTimeProviderMock.DateOnlyNow().Returns(Constants.MissingAlertData.RecoveryDate);
+		_valueProviderMock.DateOnlyNow().Returns(Constants.MissingAlertData.RecoveryDate);
 
 		MissingAlertResponse missingAlertResponse =
 			await _sut.ToggleFoundStatusAsync(MissingAlert.Id, MissingAlert.User.Id);

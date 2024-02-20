@@ -15,236 +15,244 @@ namespace Tests.UnitTests;
 
 public class UserMessageServiceTests
 {
-    private readonly IUserMessageRepository _userMessageRepositoryMock;
-    private readonly IUserRepository _userRepositoryMock;
-    private readonly IDateTimeProvider _dateTimeProviderMock;
-    private readonly IUserMessageService _sut;
+	private readonly IUserMessageRepository _userMessageRepositoryMock;
+	private readonly IUserRepository _userRepositoryMock;
+	private readonly IValueProvider _valueProviderMock;
+	private readonly IUserMessageService _sut;
 
-    private static readonly UserMessage UserMessage = UserMessageGenerator.GenerateUserMessage();
-    private static readonly UserMessage EditedUserMessage = UserMessageGenerator.GenerateEditedUserMessage();
-    private static readonly User User = UserGenerator.GenerateUser();
+	private static readonly UserMessage UserMessage = UserMessageGenerator.GenerateUserMessage();
+	private static readonly UserMessage EditedUserMessage = UserMessageGenerator.GenerateEditedUserMessage();
+	private static readonly User User = UserGenerator.GenerateUser();
 
-    private static readonly SendUserMessageRequest UserMessageRequest =
-        UserMessageGenerator.GenerateSendUserMessageRequest();
-    private static readonly EditUserMessageRequest EditUserMessageRequest =
-        UserMessageGenerator.GenerateEditUserMessageRequest();
-    
-    private static readonly UserMessageResponse UserMessageResponse = UserMessageGenerator.GenerateUserMessageResponse();
-    private static readonly UserMessageResponse EditedUserMessageResponse = UserMessageGenerator.GenerateEditedUserMessageResponse();
+	private static readonly SendUserMessageRequest UserMessageRequest =
+		UserMessageGenerator.GenerateSendUserMessageRequest();
+
+	private static readonly EditUserMessageRequest EditUserMessageRequest =
+		UserMessageGenerator.GenerateEditUserMessageRequest();
+
+	private static readonly UserMessageResponse
+		UserMessageResponse = UserMessageGenerator.GenerateUserMessageResponse();
+
+	private static readonly UserMessageResponse EditedUserMessageResponse =
+		UserMessageGenerator.GenerateEditedUserMessageResponse();
 
 
-    public UserMessageServiceTests()
-    {
-        _userMessageRepositoryMock = Substitute.For<IUserMessageRepository>();
-        _userRepositoryMock = Substitute.For<IUserRepository>();
-        _dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
+	public UserMessageServiceTests()
+	{
+		_userMessageRepositoryMock = Substitute.For<IUserMessageRepository>();
+		_userRepositoryMock = Substitute.For<IUserRepository>();
+		_valueProviderMock = Substitute.For<IValueProvider>();
 
-        _sut = new UserMessageService(_userMessageRepositoryMock, _userRepositoryMock, _dateTimeProviderMock);
-    }
+		_sut = new UserMessageService(_userMessageRepositoryMock, _userRepositoryMock, _valueProviderMock);
+	}
 
-    [Fact]
-    public async Task Get_Message_By_Non_Existent_Id_Throws_NotFoundException()
-    {
-        _userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, UserMessage.ReceiverId).ReturnsNull();
+	[Fact]
+	public async Task Get_Message_By_Non_Existent_Id_Throws_NotFoundException()
+	{
+		_userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, UserMessage.ReceiverId).ReturnsNull();
 
-        async Task Result() => await _sut.GetByIdAsync(UserMessage.Id, UserMessage.ReceiverId);
+		async Task Result() => await _sut.GetByIdAsync(UserMessage.Id, UserMessage.ReceiverId);
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal(
-            "Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.",
-            exception.Message);
-    }
-    
-    [Fact]
-    public async Task Get_Message_Without_Being_Sender_Or_Receiver_Throws_NotFoundException()
-    {
-        Guid userIdNotSenderOrReceiver = Guid.NewGuid();
-        _userMessageRepositoryMock
-            .GetByIdAsync(Constants.UserMessageData.Id, userIdNotSenderOrReceiver).ReturnsNull();
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal(
+			"Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.",
+			exception.Message);
+	}
 
-        async Task Result() =>
-            await _sut.GetByIdAsync(Constants.UserMessageData.Id, userIdNotSenderOrReceiver);
+	[Fact]
+	public async Task Get_Message_Without_Being_Sender_Or_Receiver_Throws_NotFoundException()
+	{
+		Guid userIdNotSenderOrReceiver = Guid.NewGuid();
+		_userMessageRepositoryMock
+			.GetByIdAsync(Constants.UserMessageData.Id, userIdNotSenderOrReceiver).ReturnsNull();
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal(
-            "Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.",
-            exception.Message);
-    }
+		async Task Result() =>
+			await _sut.GetByIdAsync(Constants.UserMessageData.Id, userIdNotSenderOrReceiver);
 
-    [Fact]
-    public async Task Get_Message_By_Id_Returns_UserMessageResponse()
-    {
-        _userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, UserMessage.ReceiverId).Returns(UserMessage);
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal(
+			"Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.",
+			exception.Message);
+	}
 
-        UserMessageResponse userMessageResponse = await _sut.GetByIdAsync(UserMessage.Id, UserMessage.ReceiverId);
-        
-        Assert.Equivalent(UserMessageResponse, userMessageResponse);
-    }
+	[Fact]
+	public async Task Get_Message_By_Id_Returns_UserMessageResponse()
+	{
+		_userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, UserMessage.ReceiverId).Returns(UserMessage);
 
-    [Fact]
-    public async Task Get_Messages_From_Sender_Returns_Messages()
-    {
-        PagedList<UserMessage> pagedUserMessages = PagedListGenerator.GeneratePagedUserMessages();
-        _userMessageRepositoryMock.GetAllFromUserAsync(UserMessage.SenderId, UserMessage.ReceiverId, 1, 50).Returns(pagedUserMessages);
-        var expectedUserMessageResponse = PaginatedEntityGenerator.GeneratePaginatedUserMessageResponse();
+		UserMessageResponse userMessageResponse = await _sut.GetByIdAsync(UserMessage.Id, UserMessage.ReceiverId);
 
-        var userMessageResponse = 
-            await _sut.GetMessagesAsync(UserMessage.SenderId, UserMessage.ReceiverId, UserMessage.ReceiverId, 1, 50);
-        
-        Assert.Equivalent(expectedUserMessageResponse, userMessageResponse);
-    }
+		Assert.Equivalent(UserMessageResponse, userMessageResponse);
+	}
 
-    [Fact]
-    public async Task Send_Message_To_Non_Existent_Receiver_Throws_NotFoundException()
-    {
-        _userRepositoryMock.GetUserByIdAsync(Constants.UserMessageData.ReceiverId).ReturnsNull();
+	[Fact]
+	public async Task Get_Messages_From_Sender_Returns_Messages()
+	{
+		PagedList<UserMessage> pagedUserMessages = PagedListGenerator.GeneratePagedUserMessages();
+		_userMessageRepositoryMock.GetAllFromUserAsync(UserMessage.SenderId, UserMessage.ReceiverId, 1, 50)
+			.Returns(pagedUserMessages);
+		var expectedUserMessageResponse = PaginatedEntityGenerator.GeneratePaginatedUserMessageResponse();
 
-        async Task Result() => await _sut.SendAsync(UserMessageRequest, Constants.UserMessageData.SenderId);
+		var userMessageResponse =
+			await _sut.GetMessagesAsync(UserMessage.SenderId, UserMessage.ReceiverId, UserMessage.ReceiverId, 1, 50);
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal("Usuário destinatário não foi encontrado.", exception.Message);
-    }
+		Assert.Equivalent(expectedUserMessageResponse, userMessageResponse);
+	}
 
-    [Fact]
-    public async Task Send_Message_As_Non_Existent_Sender_Throws_NotFoundException()
-    {
-        _userRepositoryMock.GetUserByIdAsync(UserMessage.ReceiverId).Returns(User);
-        _userRepositoryMock.GetUserByIdAsync(UserMessage.SenderId).ReturnsNull();
+	[Fact]
+	public async Task Send_Message_To_Non_Existent_Receiver_Throws_NotFoundException()
+	{
+		_userRepositoryMock.GetUserByIdAsync(Constants.UserMessageData.ReceiverId).ReturnsNull();
 
-        async Task Result() => await _sut.SendAsync(UserMessageRequest, UserMessage.SenderId);
+		async Task Result() => await _sut.SendAsync(UserMessageRequest, Constants.UserMessageData.SenderId);
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal("Usuário remetente não foi encontrado.", exception.Message);
-    }
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Usuário destinatário não foi encontrado.", exception.Message);
+	}
 
-    [Fact]
-    public async Task Send_message_Returns_Sent_Message()
-    {
-        _userRepositoryMock.GetUserByIdAsync(UserMessage.ReceiverId).Returns(UserMessage.Receiver);
-        _userRepositoryMock.GetUserByIdAsync(UserMessage.SenderId).Returns(UserMessage.Sender);
-        _dateTimeProviderMock.UtcNow().Returns(Constants.UserMessageData.TimeStamp);
+	[Fact]
+	public async Task Send_Message_As_Non_Existent_Sender_Throws_NotFoundException()
+	{
+		_userRepositoryMock.GetUserByIdAsync(UserMessage.ReceiverId).Returns(User);
+		_userRepositoryMock.GetUserByIdAsync(UserMessage.SenderId).ReturnsNull();
 
-        var userMessageResponse =
-            await _sut.SendAsync(UserMessageRequest, Constants.UserMessageData.SenderId);
-        userMessageResponse.Id = Constants.UserMessageData.Id;
-        
-        Assert.Equivalent(UserMessageResponse, userMessageResponse);
-    }
-    
-    [Fact]
-    public async Task
-        Edit_Message_With_Route_Different_Than_Specified_On_Request_Throws_BadRequestException()
-    {
-        const long differentRouteId = 999;
+		async Task Result() => await _sut.SendAsync(UserMessageRequest, UserMessage.SenderId);
 
-        async Task Result() => await _sut.EditAsync(
-            EditUserMessageRequest.Id, EditUserMessageRequest, User.Id, differentRouteId);
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Usuário remetente não foi encontrado.", exception.Message);
+	}
 
-        var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
-        Assert.Equal("Id da rota não coincide com o id especificado.", exception.Message);
-    }
+	[Fact]
+	public async Task Send_message_Returns_Sent_Message()
+	{
+		_userRepositoryMock.GetUserByIdAsync(UserMessage.ReceiverId).Returns(UserMessage.Receiver);
+		_userRepositoryMock.GetUserByIdAsync(UserMessage.SenderId).Returns(UserMessage.Sender);
+		_valueProviderMock.UtcNow().Returns(Constants.UserMessageData.TimeStamp);
 
-    [Fact]
-    public async Task Edit_Non_Existent_Message_Throws_NotFoundException()
-    {
-        _userMessageRepositoryMock.GetByIdAsync(EditUserMessageRequest.Id, Constants.UserData.Id)
-            .ReturnsNull();
+		var userMessageResponse =
+			await _sut.SendAsync(UserMessageRequest, Constants.UserMessageData.SenderId);
+		userMessageResponse.Id = Constants.UserMessageData.Id;
 
-        async Task Result() => await _sut.EditAsync(
-            EditUserMessageRequest.Id, EditUserMessageRequest, User.Id, EditUserMessageRequest.Id);
+		Assert.Equivalent(UserMessageResponse, userMessageResponse);
+	}
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal("Mensagem com o id especificado não existe ou você não tem permissão para editá-la.", exception.Message);
-    }
+	[Fact]
+	public async Task
+		Edit_Message_With_Route_Different_Than_Specified_On_Request_Throws_BadRequestException()
+	{
+		const long differentRouteId = 999;
 
-    [Fact]
-    public async Task Edit_Message_Without_Being_Its_Sender_Throws_NotFoundException()
-    {
-        Guid differentUserId = Guid.NewGuid();
-        _userMessageRepositoryMock
-            .GetByIdAsync(EditUserMessageRequest.Id, User.Id)
-            .Returns(UserMessage);
+		async Task Result() => await _sut.EditAsync(
+			EditUserMessageRequest.Id, EditUserMessageRequest, User.Id, differentRouteId);
 
-        async Task Result() => await _sut.EditAsync(
-            EditUserMessageRequest.Id, EditUserMessageRequest, differentUserId, EditUserMessageRequest.Id);
+		var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+		Assert.Equal("Id da rota não coincide com o id especificado.", exception.Message);
+	}
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal("Mensagem com o id especificado não existe ou você não tem permissão para editá-la.", exception.Message);
-    }
+	[Fact]
+	public async Task Edit_Non_Existent_Message_Throws_NotFoundException()
+	{
+		_userMessageRepositoryMock.GetByIdAsync(EditUserMessageRequest.Id, Constants.UserData.Id)
+			.ReturnsNull();
 
-    [Fact]
-    public async Task Edit_Message_After_Maximum_Edit_Time_Has_Passed_Throws_ForbiddenException()
-    {
-        const int maximumTimeToEditMessageInMinutes = 7;
-        UserMessage userMessage = UserMessageGenerator.GenerateUserMessage();
-        DateTime currentDateTime = DateTime.Now;
-        userMessage.TimeStampUtc = currentDateTime;
-        _userMessageRepositoryMock.GetByIdAsync(EditUserMessageRequest.Id, userMessage.Sender.Id).Returns(userMessage);
-        _dateTimeProviderMock.UtcNow().Returns(currentDateTime.AddMinutes(maximumTimeToEditMessageInMinutes + 1));
+		async Task Result() => await _sut.EditAsync(
+			EditUserMessageRequest.Id, EditUserMessageRequest, User.Id, EditUserMessageRequest.Id);
 
-        async Task Result() => await _sut.EditAsync(
-            UserMessage.Id, EditUserMessageRequest, userMessage.Sender.Id, EditUserMessageRequest.Id);
-        
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
-        Assert.Equal("Não é possível editar a mensagem, o tempo limite foi expirado.",
-            exception.Message);
-    }
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Mensagem com o id especificado não existe ou você não tem permissão para editá-la.",
+			exception.Message);
+	}
 
-    [Fact]
-    public async Task Edit_Message_Returns_Edited_Message()
-    {
-        _userMessageRepositoryMock.GetByIdAsync(EditUserMessageRequest.Id, UserMessage.Sender.Id).Returns(EditedUserMessage);
-        _dateTimeProviderMock.UtcNow().Returns(UserMessage.TimeStampUtc);
+	[Fact]
+	public async Task Edit_Message_Without_Being_Its_Sender_Throws_NotFoundException()
+	{
+		Guid differentUserId = Guid.NewGuid();
+		_userMessageRepositoryMock
+			.GetByIdAsync(EditUserMessageRequest.Id, User.Id)
+			.Returns(UserMessage);
 
-        var userMessageResponse = await _sut.EditAsync(
-            EditUserMessageRequest.Id, EditUserMessageRequest, UserMessage.Sender.Id, EditUserMessageRequest.Id);
-        
-        Assert.Equivalent(EditedUserMessageResponse, userMessageResponse);
-    }
+		async Task Result() => await _sut.EditAsync(
+			EditUserMessageRequest.Id, EditUserMessageRequest, differentUserId, EditUserMessageRequest.Id);
 
-    [Fact]
-    public async Task Delete_Non_Existent_Message_Throws_NotFoundException()
-    {
-        _userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, User.Id).ReturnsNull();
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Mensagem com o id especificado não existe ou você não tem permissão para editá-la.",
+			exception.Message);
+	}
 
-        async Task Result() => await _sut.DeleteAsync(UserMessage.Id, User.Id);
+	[Fact]
+	public async Task Edit_Message_After_Maximum_Edit_Time_Has_Passed_Throws_ForbiddenException()
+	{
+		const int maximumTimeToEditMessageInMinutes = 7;
+		UserMessage userMessage = UserMessageGenerator.GenerateUserMessage();
+		DateTime currentDateTime = DateTime.Now;
+		userMessage.TimeStampUtc = currentDateTime;
+		_userMessageRepositoryMock.GetByIdAsync(EditUserMessageRequest.Id, userMessage.Sender.Id).Returns(userMessage);
+		_valueProviderMock.UtcNow().Returns(currentDateTime.AddMinutes(maximumTimeToEditMessageInMinutes + 1));
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal(
-            "Mensagem com o id especificado não existe ou você não tem permissão para excluí-la.",
-            exception.Message);
-    }
+		async Task Result() => await _sut.EditAsync(
+			UserMessage.Id, EditUserMessageRequest, userMessage.Sender.Id, EditUserMessageRequest.Id);
 
-    [Fact]
-    public async Task Delete_Message_Without_Being_Sender_Throws_NotFoundException()
-    {
-        Guid differentUSerId = Guid.NewGuid();
-        _userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, User.Id).ReturnsNull();
+		var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
+		Assert.Equal("Não é possível editar a mensagem, o tempo limite foi expirado.",
+			exception.Message);
+	}
 
-        async Task Result() => await _sut.DeleteAsync(UserMessage.Id, differentUSerId);
+	[Fact]
+	public async Task Edit_Message_Returns_Edited_Message()
+	{
+		_userMessageRepositoryMock.GetByIdAsync(EditUserMessageRequest.Id, UserMessage.Sender.Id)
+			.Returns(EditedUserMessage);
+		_valueProviderMock.UtcNow().Returns(UserMessage.TimeStampUtc);
 
-        var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-        Assert.Equal(
-            "Mensagem com o id especificado não existe ou você não tem permissão para excluí-la.",
-            exception.Message);
-    }
+		var userMessageResponse = await _sut.EditAsync(
+			EditUserMessageRequest.Id, EditUserMessageRequest, UserMessage.Sender.Id, EditUserMessageRequest.Id);
 
-    [Fact]
-    public async Task
-        Delete_Message_After_Maximum_Delete_Time_Has_Passed_Throws_ForbiddenException()
-    {
-        const int maximumTimeToEditMessageInMinutes = 5;
-        UserMessage userMessage = UserMessageGenerator.GenerateUserMessage();
-        DateTime currentDateTime = DateTime.Now;
-        userMessage.TimeStampUtc = currentDateTime;
-        _userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, userMessage.Sender.Id).Returns(userMessage);
-        _dateTimeProviderMock.UtcNow()
-            .Returns(currentDateTime.AddMinutes(maximumTimeToEditMessageInMinutes + 1));
+		Assert.Equivalent(EditedUserMessageResponse, userMessageResponse);
+	}
 
-        async Task Result() => await _sut.DeleteAsync(userMessage.Id, userMessage.Sender.Id);
+	[Fact]
+	public async Task Delete_Non_Existent_Message_Throws_NotFoundException()
+	{
+		_userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, User.Id).ReturnsNull();
 
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
-        Assert.Equal("Não é possível excluir a mensagem, o tempo limite foi excedido.",
-            exception.Message);
-    }
+		async Task Result() => await _sut.DeleteAsync(UserMessage.Id, User.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal(
+			"Mensagem com o id especificado não existe ou você não tem permissão para excluí-la.",
+			exception.Message);
+	}
+
+	[Fact]
+	public async Task Delete_Message_Without_Being_Sender_Throws_NotFoundException()
+	{
+		Guid differentUSerId = Guid.NewGuid();
+		_userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, User.Id).ReturnsNull();
+
+		async Task Result() => await _sut.DeleteAsync(UserMessage.Id, differentUSerId);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal(
+			"Mensagem com o id especificado não existe ou você não tem permissão para excluí-la.",
+			exception.Message);
+	}
+
+	[Fact]
+	public async Task
+		Delete_Message_After_Maximum_Delete_Time_Has_Passed_Throws_ForbiddenException()
+	{
+		const int maximumTimeToEditMessageInMinutes = 5;
+		UserMessage userMessage = UserMessageGenerator.GenerateUserMessage();
+		DateTime currentDateTime = DateTime.Now;
+		userMessage.TimeStampUtc = currentDateTime;
+		_userMessageRepositoryMock.GetByIdAsync(UserMessage.Id, userMessage.Sender.Id).Returns(userMessage);
+		_valueProviderMock.UtcNow()
+			.Returns(currentDateTime.AddMinutes(maximumTimeToEditMessageInMinutes + 1));
+
+		async Task Result() => await _sut.DeleteAsync(userMessage.Id, userMessage.Sender.Id);
+
+		var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
+		Assert.Equal("Não é possível excluir a mensagem, o tempo limite foi excedido.",
+			exception.Message);
+	}
 }

@@ -25,8 +25,7 @@ public class FoundAnimalAlertServiceTests
 	private readonly IBreedRepository _breedRepositoryMock;
 	private readonly IUserRepository _userRepositoryMock;
 	private readonly IColorRepository _colorRepositoryMock;
-	private readonly IGuidProvider _guidProviderMock;
-	private readonly IDateTimeProvider _dateTimeProviderMock;
+	private readonly IValueProvider _valueProviderMock;
 	private readonly IImageSubmissionService _imageSubmissionServiceMock;
 	private readonly IFoundAnimalAlertService _sut;
 
@@ -50,18 +49,17 @@ public class FoundAnimalAlertServiceTests
 		_breedRepositoryMock = Substitute.For<IBreedRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
 		_colorRepositoryMock = Substitute.For<IColorRepository>();
-		_guidProviderMock = Substitute.For<IGuidProvider>();
-		_dateTimeProviderMock = Substitute.For<IDateTimeProvider>();
 		_imageSubmissionServiceMock = Substitute.For<IImageSubmissionService>();
+		_valueProviderMock = Substitute.For<IValueProvider>();
+
 		_sut = new FoundAnimalAlertService(
 			_foundAnimalAlertRepositoryMock,
 			_speciesRepositoryMock,
 			_breedRepositoryMock,
 			_userRepositoryMock,
 			_colorRepositoryMock,
-			_guidProviderMock,
-			_dateTimeProviderMock,
-			_imageSubmissionServiceMock);
+			_imageSubmissionServiceMock,
+			_valueProviderMock);
 	}
 
 	[Fact]
@@ -130,10 +128,10 @@ public class FoundAnimalAlertServiceTests
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreateFoundAnimalAlertRequest.ColorIds).Returns(Colors);
 		_breedRepositoryMock.GetBreedByIdAsync((int)CreateFoundAnimalAlertRequest.BreedId!).Returns(Breed);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
-		_guidProviderMock.NewGuid().Returns(FoundAnimalAlert.Id);
+		_valueProviderMock.NewGuid().Returns(FoundAnimalAlert.Id);
 		_imageSubmissionServiceMock.UploadFoundAlertImageAsync(FoundAnimalAlert.Id, CreateFoundAnimalAlertRequest.Image)
 			.Returns(FoundAnimalAlert.Image);
-		_dateTimeProviderMock.UtcNow().Returns(FoundAnimalAlert.RegistrationDate);
+		_valueProviderMock.UtcNow().Returns(FoundAnimalAlert.RegistrationDate);
 
 		var createdAlertResponse = await _sut.CreateAsync(CreateFoundAnimalAlertRequest, User.Id);
 

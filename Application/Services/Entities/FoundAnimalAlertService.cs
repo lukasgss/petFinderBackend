@@ -103,7 +103,11 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		}
 
 		FoundAnimalAlert? alertToBeEdited = await _foundAnimalAlertRepository.GetByIdAsync(editAlertRequest.Id);
-		ValidatePermissionToEdit(alertToBeEdited, userId);
+		bool canUpdate = ValidatePermissionToChange(alertToBeEdited, userId);
+		if (!canUpdate)
+		{
+			throw new ForbiddenException("Não é possível editar alertas de outros usuários.");
+		}
 
 		Species? species = await _speciesRepository.GetSpeciesByIdAsync(editAlertRequest.SpeciesId);
 		if (species is null)
@@ -134,17 +138,27 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		return alertToBeEdited.ToFoundAnimalAlertResponse();
 	}
 
-	private void ValidatePermissionToEdit(FoundAnimalAlert? alertToBeEdited, Guid userId)
+	public async Task DeleteAsync(Guid alertId, Guid userId)
+	{
+		FoundAnimalAlert? alertToDelete = await _foundAnimalAlertRepository.GetByIdAsync(alertId);
+		bool canUpdate = ValidatePermissionToChange(alertToDelete, userId);
+		if (!canUpdate)
+		{
+			throw new ForbiddenException("Não é possível excluir alertas de outros usuários.");
+		}
+
+		_foundAnimalAlertRepository.Delete(alertToDelete!);
+		await _foundAnimalAlertRepository.CommitAsync();
+	}
+
+	private static bool ValidatePermissionToChange(FoundAnimalAlert? alertToBeEdited, Guid userId)
 	{
 		if (alertToBeEdited is null)
 		{
 			throw new NotFoundException("Alerta com o id especificado não existe.");
 		}
 
-		if (userId != alertToBeEdited.User.Id)
-		{
-			throw new ForbiddenException("Não é possível editar alertas de outros usuários.");
-		}
+		return userId == alertToBeEdited.User.Id;
 	}
 
 	private async Task<Breed?> ValidateAndQueryBreed(int? breedId)

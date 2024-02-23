@@ -51,9 +51,9 @@ public class FoundAnimalAlertController : ControllerBase
 		return new CreatedAtRouteResult(nameof(GetFoundAlertById), new { alertId = createdAlert.Id }, createdAlert);
 	}
 
-	[HttpPut("{routeId:guid}")]
+	[HttpPut("{alertId:guid}")]
 	public async Task<ActionResult<FoundAnimalAlertResponse>> Edit(
-		[FromForm] EditFoundAnimalAlertRequest editRequest, Guid routeId)
+		[FromForm] EditFoundAnimalAlertRequest editRequest, Guid alertId)
 	{
 		EditFoundAnimalAlertValidator requestValidator = new();
 		ValidationResult validationResult = requestValidator.Validate(editRequest);
@@ -66,6 +66,15 @@ public class FoundAnimalAlertController : ControllerBase
 
 		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-		return await _foundAnimalAlertService.EditAsync(editRequest, userId, routeId);
+		return await _foundAnimalAlertService.EditAsync(editRequest, userId, alertId);
+	}
+
+	[HttpDelete("{alertId:guid}")]
+	public async Task<ActionResult> Delete(Guid alertId)
+	{
+		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+		await _foundAnimalAlertService.DeleteAsync(alertId, userId);
+		return NoContent();
 	}
 }

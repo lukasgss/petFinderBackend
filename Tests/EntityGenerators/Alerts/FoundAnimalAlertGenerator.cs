@@ -46,6 +46,23 @@ public static class FoundAnimalAlertGenerator
 		};
 	}
 
+	public static EditFoundAnimalAlertRequest GenerateEditFoundAnimalAlertRequest()
+	{
+		return new EditFoundAnimalAlertRequest()
+		{
+			Id = Constants.FoundAnimalAlertData.Id,
+			Name = Constants.FoundAnimalAlertData.Name,
+			Description = Constants.FoundAnimalAlertData.Description,
+			FoundLocationLatitude = Constants.FoundAnimalAlertData.FoundLocationLatitude,
+			FoundLocationLongitude = Constants.FoundAnimalAlertData.FoundLocationLongitude,
+			Image = Constants.FoundAnimalAlertData.ImageFile,
+			SpeciesId = Constants.FoundAnimalAlertData.SpeciesId,
+			Gender = Constants.FoundAnimalAlertData.Gender,
+			BreedId = Constants.FoundAnimalAlertData.BreedId,
+			ColorIds = Constants.FoundAnimalAlertData.ColorIds
+		};
+	}
+
 	public static FoundAnimalAlertResponse GenerateFoundAnimalAlertResponse()
 	{
 		return new FoundAnimalAlertResponse()

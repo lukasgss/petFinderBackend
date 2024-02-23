@@ -34,6 +34,9 @@ public class FoundAnimalAlertServiceTests
 	private static readonly CreateFoundAnimalAlertRequest CreateFoundAnimalAlertRequest =
 		FoundAnimalAlertGenerator.GenerateCreateFoundAnimalAlertRequest();
 
+	private static readonly EditFoundAnimalAlertRequest EditFoundAnimalAlertRequest =
+		FoundAnimalAlertGenerator.GenerateEditFoundAnimalAlertRequest();
+
 	private static readonly FoundAnimalAlertResponse FoundAnimalAlertResponse =
 		FoundAnimalAlertGenerator.GenerateFoundAnimalAlertResponse();
 
@@ -136,5 +139,100 @@ public class FoundAnimalAlertServiceTests
 		var createdAlertResponse = await _sut.CreateAsync(CreateFoundAnimalAlertRequest, User.Id);
 
 		Assert.Equivalent(FoundAnimalAlertResponse, createdAlertResponse);
+	}
+
+	[Fact]
+	public async Task Edit_Alert_With_Different_Route_Id_Than_Specified_Throws_BadRequestException()
+	{
+		Guid differentRouteId = Guid.NewGuid();
+
+		async Task Result() => await _sut.EditAsync(EditFoundAnimalAlertRequest, User.Id, differentRouteId);
+
+		var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+		Assert.Equal("Id da rota não coincide com o id especificado.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Edit_Non_Existent_Alert_Throws_NotFoundException()
+	{
+		_foundAnimalAlertRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.Id).ReturnsNull();
+
+		async Task Result() =>
+			await _sut.EditAsync(EditFoundAnimalAlertRequest, User.Id, EditFoundAnimalAlertRequest.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Alerta com o id especificado não existe.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Edit_Alert_From_Other_User_Throws_ForbiddenException()
+	{
+		_foundAnimalAlertRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.Id).Returns(FoundAnimalAlert);
+		Guid differentUserId = Guid.NewGuid();
+
+		async Task Result() =>
+			await _sut.EditAsync(EditFoundAnimalAlertRequest, differentUserId, EditFoundAnimalAlertRequest.Id);
+
+		var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
+		Assert.Equal("Não é possível editar alertas de outros usuários.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Edit_Alert_With_Non_Existent_Species_Throws_NotFoundException()
+	{
+		_foundAnimalAlertRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.Id).Returns(FoundAnimalAlert);
+		_speciesRepositoryMock.GetSpeciesByIdAsync(EditFoundAnimalAlertRequest.SpeciesId).ReturnsNull();
+
+		async Task Result() =>
+			await _sut.EditAsync(EditFoundAnimalAlertRequest, User.Id, EditFoundAnimalAlertRequest.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Espécie com o id especificado não existe.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Edit_Alert_With_Non_Existent_Color_Throws_NotFoundException()
+	{
+		_foundAnimalAlertRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.Id).Returns(FoundAnimalAlert);
+		_speciesRepositoryMock.GetSpeciesByIdAsync(EditFoundAnimalAlertRequest.SpeciesId).Returns(Species);
+		List<Color> emptyColorsList = new();
+		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditFoundAnimalAlertRequest.ColorIds).Returns(emptyColorsList);
+
+		async Task Result() =>
+			await _sut.EditAsync(EditFoundAnimalAlertRequest, User.Id, EditFoundAnimalAlertRequest.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Alguma das cores especificadas não existe.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Edit_Alert_With_Non_Existent_Breed_Throws_NotFoundException()
+	{
+		_foundAnimalAlertRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.Id).Returns(FoundAnimalAlert);
+		_speciesRepositoryMock.GetSpeciesByIdAsync(EditFoundAnimalAlertRequest.SpeciesId).Returns(Species);
+		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditFoundAnimalAlertRequest.ColorIds).Returns(Colors);
+		_breedRepositoryMock.GetBreedByIdAsync((int)EditFoundAnimalAlertRequest.BreedId!).ReturnsNull();
+
+		async Task Result() =>
+			await _sut.EditAsync(EditFoundAnimalAlertRequest, User.Id, EditFoundAnimalAlertRequest.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Raça com o id especificado não existe.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Edit_Alert_Returns_Edited_Alert()
+	{
+		_foundAnimalAlertRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.Id).Returns(FoundAnimalAlert);
+		_speciesRepositoryMock.GetSpeciesByIdAsync(EditFoundAnimalAlertRequest.SpeciesId).Returns(Species);
+		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditFoundAnimalAlertRequest.ColorIds).Returns(Colors);
+		_breedRepositoryMock.GetBreedByIdAsync((int)EditFoundAnimalAlertRequest.BreedId!).Returns(Breed);
+		_imageSubmissionServiceMock.UploadFoundAlertImageAsync(EditFoundAnimalAlertRequest.Id,
+			EditFoundAnimalAlertRequest.Image).Returns(FoundAnimalAlert.Image);
+
+		FoundAnimalAlertResponse foundAnimalAlertResponse =
+			await _sut.EditAsync(EditFoundAnimalAlertRequest, User.Id, EditFoundAnimalAlertRequest.Id);
+
+		Assert.Equivalent(FoundAnimalAlertResponse, foundAnimalAlertResponse);
 	}
 }

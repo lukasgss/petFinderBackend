@@ -3,10 +3,14 @@ using FluentValidation;
 
 namespace Application.Common.Validations.Alerts.FoundAnimalAlertValidations;
 
-public class CreateFoundAnimalAlertValidator : AbstractValidator<CreateFoundAnimalAlertRequest>
+public class EditFoundAnimalAlertValidator : AbstractValidator<EditFoundAnimalAlertRequest>
 {
-	public CreateFoundAnimalAlertValidator()
+	public EditFoundAnimalAlertValidator()
 	{
+		RuleFor(alert => alert.Id)
+			.NotEmpty()
+			.WithMessage("Campo de id é obrigatório.");
+
 		RuleFor(alert => alert.Name)
 			.MaximumLength(255)
 			.WithMessage("Máximo de 255 caracteres permitidos.");

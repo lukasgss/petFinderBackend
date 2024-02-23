@@ -235,4 +235,27 @@ public class FoundAnimalAlertServiceTests
 
 		Assert.Equivalent(FoundAnimalAlertResponse, foundAnimalAlertResponse);
 	}
+
+	[Fact]
+	public async Task Delete_Non_Existent_Alert_Throws_NotFoundException()
+	{
+		_foundAnimalAlertRepositoryMock.GetByIdAsync(FoundAnimalAlert.Id).ReturnsNull();
+
+		async Task Result() => await _sut.DeleteAsync(FoundAnimalAlert.Id, User.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Alerta com o id especificado não existe.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Delete_Alert_From_Another_User_Throws_ForbiddenException()
+	{
+		_foundAnimalAlertRepositoryMock.GetByIdAsync(FoundAnimalAlert.Id).Returns(FoundAnimalAlert);
+		Guid differentUserId = Guid.NewGuid();
+
+		async Task Result() => await _sut.DeleteAsync(FoundAnimalAlert.Id, differentUserId);
+
+		var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
+		Assert.Equal("Não é possível excluir alertas de outros usuários.", exception.Message);
+	}
 }

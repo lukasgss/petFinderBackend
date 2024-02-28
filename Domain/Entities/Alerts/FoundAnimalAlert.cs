@@ -23,8 +23,7 @@ public class FoundAnimalAlert
 	[Required]
 	public DateTime RegistrationDate { get; set; }
 
-	[Required]
-	public bool HasBeenRecovered { get; set; }
+	public DateOnly? RecoveryDate { get; set; }
 
 	// TODO: Add the functionality of adding multiple images
 	[MaxLength(100)]

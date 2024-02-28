@@ -79,7 +79,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 			FoundLocationLatitude = createAlertRequest.FoundLocationLatitude,
 			FoundLocationLongitude = createAlertRequest.FoundLocationLongitude,
 			RegistrationDate = _valueProvider.UtcNow(),
-			HasBeenRecovered = false,
+			RecoveryDate = null,
 			Image = uploadedImageUrl,
 			Gender = createAlertRequest.Gender,
 			Colors = colors,
@@ -149,6 +149,26 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 
 		_foundAnimalAlertRepository.Delete(alertToDelete!);
 		await _foundAnimalAlertRepository.CommitAsync();
+	}
+
+	public async Task<FoundAnimalAlertResponse> ToggleAlertStatus(Guid alertId, Guid userId)
+	{
+		FoundAnimalAlert? alertToToggle = await _foundAnimalAlertRepository.GetByIdAsync(alertId);
+		if (alertToToggle is null)
+		{
+			throw new NotFoundException("Alerta com o id especificado não existe.");
+		}
+
+		if (alertToToggle.User.Id != userId)
+		{
+			throw new ForbiddenException("Não é possível alterar o status de alertas de outros usuários.");
+		}
+
+		alertToToggle.RecoveryDate = alertToToggle.RecoveryDate is null ? _valueProvider.DateOnlyNow() : null;
+
+		await _foundAnimalAlertRepository.CommitAsync();
+
+		return alertToToggle.ToFoundAnimalAlertResponse();
 	}
 
 	private static bool ValidatePermissionToChange(FoundAnimalAlert? alertToBeEdited, Guid userId)

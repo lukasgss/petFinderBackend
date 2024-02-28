@@ -17,7 +17,7 @@ public static partial class Constants
 		public const double FoundLocationLatitude = 32;
 		public const double FoundLocationLongitude = 44.322;
 		public static readonly DateTime RegistrationDate = new(2020, 1, 1);
-		public const bool HasBeenRecovered = false;
+		public static readonly DateOnly? RecoveryDate = null;
 		public const string Image = "Image";
 		public static readonly IFormFile ImageFile = new EmptyFormFile();
 		public static readonly Species Species = SpeciesGenerator.GenerateSpecies();

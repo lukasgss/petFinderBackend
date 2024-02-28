@@ -69,6 +69,14 @@ public class FoundAnimalAlertController : ControllerBase
 		return await _foundAnimalAlertService.EditAsync(editRequest, userId, alertId);
 	}
 
+	[HttpPut("rescue/{alertId:guid}")]
+	public async Task<ActionResult<FoundAnimalAlertResponse>> ToggleStatus(Guid alertId)
+	{
+		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+		return await _foundAnimalAlertService.ToggleAlertStatus(alertId, userId);
+	}
+
 	[HttpDelete("{alertId:guid}")]
 	public async Task<ActionResult> Delete(Guid alertId)
 	{

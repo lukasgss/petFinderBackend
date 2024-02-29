@@ -5,14 +5,15 @@ namespace Domain.Entities;
 
 public class Breed
 {
-    public int Id { get; set; }
+	public int Id { get; set; }
 
-    [Required, MaxLength(255)]
-    public string Name { get; set; } = null!;
+	[Required, MaxLength(255)]
+	public string Name { get; set; } = null!;
 
-    [ForeignKey("SpeciesId")]
-    public virtual Species Species { get; set; } = null!;
-    public int SpeciesId { get; set; }
-    
-    public virtual ICollection<Pet> Pets { get; set; } = null!;
+	[ForeignKey("SpeciesId")]
+	public virtual Species Species { get; set; } = null!;
+
+	public int SpeciesId { get; set; }
+
+	public virtual ICollection<Pet> Pets { get; set; } = null!;
 }

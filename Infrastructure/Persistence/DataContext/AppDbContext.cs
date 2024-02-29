@@ -23,6 +23,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	public DbSet<FoundAnimalAlert> FoundAnimalAlerts { get; set; } = null!;
 	public DbSet<UserMessage> UserMessages { get; set; } = null!;
 	public DbSet<AdoptionAlertComment> AdoptionAlertComments { get; set; } = null!;
+	public DbSet<Vaccine> Vaccines { get; set; } = null!;
 
 	protected override void OnModelCreating(ModelBuilder builder)
 	{

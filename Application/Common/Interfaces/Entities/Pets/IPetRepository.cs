@@ -5,5 +5,5 @@ namespace Application.Common.Interfaces.Entities.Pets;
 
 public interface IPetRepository : IGenericRepository<Pet>
 {
-    Task<Pet?> GetPetByIdAsync(Guid petId);
+	Task<Pet?> GetPetByIdAsync(Guid petId);
 }

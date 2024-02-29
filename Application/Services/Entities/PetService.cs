@@ -6,6 +6,7 @@ using Application.Common.Interfaces.Entities.Colors;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Application.Common.Interfaces.Entities.Users;
+using Application.Common.Interfaces.Entities.Vaccines;
 using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
@@ -20,6 +21,7 @@ public class PetService : IPetService
 	private readonly ISpeciesRepository _speciesRepository;
 	private readonly IColorRepository _colorRepository;
 	private readonly IUserRepository _userRepository;
+	private readonly IVaccineRepository _vaccineRepository;
 	private readonly IImageSubmissionService _imageSubmissionService;
 	private readonly IValueProvider _valueProvider;
 
@@ -29,6 +31,7 @@ public class PetService : IPetService
 		ISpeciesRepository speciesRepository,
 		IColorRepository colorRepository,
 		IUserRepository userRepository,
+		IVaccineRepository vaccineRepository,
 		IImageSubmissionService imageSubmissionService,
 		IValueProvider valueProvider)
 	{
@@ -37,6 +40,7 @@ public class PetService : IPetService
 		_speciesRepository = speciesRepository ?? throw new ArgumentNullException(nameof(speciesRepository));
 		_colorRepository = colorRepository ?? throw new ArgumentNullException(nameof(colorRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+		_vaccineRepository = vaccineRepository ?? throw new ArgumentNullException(nameof(vaccineRepository));
 		_imageSubmissionService =
 			imageSubmissionService ?? throw new ArgumentNullException(nameof(imageSubmissionService));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
@@ -60,6 +64,7 @@ public class PetService : IPetService
 
 		string uploadedImageUrl = await _imageSubmissionService.UploadPetImageAsync(petId, createPetRequest.Image);
 
+		// TODO: Make it possible to add vaccinations already when creating pet
 		Pet petToBeCreated = new()
 		{
 			Id = petId,
@@ -71,7 +76,8 @@ public class PetService : IPetService
 			Owner = petOwner,
 			Breed = breed,
 			Species = species,
-			Colors = colors
+			Colors = colors,
+			Vaccines = new List<Vaccine>(0)
 		};
 		_petRepository.Add(petToBeCreated);
 		await _petRepository.CommitAsync();
@@ -128,6 +134,42 @@ public class PetService : IPetService
 
 		_petRepository.Delete(petToDelete);
 		await _petRepository.CommitAsync();
+	}
+
+	public async Task<PetResponse> UpdateVaccinations(PetVaccinationRequest petVaccinationRequest, Guid petId,
+		Guid userId)
+	{
+		Pet? vaccinatedPet = await _petRepository.GetPetByIdAsync(petId);
+		if (vaccinatedPet is null)
+		{
+			throw new NotFoundException("Animal com o id especificado não existe.");
+		}
+
+		if (vaccinatedPet.Owner.Id != userId)
+		{
+			throw new ForbiddenException("Você não possui permissão para adicionar vacinas ao animal.");
+		}
+
+		var appliedVaccines = await _vaccineRepository.GetMultipleByIdAsync(petVaccinationRequest.VaccinationIds);
+		if (appliedVaccines.Count != petVaccinationRequest.VaccinationIds.Count)
+		{
+			throw new NotFoundException("Alguma vacina com o id especificado não existe.");
+		}
+
+		if (!ValidateIfVaccinesAreFromCorrectSpecies(appliedVaccines, vaccinatedPet.Species.Id))
+		{
+			throw new BadRequestException("Não é possível adicionar vacinas de outras espécies.");
+		}
+
+		vaccinatedPet.Vaccines = appliedVaccines;
+		await _petRepository.CommitAsync();
+
+		return vaccinatedPet.ToPetResponse(vaccinatedPet.Owner, vaccinatedPet.Colors, vaccinatedPet.Breed);
+	}
+
+	private static bool ValidateIfVaccinesAreFromCorrectSpecies(List<Vaccine> vaccines, int speciesId)
+	{
+		return vaccines.All(vaccine => vaccine.Species.Any(species => species.Id == speciesId));
 	}
 
 	private async Task<User> ValidateAndAssignUserAsync(Guid userId)

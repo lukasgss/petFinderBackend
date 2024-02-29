@@ -21,4 +21,13 @@ public class VaccineRepository : GenericRepository<Vaccine>, IVaccineRepository
 			.Where(vaccine => vaccineIds.Contains(vaccine.Id))
 			.ToListAsync();
 	}
+
+	public async Task<List<Vaccine>> GetVaccinesOfSpecies(int speciesId)
+	{
+		return await _dbContext.Vaccines
+			.Include(vaccine => vaccine.Species)
+			.Where(vaccine => vaccine.Species.Any(species => species.Id == speciesId))
+			.AsNoTracking()
+			.ToListAsync();
+	}
 }

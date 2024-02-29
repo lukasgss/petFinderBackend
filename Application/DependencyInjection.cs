@@ -10,6 +10,7 @@ using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
+using Application.Common.Interfaces.Entities.Vaccines;
 using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.General.Notifications;
 using Application.Common.Interfaces.Messaging;
@@ -48,6 +49,7 @@ public static class DependencyInjection
 		services.AddScoped<IMissingAlertCommentService, MissingAlertCommentService>();
 		services.AddScoped<IAdoptionAlertCommentService, AdoptionAlertCommentService>();
 		services.AddScoped<IFoundAnimalAlertService, FoundAnimalAlertService>();
+		services.AddScoped<IVaccineService, VaccineService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

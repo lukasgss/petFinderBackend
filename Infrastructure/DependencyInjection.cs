@@ -8,6 +8,7 @@ using Application.Common.Interfaces.Entities.Colors;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
+using Application.Common.Interfaces.Entities.Vaccines;
 using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.Messaging;
 using Application.Services.General.Notifications;
@@ -41,6 +42,7 @@ public static class DependencyInjection
 		services.AddScoped<IMissingAlertCommentRepository, MissingAlertCommentRepository>();
 		services.AddScoped<IAdoptionAlertCommentRepository, AdoptionAlertCommentRepository>();
 		services.AddScoped<IFoundAnimalAlertRepository, FoundAnimalAlertRepository>();
+		services.AddScoped<IVaccineRepository, VaccineRepository>();
 
 		services.AddScoped<IAwsS3Client, AwsS3Client>();
 		services.Configure<AwsData>(configuration.GetSection("AWS"));

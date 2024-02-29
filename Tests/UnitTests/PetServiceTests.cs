@@ -7,6 +7,7 @@ using Application.Common.Interfaces.Entities.Colors;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Application.Common.Interfaces.Entities.Users;
+using Application.Common.Interfaces.Entities.Vaccines;
 using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
@@ -25,6 +26,7 @@ public class PetServiceTests
 	private readonly ISpeciesRepository _speciesRepositoryMock;
 	private readonly IColorRepository _colorRepositoryMock;
 	private readonly IUserRepository _userRepositoryMock;
+	private readonly IVaccineRepository _vaccineRepositoryMock;
 	private readonly IImageSubmissionService _imageSubmissionServiceMock;
 	private readonly IValueProvider _valueProviderMock;
 	private readonly IPetService _sut;
@@ -38,6 +40,11 @@ public class PetServiceTests
 	private static readonly CreatePetRequest CreatePetRequest = PetGenerator.GenerateCreatePetRequest();
 	private static readonly EditPetRequest EditPetRequest = PetGenerator.GenerateEditPetRequest();
 
+	private static readonly PetVaccinationRequest PetVaccinationRequest =
+		VaccinationGenerator.GeneratePetVaccinationRequest();
+
+	private static readonly List<Vaccine> Vaccines = VaccinesGenerator.GenerateListOfVaccines();
+
 	public PetServiceTests()
 	{
 		_petRepositoryMock = Substitute.For<IPetRepository>();
@@ -45,6 +52,7 @@ public class PetServiceTests
 		_speciesRepositoryMock = Substitute.For<ISpeciesRepository>();
 		_colorRepositoryMock = Substitute.For<IColorRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
+		_vaccineRepositoryMock = Substitute.For<IVaccineRepository>();
 		_imageSubmissionServiceMock = Substitute.For<IImageSubmissionService>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
 
@@ -54,6 +62,7 @@ public class PetServiceTests
 			_speciesRepositoryMock,
 			_colorRepositoryMock,
 			_userRepositoryMock,
+			_vaccineRepositoryMock,
 			_imageSubmissionServiceMock,
 			_valueProviderMock);
 	}
@@ -245,5 +254,73 @@ public class PetServiceTests
 
 		var exception = await Assert.ThrowsAsync<UnauthorizedException>(Result);
 		Assert.Equal("Você não possui permissão para excluir o animal.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Update_Vaccination_Of_Non_Existent_Pet_Throws_NotFoundException()
+	{
+		_petRepositoryMock.GetPetByIdAsync(Pet.Id).ReturnsNull();
+
+		async Task Result() => await _sut.UpdateVaccinations(PetVaccinationRequest, Pet.Id, User.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Animal com o id especificado não existe.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Update_Vaccination_Of_Unowned_Pet_Throws_ForbiddenException()
+	{
+		Guid differentUserId = Guid.NewGuid();
+		_petRepositoryMock.GetPetByIdAsync(Pet.Id).Returns(Pet);
+
+		async Task Result() => await _sut.UpdateVaccinations(PetVaccinationRequest, Pet.Id, differentUserId);
+
+		var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
+		Assert.Equal("Você não possui permissão para adicionar vacinas ao animal.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Update_Vaccination_With_Non_Existent_Vaccine_Throws_NotFoundException()
+	{
+		_petRepositoryMock.GetPetByIdAsync(Pet.Id).Returns(Pet);
+		List<Vaccine> emptyVaccinesList = new();
+		_vaccineRepositoryMock.GetMultipleByIdAsync(PetVaccinationRequest.VaccinationIds).Returns(emptyVaccinesList);
+
+		async Task Result() => await _sut.UpdateVaccinations(PetVaccinationRequest, Pet.Id, User.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Alguma vacina com o id especificado não existe.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Update_Vaccination_With_Vaccine_From_Different_Species_Throws_BadRequestException()
+	{
+		_petRepositoryMock.GetPetByIdAsync(Pet.Id).Returns(Pet);
+		_vaccineRepositoryMock.GetMultipleByIdAsync(PetVaccinationRequest.VaccinationIds).Returns(Vaccines);
+		List<Vaccine> vaccinesFromDifferentSpecies = new()
+		{
+			new Vaccine()
+			{
+				Species = new List<Species>() { new() { Id = 55 } }
+			}
+		};
+		_vaccineRepositoryMock.GetMultipleByIdAsync(PetVaccinationRequest.VaccinationIds)
+			.Returns(vaccinesFromDifferentSpecies);
+
+		async Task Result() => await _sut.UpdateVaccinations(PetVaccinationRequest, Pet.Id, User.Id);
+
+		var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+		Assert.Equal("Não é possível adicionar vacinas de outras espécies.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Update_Vaccination_Returns_Vaccinated_Pet()
+	{
+		_petRepositoryMock.GetPetByIdAsync(Pet.Id).Returns(Pet);
+		_vaccineRepositoryMock.GetMultipleByIdAsync(PetVaccinationRequest.VaccinationIds).Returns(Vaccines);
+
+		PetResponse vaccinatedPet = await _sut.UpdateVaccinations(PetVaccinationRequest, Pet.Id, User.Id);
+
+		Assert.Equivalent(ExpectedPetResponse, vaccinatedPet);
 	}
 }

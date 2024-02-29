@@ -13,68 +13,79 @@ namespace Api.Controllers;
 [ApiController]
 public class PetController : ControllerBase
 {
-    private readonly IPetService _petService;
-    private readonly IUserAuthorizationService _userAuthorizationService;
+	private readonly IPetService _petService;
+	private readonly IUserAuthorizationService _userAuthorizationService;
 
-    public PetController(IPetService petService, IUserAuthorizationService userAuthorizationService)
-    {
-        _petService = petService ?? throw new ArgumentNullException(nameof(petService));
-        _userAuthorizationService = userAuthorizationService ??
-                                    throw new ArgumentNullException(nameof(userAuthorizationService));
-    }
+	public PetController(IPetService petService, IUserAuthorizationService userAuthorizationService)
+	{
+		_petService = petService ?? throw new ArgumentNullException(nameof(petService));
+		_userAuthorizationService = userAuthorizationService ??
+		                            throw new ArgumentNullException(nameof(userAuthorizationService));
+	}
 
-    [HttpGet("{petId:guid}", Name = "GetPetById")]
-    public async Task<ActionResult<PetResponse>> GetPetById(Guid petId)
-    {
-        return await _petService.GetPetBydIdAsync(petId);
-    }
+	[HttpGet("{petId:guid}", Name = "GetPetById")]
+	public async Task<ActionResult<PetResponse>> GetPetById(Guid petId)
+	{
+		return await _petService.GetPetBydIdAsync(petId);
+	}
 
-    [Authorize]
-    [HttpPost]
-    public async Task<ActionResult<PetResponse>> CreatePet([FromForm] CreatePetRequest createPetRequest)
-    {
-        CreatePetValidator requestValidator = new();
-        ValidationResult validationResult = requestValidator.Validate(createPetRequest);
-        if (!validationResult.IsValid)
-        {
-            var errors = validationResult.Errors
-                .Select(e => new ValidationError(e.PropertyName, e.ErrorMessage));
-            return BadRequest(errors);
-        }
+	[Authorize]
+	[HttpPost]
+	public async Task<ActionResult<PetResponse>> CreatePet([FromForm] CreatePetRequest createPetRequest)
+	{
+		CreatePetValidator requestValidator = new();
+		ValidationResult validationResult = requestValidator.Validate(createPetRequest);
+		if (!validationResult.IsValid)
+		{
+			var errors = validationResult.Errors
+				.Select(e => new ValidationError(e.PropertyName, e.ErrorMessage));
+			return BadRequest(errors);
+		}
 
-        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-        PetResponse createdPet = await _petService.CreatePetAsync(createPetRequest, userId);
+		PetResponse createdPet = await _petService.CreatePetAsync(createPetRequest, userId);
 
-        return new CreatedAtRouteResult(nameof(GetPetById), new { petId = createdPet.Id }, createdPet);
-    }
+		return new CreatedAtRouteResult(nameof(GetPetById), new { petId = createdPet.Id }, createdPet);
+	}
 
-    [Authorize]
-    [HttpPut("{petId:guid}")]
-    public async Task<ActionResult<PetResponse>> EditPet([FromForm] EditPetRequest editPetRequest, Guid petId)
-    {
-        EditPetValidator requestValidator = new();
-        ValidationResult validationResult = requestValidator.Validate(editPetRequest);
-        if (!validationResult.IsValid)
-        {
-            var errors = validationResult.Errors
-                .Select(e => new ValidationError(e.PropertyName, e.ErrorMessage));
-            return BadRequest(errors);
-        }
 
-        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+	[Authorize]
+	[HttpPut("{petId:guid}")]
+	public async Task<ActionResult<PetResponse>> EditPet([FromForm] EditPetRequest editPetRequest, Guid petId)
+	{
+		EditPetValidator requestValidator = new();
+		ValidationResult validationResult = requestValidator.Validate(editPetRequest);
+		if (!validationResult.IsValid)
+		{
+			var errors = validationResult.Errors
+				.Select(e => new ValidationError(e.PropertyName, e.ErrorMessage));
+			return BadRequest(errors);
+		}
 
-        PetResponse editedPet = await _petService.EditPetAsync(editPetRequest, userId, petId);
-        return Ok(editedPet);
-    }
+		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-    [Authorize]
-    [HttpDelete("{petId:guid}")]
-    public async Task<ActionResult> DeletePet(Guid petId)
-    {
-        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+		PetResponse editedPet = await _petService.EditPetAsync(editPetRequest, userId, petId);
+		return Ok(editedPet);
+	}
 
-        await _petService.DeletePetAsync(petId, userId);
-        return new NoContentResult();
-    }
+	[Authorize]
+	[HttpPut("vaccinations/{petId:guid}")]
+	public async Task<ActionResult<PetResponse>> UpdateVaccinations(
+		PetVaccinationRequest petVaccinationRequest, Guid petId)
+	{
+		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+		return await _petService.UpdateVaccinations(petVaccinationRequest, petId, userId);
+	}
+
+	[Authorize]
+	[HttpDelete("{petId:guid}")]
+	public async Task<ActionResult> DeletePet(Guid petId)
+	{
+		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+		await _petService.DeletePetAsync(petId, userId);
+		return new NoContentResult();
+	}
 }

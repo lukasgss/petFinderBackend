@@ -17,6 +17,7 @@ public static class MissingAlertGenerator
 			LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
 			LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
 			RecoveryDate = Constants.MissingAlertData.NonRecoveredRecoveryDate,
+			Description = Constants.MissingAlertData.Description,
 			Pet = Constants.MissingAlertData.Pet,
 			PetId = Constants.MissingAlertData.PetId,
 			User = Constants.MissingAlertData.User,
@@ -43,6 +44,7 @@ public static class MissingAlertGenerator
 			RegistrationDate = Constants.MissingAlertData.RegistrationDate,
 			LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
 			LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+			Description = Constants.MissingAlertData.Description,
 			RecoveryDate = Constants.MissingAlertData.NonRecoveredRecoveryDate,
 			Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
 				ColorGenerator.GenerateListOfColors(),
@@ -70,6 +72,7 @@ public static class MissingAlertGenerator
 			RegistrationDate = Constants.MissingAlertData.RegistrationDate,
 			LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
 			LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+			Description = Constants.MissingAlertData.Description,
 			RecoveryDate = Constants.MissingAlertData.RecoveryDate,
 			Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
 				ColorGenerator.GenerateListOfColors(),
@@ -84,6 +87,7 @@ public static class MissingAlertGenerator
 		{
 			LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
 			LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+			Description = Constants.MissingAlertData.Description,
 			PetId = Constants.PetData.Id
 		};
 	}
@@ -94,6 +98,7 @@ public static class MissingAlertGenerator
 		{
 			LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
 			LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+			Description = Constants.MissingAlertData.Description,
 			PetId = Constants.MissingAlertData.PetId
 		};
 	}

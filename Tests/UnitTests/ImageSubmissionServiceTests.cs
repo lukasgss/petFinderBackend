@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
@@ -35,10 +36,11 @@ public class ImageSubmissionServiceTests
 	[Fact]
 	public async Task Failed_Pet_Image_Upload_Throws_InternalServerErrorException()
 	{
-		_awsS3ClientMock.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Image, Arg.Any<string>())
+		_awsS3ClientMock
+			.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Images.First(), Arg.Any<string>())
 			.Returns(S3FailImageResponse);
 
-		async Task Result() => await _sut.UploadPetImageAsync(Pet.Id, CreatePetRequest.Image);
+		async Task Result() => await _sut.UploadPetImageAsync(Pet.Id, CreatePetRequest.Images);
 
 		var exception = await Assert.ThrowsAsync<InternalServerErrorException>(Result);
 		Assert.Equal("Não foi possível fazer upload da imagem, tente novamente mais tarde.", exception.Message);
@@ -48,10 +50,10 @@ public class ImageSubmissionServiceTests
 	public async Task Failed_User_Image_Upload_Throws_InternalServerErrorException()
 	{
 		_awsS3ClientMock
-			.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Image, Arg.Any<string>())
+			.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Images.First(), Arg.Any<string>())
 			.Returns(S3FailImageResponse);
 
-		async Task Result() => await _sut.UploadPetImageAsync(User.Id, CreatePetRequest.Image);
+		async Task Result() => await _sut.UploadPetImageAsync(User.Id, CreatePetRequest.Images);
 
 		var exception = await Assert.ThrowsAsync<InternalServerErrorException>(Result);
 		Assert.Equal("Não foi possível fazer upload da imagem, tente novamente mais tarde.", exception.Message);

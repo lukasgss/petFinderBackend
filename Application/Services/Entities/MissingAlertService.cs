@@ -66,6 +66,7 @@ public class MissingAlertService : IMissingAlertService
 			RegistrationDate = _valueProvider.UtcNow(),
 			LastSeenLocationLatitude = createMissingAlertRequest.LastSeenLocationLatitude,
 			LastSeenLocationLongitude = createMissingAlertRequest.LastSeenLocationLongitude,
+			Description = createMissingAlertRequest.Description,
 			RecoveryDate = null,
 			Pet = missingPet,
 			User = petOwner,
@@ -95,6 +96,7 @@ public class MissingAlertService : IMissingAlertService
 
 		dbMissingAlert.LastSeenLocationLatitude = editMissingAlertRequest.LastSeenLocationLatitude;
 		dbMissingAlert.LastSeenLocationLongitude = editMissingAlertRequest.LastSeenLocationLongitude;
+		dbMissingAlert.Description = editMissingAlertRequest.Description;
 		dbMissingAlert.Pet = pet;
 		dbMissingAlert.User = user;
 

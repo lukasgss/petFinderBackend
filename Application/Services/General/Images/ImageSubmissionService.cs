@@ -24,25 +24,32 @@ public class ImageSubmissionService : IImageSubmissionService
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
 	}
 
-	public async Task<string> UploadPetImageAsync(Guid petId, IFormFile petImage)
+	public async Task<List<string>> UploadPetImageAsync(Guid petId, List<IFormFile> petImages)
 	{
-		await using MemoryStream compressedImage =
-			await _imageProcessingService.CompressImageAsync(petImage.OpenReadStream());
+		List<string> uploadedImages = new(petImages.Count);
 
-		string hashedPetId = _idConverterService.ConvertGuidToShortId(petId);
-
-		AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadPetImageAsync(
-			imageStream: compressedImage,
-			imageFile: petImage,
-			hashedPetId);
-
-		if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
+		for (int i = 0; i < petImages.Count; i++)
 		{
-			throw new InternalServerErrorException(
-				"Não foi possível fazer upload da imagem, tente novamente mais tarde.");
+			await using MemoryStream compressedImage =
+				await _imageProcessingService.CompressImageAsync(petImages[i].OpenReadStream());
+
+			string hashedPetId = _idConverterService.ConvertGuidToShortId(petId, i);
+
+			AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadPetImageAsync(
+				imageStream: compressedImage,
+				imageFile: petImages[i],
+				hashedPetId);
+
+			if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
+			{
+				throw new InternalServerErrorException(
+					"Não foi possível fazer upload da imagem, tente novamente mais tarde.");
+			}
+
+			uploadedImages.Add(uploadedImage.PublicUrl);
 		}
 
-		return uploadedImage.PublicUrl;
+		return uploadedImages;
 	}
 
 	public async Task<string> UploadUserImageAsync(Guid userId, IFormFile? userImage)

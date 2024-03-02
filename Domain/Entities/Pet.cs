@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Enums;
+using Domain.ValueObjects;
 
 namespace Domain.Entities;
 
@@ -19,10 +20,6 @@ public class Pet
 
 	public int? AgeInMonths { get; set; }
 
-	// TODO: Add the functionality of adding multiple images
-	[MaxLength(100)]
-	public string Image { get; set; } = null!;
-
 	[Required, ForeignKey("UserId")]
 	public virtual User Owner { get; set; } = null!;
 
@@ -40,4 +37,5 @@ public class Pet
 
 	public virtual ICollection<Color> Colors { get; set; } = null!;
 	public virtual ICollection<Vaccine> Vaccines { get; set; } = null!;
+	public virtual List<PetImage> Images { get; set; } = null!;
 }

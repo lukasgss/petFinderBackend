@@ -10,6 +10,8 @@ using Application.Common.Interfaces.Entities.Vaccines;
 using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
+using Domain.ValueObjects;
+using Microsoft.AspNetCore.Http;
 using Color = Domain.Entities.Color;
 
 namespace Application.Services.Entities;
@@ -62,7 +64,10 @@ public class PetService : IPetService
 
 		Guid petId = _valueProvider.NewGuid();
 
-		string uploadedImageUrl = await _imageSubmissionService.UploadPetImageAsync(petId, createPetRequest.Image);
+		if (createPetRequest.Images.Count >= 10)
+		{
+			throw new BadRequestException("Não é possível adicionar 10 ou mais imagens");
+		}
 
 		// TODO: Make it possible to add vaccinations already when creating pet
 		Pet petToBeCreated = new()
@@ -72,15 +77,21 @@ public class PetService : IPetService
 			Observations = createPetRequest.Observations,
 			Gender = createPetRequest.Gender,
 			AgeInMonths = createPetRequest.AgeInMonths,
-			Image = uploadedImageUrl,
 			Owner = petOwner,
 			Breed = breed,
 			Species = species,
 			Colors = colors,
+			Images = new List<PetImage>(0),
 			Vaccines = new List<Vaccine>(0)
 		};
-		_petRepository.Add(petToBeCreated);
-		await _petRepository.CommitAsync();
+
+		List<PetImage> uploadedImages = await UploadPetImages(petToBeCreated, createPetRequest.Images);
+
+		bool success = await _petRepository.CreatePetAndImages(petToBeCreated, uploadedImages);
+		if (!success)
+		{
+			throw new InternalServerErrorException();
+		}
 
 		return petToBeCreated.ToPetResponse(petOwner, colors, breed);
 	}
@@ -104,14 +115,18 @@ public class PetService : IPetService
 			throw new UnauthorizedException("Você não possui permissão para editar dados desse animal.");
 		}
 
-		string uploadedImageUrl = await _imageSubmissionService.UploadPetImageAsync(dbPet.Id, editPetRequest.Image);
+		var uploadedImageUrls =
+			await _imageSubmissionService.UploadPetImageAsync(dbPet.Id, editPetRequest.Images);
+		List<PetImage> uploadedImages = uploadedImageUrls
+			.Select(image => new PetImage() { ImageUrl = image, Pet = dbPet, PetId = dbPet.Id })
+			.ToList();
 
 		dbPet.Id = editPetRequest.Id;
 		dbPet.Name = editPetRequest.Name;
 		dbPet.Observations = editPetRequest.Observations;
 		dbPet.Gender = editPetRequest.Gender;
+		dbPet.Images = uploadedImages;
 		dbPet.AgeInMonths = editPetRequest.AgeInMonths;
-		dbPet.Image = uploadedImageUrl;
 		dbPet.Owner = petOwner;
 		dbPet.Breed = breed;
 		dbPet.Colors = colors;
@@ -225,5 +240,14 @@ public class PetService : IPetService
 		}
 
 		return colors;
+	}
+
+	private async Task<List<PetImage>> UploadPetImages(Pet petToBeCreated, List<IFormFile> submittedImages)
+	{
+		var uploadedImageUrls = await _imageSubmissionService.UploadPetImageAsync(petToBeCreated.Id, submittedImages);
+
+		return uploadedImageUrls
+			.Select(image => new PetImage() { ImageUrl = image, PetId = petToBeCreated.Id, Pet = petToBeCreated })
+			.ToList();
 	}
 }

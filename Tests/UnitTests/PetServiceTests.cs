@@ -12,6 +12,7 @@ using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
 using Domain.Entities;
+using Domain.ValueObjects;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -126,6 +127,23 @@ public class PetServiceTests
 	}
 
 	[Fact]
+	public async Task Create_Pet_With_Pet_Images_Transaction_Error_Throws_InternalServerErrorException()
+	{
+		_breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
+		_speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).Returns(Species);
+		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreatePetRequest.ColorIds).Returns(Colors);
+		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
+		_valueProviderMock.NewGuid().Returns(Pet.Id);
+		_imageSubmissionServiceMock.UploadPetImageAsync(Pet.Id, CreatePetRequest.Images)
+			.Returns(Constants.PetData.ImageUrls);
+		_petRepositoryMock.CreatePetAndImages(Arg.Any<Pet>(), Pet.Images).Returns(false);
+
+		async Task Result() => await _sut.CreatePetAsync(CreatePetRequest, User.Id);
+
+		await Assert.ThrowsAsync<InternalServerErrorException>(Result);
+	}
+
+	[Fact]
 	public async Task Create_Pet_While_Authenticated_Returns_Pet_Response_With_Logged_In_User_As_Owner()
 	{
 		_breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
@@ -133,7 +151,9 @@ public class PetServiceTests
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreatePetRequest.ColorIds).Returns(Colors);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
 		_valueProviderMock.NewGuid().Returns(Pet.Id);
-		_imageSubmissionServiceMock.UploadPetImageAsync(Pet.Id, CreatePetRequest.Image).Returns(Pet.Image);
+		_imageSubmissionServiceMock.UploadPetImageAsync(Pet.Id, CreatePetRequest.Images)
+			.Returns(Constants.PetData.ImageUrls);
+		_petRepositoryMock.CreatePetAndImages(Arg.Any<Pet>(), Arg.Any<List<PetImage>>()).Returns(true);
 
 		PetResponse petResponse = await _sut.CreatePetAsync(CreatePetRequest, userId: User.Id);
 
@@ -227,7 +247,8 @@ public class PetServiceTests
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditPetRequest.ColorIds).Returns(Colors);
 		_userRepositoryMock.GetUserByIdAsync(Constants.UserData.Id).Returns(User);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
-		_imageSubmissionServiceMock.UploadPetImageAsync(EditPetRequest.Id, EditPetRequest.Image).Returns(Pet.Image);
+		_imageSubmissionServiceMock.UploadPetImageAsync(EditPetRequest.Id, EditPetRequest.Images)
+			.Returns(Constants.PetData.ImageUrls);
 
 		PetResponse editedPetResponse = await _sut.EditPetAsync(EditPetRequest, User.Id, EditPetRequest.Id);
 

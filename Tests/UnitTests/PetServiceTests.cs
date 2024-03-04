@@ -33,7 +33,7 @@ public class PetServiceTests
 	private readonly IPetService _sut;
 
 	private static readonly Pet Pet = PetGenerator.GeneratePet();
-	private static readonly PetResponse ExpectedPetResponse = Pet.ToPetResponse(Pet.Owner, Pet.Colors, Pet.Breed);
+	private static readonly PetResponse ExpectedPetResponse = Pet.ToPetResponse();
 	private static readonly User User = UserGenerator.GenerateUser();
 	private static readonly Breed Breed = BreedGenerator.GenerateBreed();
 	private static readonly Species Species = SpeciesGenerator.GenerateSpecies();

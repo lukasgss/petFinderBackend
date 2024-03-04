@@ -1,4 +1,3 @@
-using System.Net.Mime;
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Domain.Entities;
 using Domain.ValueObjects;
@@ -8,10 +7,7 @@ namespace Application.Common.Extensions.Mapping;
 
 public static class PetMappings
 {
-	public static PetResponse ToPetResponse(this Pet pet,
-		User? owner,
-		IEnumerable<Color> colors,
-		Breed breed)
+	public static PetResponse ToPetResponse(this Pet pet)
 	{
 		return new PetResponse()
 		{
@@ -21,9 +17,9 @@ public static class PetMappings
 			AgeInMonths = pet.AgeInMonths,
 			Images = pet.Images.ToPetImagesResponse(),
 			Gender = pet.Gender.ToString(),
-			Owner = owner?.ToOwnerResponse(),
-			Breed = breed.ToBreedResponse(),
-			Colors = colors.ToListOfColorResponse(),
+			Owner = pet.Owner.ToOwnerResponse(),
+			Breed = pet.Breed.ToBreedResponse(),
+			Colors = pet.Colors.ToListOfColorResponse(),
 			Vaccines = pet.Vaccines.ToVaccineResponseList()
 		};
 	}

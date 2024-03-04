@@ -52,7 +52,7 @@ public class PetService : IPetService
 	{
 		Pet searchedPet = await ValidateAndAssignPetAsync(petId);
 
-		return searchedPet.ToPetResponse(searchedPet.Owner, searchedPet.Colors, searchedPet.Breed);
+		return searchedPet.ToPetResponse();
 	}
 
 	public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest, Guid userId)
@@ -93,7 +93,7 @@ public class PetService : IPetService
 			throw new InternalServerErrorException();
 		}
 
-		return petToBeCreated.ToPetResponse(petOwner, colors, breed);
+		return petToBeCreated.ToPetResponse();
 	}
 
 	public async Task<PetResponse> EditPetAsync(EditPetRequest editPetRequest, Guid userId, Guid routeId)
@@ -134,7 +134,7 @@ public class PetService : IPetService
 
 		await _petRepository.CommitAsync();
 
-		return dbPet.ToPetResponse(petOwner, colors, breed);
+		return dbPet.ToPetResponse();
 	}
 
 	public async Task DeletePetAsync(Guid petId, Guid userId)
@@ -179,7 +179,7 @@ public class PetService : IPetService
 		vaccinatedPet.Vaccines = appliedVaccines;
 		await _petRepository.CommitAsync();
 
-		return vaccinatedPet.ToPetResponse(vaccinatedPet.Owner, vaccinatedPet.Colors, vaccinatedPet.Breed);
+		return vaccinatedPet.ToPetResponse();
 	}
 
 	private static bool ValidateIfVaccinesAreFromCorrectSpecies(List<Vaccine> vaccines, int speciesId)

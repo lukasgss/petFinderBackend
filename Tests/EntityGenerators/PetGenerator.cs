@@ -68,7 +68,8 @@ public static class PetGenerator
 			Images = Constants.PetData.ImageFiles,
 			BreedId = Constants.PetData.BreedId,
 			SpeciesId = Constants.PetData.SpeciesId,
-			ColorIds = Constants.PetData.ColorIds
+			ColorIds = Constants.PetData.ColorIds,
+			VaccineIds = Constants.PetData.VaccineIds
 		};
 	}
 

@@ -132,6 +132,7 @@ public class PetServiceTests
 		_breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreatePetRequest.ColorIds).Returns(Colors);
+		_vaccineRepositoryMock.GetMultipleByIdAsync(CreatePetRequest.VaccineIds).Returns(Vaccines);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
 		_valueProviderMock.NewGuid().Returns(Pet.Id);
 		_imageSubmissionServiceMock.UploadPetImageAsync(Pet.Id, CreatePetRequest.Images)
@@ -149,6 +150,7 @@ public class PetServiceTests
 		_breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreatePetRequest.ColorIds).Returns(Colors);
+		_vaccineRepositoryMock.GetMultipleByIdAsync(CreatePetRequest.VaccineIds).Returns(Vaccines);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
 		_valueProviderMock.NewGuid().Returns(Pet.Id);
 		_imageSubmissionServiceMock.UploadPetImageAsync(Pet.Id, CreatePetRequest.Images)

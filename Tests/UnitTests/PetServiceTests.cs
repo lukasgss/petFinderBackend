@@ -28,7 +28,7 @@ public class PetServiceTests
 	private readonly IColorRepository _colorRepositoryMock;
 	private readonly IUserRepository _userRepositoryMock;
 	private readonly IVaccineRepository _vaccineRepositoryMock;
-	private readonly IImageSubmissionService _imageSubmissionServiceMock;
+	private readonly IPetImageSubmissionService _imageSubmissionServiceMock;
 	private readonly IValueProvider _valueProviderMock;
 	private readonly IPetService _sut;
 
@@ -54,7 +54,7 @@ public class PetServiceTests
 		_colorRepositoryMock = Substitute.For<IColorRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
 		_vaccineRepositoryMock = Substitute.For<IVaccineRepository>();
-		_imageSubmissionServiceMock = Substitute.For<IImageSubmissionService>();
+		_imageSubmissionServiceMock = Substitute.For<IPetImageSubmissionService>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new PetService(
@@ -247,9 +247,9 @@ public class PetServiceTests
 		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(Species.Id).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditPetRequest.ColorIds).Returns(Colors);
-		_userRepositoryMock.GetUserByIdAsync(Constants.UserData.Id).Returns(User);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
-		_imageSubmissionServiceMock.UploadPetImageAsync(EditPetRequest.Id, EditPetRequest.Images)
+		_imageSubmissionServiceMock
+			.UpdatePetImageAsync(EditPetRequest.Id, EditPetRequest.Images, Pet.Images.Count)
 			.Returns(Constants.PetData.ImageUrls);
 
 		PetResponse editedPetResponse = await _sut.EditPetAsync(EditPetRequest, User.Id, EditPetRequest.Id);

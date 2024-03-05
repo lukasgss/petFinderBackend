@@ -23,7 +23,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 	private readonly IBreedRepository _breedRepository;
 	private readonly IUserRepository _userRepository;
 	private readonly IColorRepository _colorRepository;
-	private readonly IImageSubmissionService _imageSubmissionService;
+	private readonly IFoundAlertImageSubmissionService _imageSubmissionService;
 	private readonly IValueProvider _valueProvider;
 
 	public FoundAnimalAlertService(
@@ -32,7 +32,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		IBreedRepository breedRepository,
 		IUserRepository userRepository,
 		IColorRepository colorRepository,
-		IImageSubmissionService imageSubmissionService,
+		IFoundAlertImageSubmissionService imageSubmissionService,
 		IValueProvider valueProvider)
 	{
 		_foundAnimalAlertRepository = foundAnimalAlertRepository ??

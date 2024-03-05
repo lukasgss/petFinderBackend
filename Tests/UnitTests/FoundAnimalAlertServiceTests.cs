@@ -26,7 +26,7 @@ public class FoundAnimalAlertServiceTests
 	private readonly IUserRepository _userRepositoryMock;
 	private readonly IColorRepository _colorRepositoryMock;
 	private readonly IValueProvider _valueProviderMock;
-	private readonly IImageSubmissionService _imageSubmissionServiceMock;
+	private readonly IFoundAlertImageSubmissionService _imageSubmissionServiceMock;
 	private readonly IFoundAnimalAlertService _sut;
 
 	private static readonly FoundAnimalAlert FoundAnimalAlert = FoundAnimalAlertGenerator.GenerateFoundAnimalAlert();
@@ -58,7 +58,7 @@ public class FoundAnimalAlertServiceTests
 		_breedRepositoryMock = Substitute.For<IBreedRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
 		_colorRepositoryMock = Substitute.For<IColorRepository>();
-		_imageSubmissionServiceMock = Substitute.For<IImageSubmissionService>();
+		_imageSubmissionServiceMock = Substitute.For<IFoundAlertImageSubmissionService>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new FoundAnimalAlertService(
@@ -171,7 +171,8 @@ public class FoundAnimalAlertServiceTests
 		_breedRepositoryMock.GetBreedByIdAsync((int)CreateFoundAnimalAlertRequest.BreedId!).Returns(Breed);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
 		_valueProviderMock.NewGuid().Returns(FoundAnimalAlert.Id);
-		_imageSubmissionServiceMock.UploadFoundAlertImageAsync(FoundAnimalAlert.Id, CreateFoundAnimalAlertRequest.Image)
+		_imageSubmissionServiceMock
+			.UploadFoundAlertImageAsync(FoundAnimalAlert.Id, CreateFoundAnimalAlertRequest.Image)
 			.Returns(FoundAnimalAlert.Image);
 		_valueProviderMock.UtcNow().Returns(FoundAnimalAlert.RegistrationDate);
 

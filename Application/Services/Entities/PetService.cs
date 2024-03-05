@@ -24,7 +24,7 @@ public class PetService : IPetService
 	private readonly IColorRepository _colorRepository;
 	private readonly IUserRepository _userRepository;
 	private readonly IVaccineRepository _vaccineRepository;
-	private readonly IImageSubmissionService _imageSubmissionService;
+	private readonly IPetImageSubmissionService _imageSubmissionService;
 	private readonly IValueProvider _valueProvider;
 
 	public PetService(
@@ -34,7 +34,7 @@ public class PetService : IPetService
 		IColorRepository colorRepository,
 		IUserRepository userRepository,
 		IVaccineRepository vaccineRepository,
-		IImageSubmissionService imageSubmissionService,
+		IPetImageSubmissionService imageSubmissionService,
 		IValueProvider valueProvider)
 	{
 		_petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
@@ -117,7 +117,7 @@ public class PetService : IPetService
 		}
 
 		var uploadedImageUrls =
-			await _imageSubmissionService.UploadPetImageAsync(dbPet.Id, editPetRequest.Images);
+			await _imageSubmissionService.UpdatePetImageAsync(dbPet.Id, editPetRequest.Images, dbPet.Images.Count);
 		List<PetImage> uploadedImages = uploadedImageUrls
 			.Select(image => new PetImage() { ImageUrl = image, Pet = dbPet, PetId = dbPet.Id })
 			.ToList();
@@ -146,7 +146,7 @@ public class PetService : IPetService
 			throw new UnauthorizedException("Você não possui permissão para excluir o animal.");
 		}
 
-		await _imageSubmissionService.DeletePetImageAsync(petToDelete.Id);
+		await _imageSubmissionService.DeletePetImageAsync(petToDelete.Id, petToDelete.Images);
 
 		_petRepository.Delete(petToDelete);
 		await _petRepository.CommitAsync();

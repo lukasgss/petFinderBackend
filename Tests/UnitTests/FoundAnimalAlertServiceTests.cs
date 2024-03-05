@@ -31,6 +31,9 @@ public class FoundAnimalAlertServiceTests
 
 	private static readonly FoundAnimalAlert FoundAnimalAlert = FoundAnimalAlertGenerator.GenerateFoundAnimalAlert();
 
+	private static readonly FoundAnimalAlertFilters FoundAnimalAlertFilters =
+		FoundAnimalAlertGenerator.GenerateFoundAnimalAlertFilters();
+
 	private static readonly CreateFoundAnimalAlertRequest CreateFoundAnimalAlertRequest =
 		FoundAnimalAlertGenerator.GenerateCreateFoundAnimalAlertRequest();
 
@@ -44,6 +47,9 @@ public class FoundAnimalAlertServiceTests
 	private static readonly Species Species = SpeciesGenerator.GenerateSpecies();
 	private static readonly List<Color> Colors = ColorGenerator.GenerateListOfColors();
 	private static readonly Breed Breed = BreedGenerator.GenerateBreed();
+
+	private const int Page = 1;
+	private const int PageSize = 25;
 
 	public FoundAnimalAlertServiceTests()
 	{
@@ -84,6 +90,39 @@ public class FoundAnimalAlertServiceTests
 		FoundAnimalAlertResponse foundAlertResponse = await _sut.GetByIdAsync(FoundAnimalAlert.Id);
 
 		Assert.Equivalent(FoundAnimalAlertResponse, foundAlertResponse);
+	}
+
+	[Fact]
+	public async Task List_Found_Animal_Alerts_With_Page_Less_Than_1_Throws_BadRequestException()
+	{
+		const int pageSmallerThanOne = 0;
+		async Task Result() => await _sut.ListFoundAnimalAlerts(FoundAnimalAlertFilters, pageSmallerThanOne, PageSize);
+
+		var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+		Assert.Equal("Insira um número e tamanho de página maior ou igual a 1.", exception.Message);
+	}
+
+	[Fact]
+	public async Task List_Found_Animal_Alerts_With_Page_Size_Less_Than_1_Throws_BadRequestException()
+	{
+		const int pageSizeSmallerThanOne = 0;
+		async Task Result() => await _sut.ListFoundAnimalAlerts(FoundAnimalAlertFilters, Page, pageSizeSmallerThanOne);
+
+		var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+		Assert.Equal("Insira um número e tamanho de página maior ou igual a 1.", exception.Message);
+	}
+
+	[Fact]
+	public async Task List_Found_Animal_Alerts_Returns_Found_Animal_Alerts()
+	{
+		var pagedAlerts = PagedListGenerator.GeneratePagedFoundAnimalAlerts();
+		var expectedAlerts = PaginatedEntityGenerator.GeneratePaginatedFoundAnimalAlertResponse();
+		_foundAnimalAlertRepositoryMock.ListMissingAlerts(FoundAnimalAlertFilters, Page, PageSize)
+			.Returns(pagedAlerts);
+
+		var foundAnimalAlerts = await _sut.ListFoundAnimalAlerts(FoundAnimalAlertFilters, Page, PageSize);
+
+		Assert.Equivalent(expectedAlerts, foundAnimalAlerts);
 	}
 
 	[Fact]

@@ -27,6 +27,12 @@ public static class PagedListGenerator
 		return new PagedList<MissingAlert>(missingAlerts, missingAlerts.Count, pageNumber: 1, pageSize: 50);
 	}
 
+	public static PagedList<FoundAnimalAlert> GeneratePagedFoundAnimalAlerts()
+	{
+		List<FoundAnimalAlert> foundAnimalAlerts = FoundAnimalAlertGenerator.GenerateListOfAlerts();
+		return new PagedList<FoundAnimalAlert>(foundAnimalAlerts, foundAnimalAlerts.Count, pageNumber: 1, pageSize: 50);
+	}
+
 	public static PagedList<MissingAlertComment> GeneratePagedMissingAlertsComments()
 	{
 		List<MissingAlertComment> alertComments = MissingAlertCommentGenerator.GenerateListOfMissingAlertComment();

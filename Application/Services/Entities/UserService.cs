@@ -23,7 +23,7 @@ public class UserService : IUserService
 	private readonly IMessagingService _messagingService;
 	private readonly LinkGenerator _linkGenerator;
 	private readonly IIdConverterService _idConverterService;
-	private readonly IImageSubmissionService _imageSubmissionService;
+	private readonly IUserImageSubmissionService _userImageSubmissionService;
 	private readonly IValueProvider _valueProvider;
 
 	public UserService(
@@ -33,7 +33,7 @@ public class UserService : IUserService
 		IMessagingService messagingService,
 		LinkGenerator linkGenerator,
 		IIdConverterService idConverterService,
-		IImageSubmissionService imageSubmissionService,
+		IUserImageSubmissionService userImageSubmissionService,
 		IValueProvider valueProvider)
 	{
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -42,8 +42,8 @@ public class UserService : IUserService
 		_messagingService = messagingService ?? throw new ArgumentNullException(nameof(messagingService));
 		_linkGenerator = linkGenerator ?? throw new ArgumentNullException(nameof(linkGenerator));
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
-		_imageSubmissionService =
-			imageSubmissionService ?? throw new ArgumentNullException(nameof(imageSubmissionService));
+		_userImageSubmissionService =
+			userImageSubmissionService ?? throw new ArgumentNullException(nameof(userImageSubmissionService));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
@@ -63,7 +63,7 @@ public class UserService : IUserService
 	{
 		Guid userId = _valueProvider.NewGuid();
 
-		string userImageUrl = await _imageSubmissionService.UploadUserImageAsync(userId, createUserRequest.Image);
+		string userImageUrl = await _userImageSubmissionService.UploadUserImageAsync(userId, createUserRequest.Image);
 
 		User userToCreate = new()
 		{

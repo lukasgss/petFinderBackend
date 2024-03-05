@@ -44,12 +44,14 @@ public static class DependencyInjection
 		services.AddScoped<IUserMessageService, UserMessageService>();
 		services.AddScoped<IIdConverterService, IdConverterService>();
 		services.AddScoped<IImageProcessingService, ImageProcessingService>();
-		services.AddScoped<IImageSubmissionService, ImageSubmissionService>();
 		services.AddScoped<INotificationService, NotificationService>();
 		services.AddScoped<IMissingAlertCommentService, MissingAlertCommentService>();
 		services.AddScoped<IAdoptionAlertCommentService, AdoptionAlertCommentService>();
 		services.AddScoped<IFoundAnimalAlertService, FoundAnimalAlertService>();
 		services.AddScoped<IVaccineService, VaccineService>();
+		services.AddScoped<IUserImageSubmissionService, UserImageSubmissionService>();
+		services.AddScoped<IPetImageSubmissionService, PetImageSubmissionService>();
+		services.AddScoped<IFoundAlertImageSubmissionService, FoundAlertImageSubmissionService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Alerts.Comments.DTOs;
+using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.UserMessages.DTOs;
@@ -42,6 +43,18 @@ public static class PaginatedEntityGenerator
 			Data = missingAlertResponses,
 			CurrentPage = 1,
 			CurrentPageCount = missingAlertResponses.Count,
+			TotalPages = 1
+		};
+	}
+
+	public static PaginatedEntity<FoundAnimalAlertResponse> GeneratePaginatedFoundAnimalAlertResponse()
+	{
+		var foundAnimalAlertResponses = FoundAnimalAlertGenerator.GenerateListOfAlertsResponse();
+		return new PaginatedEntity<FoundAnimalAlertResponse>()
+		{
+			Data = foundAnimalAlertResponses,
+			CurrentPage = 1,
+			CurrentPageCount = foundAnimalAlertResponses.Count,
 			TotalPages = 1
 		};
 	}

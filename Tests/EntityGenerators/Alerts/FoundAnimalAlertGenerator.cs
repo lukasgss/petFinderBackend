@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 using Domain.Entities.Alerts;
+using Domain.Enums;
 using Tests.TestUtils.Constants;
 
 namespace Tests.EntityGenerators.Alerts;
@@ -28,6 +30,28 @@ public static class FoundAnimalAlertGenerator
 			Gender = Constants.FoundAnimalAlertData.Gender,
 			Colors = Constants.FoundAnimalAlertData.Colors
 		};
+	}
+
+	public static List<FoundAnimalAlert> GenerateListOfAlerts()
+	{
+		List<FoundAnimalAlert> alerts = new();
+		for (int i = 0; i < 3; i++)
+		{
+			alerts.Add(GenerateFoundAnimalAlert());
+		}
+
+		return alerts;
+	}
+
+	public static List<FoundAnimalAlertResponse> GenerateListOfAlertsResponse()
+	{
+		List<FoundAnimalAlertResponse> alertResponses = new();
+		for (int i = 0; i < 3; i++)
+		{
+			alertResponses.Add(GenerateFoundAnimalAlertResponse());
+		}
+
+		return alertResponses;
 	}
 
 	public static CreateFoundAnimalAlertRequest GenerateCreateFoundAnimalAlertRequest()
@@ -80,6 +104,21 @@ public static class FoundAnimalAlertGenerator
 			Owner = Constants.FoundAnimalAlertData.User.ToUserDataResponse(),
 			Gender = Constants.FoundAnimalAlertData.Gender.ToString(),
 			Colors = Constants.FoundAnimalAlertData.Colors.ToListOfColorResponse()
+		};
+	}
+
+	public static FoundAnimalAlertFilters GenerateFoundAnimalAlertFilters()
+	{
+		return new FoundAnimalAlertFilters()
+		{
+			Name = "Name",
+			Latitude = 29.977329046788345,
+			Longitude = 31.132637435581703,
+			RadiusDistanceInKm = 5,
+			SpeciesId = 1,
+			BreedId = 1,
+			ColorId = 1,
+			GenderId = Gender.Male
 		};
 	}
 }

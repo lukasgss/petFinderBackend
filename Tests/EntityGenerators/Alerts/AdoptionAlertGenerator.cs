@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
 using Domain.Entities.Alerts;
+using Domain.Enums;
 using Tests.TestUtils.Constants;
 
 namespace Tests.EntityGenerators.Alerts;
@@ -153,7 +154,11 @@ public static class AdoptionAlertGenerator
 			Longitude = 31.132637435581703,
 			RadiusDistanceInKm = 5,
 			Adopted = false,
-			NotAdopted = true
+			NotAdopted = true,
+			SpeciesId = 1,
+			BreedId = 1,
+			ColorId = 1,
+			GenderId = Gender.Male
 		};
 	}
 }

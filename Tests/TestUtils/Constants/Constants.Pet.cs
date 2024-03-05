@@ -29,5 +29,6 @@ public static partial class Constants
 		public static readonly int SpeciesId = Species.Id;
 		public static readonly List<Color> Colors = ColorGenerator.GenerateListOfColors();
 		public static readonly List<int> ColorIds = new() { 1 };
+		public static readonly List<int> VaccineIds = new() { 1 };
 	}
 }

@@ -60,6 +60,8 @@ public class PetService : IPetService
 		Breed breed = await ValidateAndAssignBreedAsync(createPetRequest.BreedId);
 		Species species = await ValidateAndAssignSpeciesAsync(createPetRequest.SpeciesId);
 		List<Color> colors = await ValidateAndAssignColorsAsync(createPetRequest.ColorIds);
+		List<Vaccine> vaccines =
+			await ValidateAndAssignVaccinesAsync(createPetRequest.VaccineIds, createPetRequest.SpeciesId);
 		User petOwner = await ValidateAndAssignUserAsync(userId);
 
 		Guid petId = _valueProvider.NewGuid();
@@ -69,7 +71,6 @@ public class PetService : IPetService
 			throw new BadRequestException("Não é possível adicionar 10 ou mais imagens");
 		}
 
-		// TODO: Make it possible to add vaccinations already when creating pet
 		Pet petToBeCreated = new()
 		{
 			Id = petId,
@@ -81,8 +82,8 @@ public class PetService : IPetService
 			Breed = breed,
 			Species = species,
 			Colors = colors,
+			Vaccines = vaccines,
 			Images = new List<PetImage>(0),
-			Vaccines = new List<Vaccine>(0)
 		};
 
 		List<PetImage> uploadedImages = await UploadPetImages(petToBeCreated, createPetRequest.Images);
@@ -171,10 +172,7 @@ public class PetService : IPetService
 			throw new NotFoundException("Alguma vacina com o id especificado não existe.");
 		}
 
-		if (!ValidateIfVaccinesAreFromCorrectSpecies(appliedVaccines, vaccinatedPet.Species.Id))
-		{
-			throw new BadRequestException("Não é possível adicionar vacinas de outras espécies.");
-		}
+		ValidateIfVaccinesAreFromCorrectSpecies(appliedVaccines, vaccinatedPet.Species.Id);
 
 		vaccinatedPet.Vaccines = appliedVaccines;
 		await _petRepository.CommitAsync();
@@ -182,9 +180,13 @@ public class PetService : IPetService
 		return vaccinatedPet.ToPetResponse();
 	}
 
-	private static bool ValidateIfVaccinesAreFromCorrectSpecies(List<Vaccine> vaccines, int speciesId)
+	private static void ValidateIfVaccinesAreFromCorrectSpecies(List<Vaccine> vaccines, int speciesId)
 	{
-		return vaccines.All(vaccine => vaccine.Species.Any(species => species.Id == speciesId));
+		bool isValid = vaccines.All(vaccine => vaccine.Species.Any(species => species.Id == speciesId));
+		if (!isValid)
+		{
+			throw new BadRequestException("Não é possível adicionar vacinas de outras espécies.");
+		}
 	}
 
 	private async Task<User> ValidateAndAssignUserAsync(Guid userId)
@@ -240,6 +242,19 @@ public class PetService : IPetService
 		}
 
 		return colors;
+	}
+
+	private async Task<List<Vaccine>> ValidateAndAssignVaccinesAsync(List<int> vaccineIds, int speciesId)
+	{
+		List<Vaccine> vaccines = await _vaccineRepository.GetMultipleByIdAsync(vaccineIds);
+		if (vaccines.Count != vaccineIds.Count || vaccines.Count == 0)
+		{
+			throw new NotFoundException("Alguma das vacinas especificadas não existe.");
+		}
+
+		ValidateIfVaccinesAreFromCorrectSpecies(vaccines, speciesId);
+
+		return vaccines;
 	}
 
 	private async Task<List<PetImage>> UploadPetImages(Pet petToBeCreated, List<IFormFile> submittedImages)

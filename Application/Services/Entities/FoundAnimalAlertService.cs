@@ -1,13 +1,16 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
+using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
+using Application.Extensions;
 using Domain.Entities;
 using Domain.Entities.Alerts;
 
@@ -52,6 +55,21 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		}
 
 		return foundAnimalAlert.ToFoundAnimalAlertResponse();
+	}
+
+	public async Task<PaginatedEntity<FoundAnimalAlertResponse>> ListFoundAnimalAlerts(
+		FoundAnimalAlertFilters filters, int page, int pageSize)
+	{
+		if (page < 1 || pageSize < 1)
+		{
+			throw new BadRequestException("Insira um número e tamanho de página maior ou igual a 1.");
+		}
+
+		filters.Name = filters.Name.ToStrWithoutDiacritics();
+
+		var filteredAlerts = await _foundAnimalAlertRepository.ListMissingAlerts(filters, page, pageSize);
+
+		return filteredAlerts.ToFoundAnimalAlertResponsePagedList();
 	}
 
 	public async Task<FoundAnimalAlertResponse> CreateAsync(CreateFoundAnimalAlertRequest createAlertRequest,

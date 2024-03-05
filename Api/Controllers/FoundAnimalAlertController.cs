@@ -1,6 +1,8 @@
+using Application.ApplicationConstants;
 using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
+using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Validations.Alerts.FoundAnimalAlertValidations;
 using Application.Common.Validations.Errors;
 using FluentValidation.Results;
@@ -29,6 +31,15 @@ public class FoundAnimalAlertController : ControllerBase
 	public async Task<ActionResult<FoundAnimalAlertResponse>> GetFoundAlertById(Guid alertId)
 	{
 		return await _foundAnimalAlertService.GetByIdAsync(alertId);
+	}
+
+	[HttpGet]
+	public async Task<ActionResult<PaginatedEntity<FoundAnimalAlertResponse>>> ListFoundAnimalAlerts(
+		[FromQuery] FoundAnimalAlertFilters filters,
+		int page = 1,
+		int pageSize = Constants.DefaultPageSize)
+	{
+		return await _foundAnimalAlertService.ListFoundAnimalAlerts(filters, page, pageSize);
 	}
 
 	[HttpPost]

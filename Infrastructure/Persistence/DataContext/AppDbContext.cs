@@ -31,6 +31,8 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	{
 		base.OnModelCreating(builder);
 
+		builder.HasPostgresExtension("unaccent");
+
 		builder.Entity<Breed>().HasData(SeedBreeds.Seed());
 		builder.Entity<Color>().HasData(SeedColors.Seed());
 		builder.Entity<Species>().HasData(SeedSpecies.Seed());

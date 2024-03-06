@@ -13,6 +13,8 @@ using Application.Common.Interfaces.Providers;
 using Application.Extensions;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Domain.ValueObjects;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Services.Entities;
 
@@ -86,9 +88,6 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		User? userCreating = await _userRepository.GetUserByIdAsync(userId);
 		Guid foundAlertId = _valueProvider.NewGuid();
 
-		string uploadedImageUrl =
-			await _imageSubmissionService.UploadFoundAlertImageAsync(foundAlertId, createAlertRequest.Image);
-
 		FoundAnimalAlert alertToBeCreated = new()
 		{
 			Id = foundAlertId,
@@ -98,13 +97,16 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 			FoundLocationLongitude = createAlertRequest.FoundLocationLongitude,
 			RegistrationDate = _valueProvider.UtcNow(),
 			RecoveryDate = null,
-			Image = uploadedImageUrl,
 			Gender = createAlertRequest.Gender,
 			Colors = colors,
 			Species = species,
 			Breed = breed,
-			User = userCreating!
+			User = userCreating!,
+			Images = new List<FoundAnimalAlertImage>(0),
 		};
+
+		var uploadedImageUrls = await UploadAlertImages(alertToBeCreated, createAlertRequest.Images);
+		alertToBeCreated.Images = uploadedImageUrls;
 
 		_foundAnimalAlertRepository.Add(alertToBeCreated);
 		await _foundAnimalAlertRepository.CommitAsync();
@@ -121,6 +123,11 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		}
 
 		FoundAnimalAlert? alertToBeEdited = await _foundAnimalAlertRepository.GetByIdAsync(editAlertRequest.Id);
+		if (alertToBeEdited is null)
+		{
+			throw new NotFoundException("Alerta com o id especificado não existe.");
+		}
+
 		bool canUpdate = ValidatePermissionToChange(alertToBeEdited, userId);
 		if (!canUpdate)
 		{
@@ -136,16 +143,13 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		List<Color> colors = await ValidateAndAssignColorsAsync(editAlertRequest.ColorIds);
 		Breed? breed = await ValidateAndQueryBreed(editAlertRequest.BreedId);
 
-		// TODO: Improve the way updating entities work with images, avoiding creating new AWS images
-		// everytime even though the image hasn't changed
-		string uploadedImageUrl =
-			await _imageSubmissionService.UploadFoundAlertImageAsync(alertToBeEdited!.Id, editAlertRequest.Image);
+		var uploadedImageUrls = await UpdateAlertImages(alertToBeEdited, editAlertRequest.Images);
 
 		alertToBeEdited.Name = editAlertRequest.Name;
 		alertToBeEdited.Description = editAlertRequest.Description;
 		alertToBeEdited.FoundLocationLatitude = editAlertRequest.FoundLocationLatitude;
 		alertToBeEdited.FoundLocationLongitude = editAlertRequest.FoundLocationLongitude;
-		alertToBeEdited.Image = uploadedImageUrl;
+		alertToBeEdited.Images = uploadedImageUrls;
 		alertToBeEdited.Species = species;
 		alertToBeEdited.Breed = breed;
 		alertToBeEdited.Gender = editAlertRequest.Gender;
@@ -224,5 +228,29 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		}
 
 		return colors;
+	}
+
+	private async Task<List<FoundAnimalAlertImage>> UploadAlertImages(FoundAnimalAlert animalAlert,
+		List<IFormFile> submittedImages)
+	{
+		var uploadedImageUrls =
+			await _imageSubmissionService.UploadImagesAsync(animalAlert.Id, submittedImages);
+
+		return uploadedImageUrls
+			.Select(image => new FoundAnimalAlertImage()
+				{ ImageUrl = image, FoundAnimalAlertId = animalAlert.Id, FoundAnimalAlert = animalAlert })
+			.ToList();
+	}
+
+	private async Task<List<FoundAnimalAlertImage>> UpdateAlertImages(
+		FoundAnimalAlert animalAlert, List<IFormFile> submittedImages)
+	{
+		var uploadedImageUrls =
+			await _imageSubmissionService.UpdateImagesAsync(animalAlert.Id, submittedImages, animalAlert.Images.Count);
+
+		return uploadedImageUrls
+			.Select(image => new FoundAnimalAlertImage()
+				{ ImageUrl = image, FoundAnimalAlertId = animalAlert.Id, FoundAnimalAlert = animalAlert })
+			.ToList();
 	}
 }

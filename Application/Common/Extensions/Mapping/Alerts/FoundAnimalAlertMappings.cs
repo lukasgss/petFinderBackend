@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 using Domain.Entities.Alerts;
+using Domain.ValueObjects;
 
 namespace Application.Common.Extensions.Mapping.Alerts;
 
@@ -16,12 +17,17 @@ public static class FoundAnimalAlertMappings
 			FoundLocationLongitude = foundAnimalAlert.FoundLocationLongitude,
 			RegistrationDate = foundAnimalAlert.RegistrationDate,
 			RecoveryDate = foundAnimalAlert.RecoveryDate,
-			Image = foundAnimalAlert.Image,
+			Images = foundAnimalAlert.Images.ToFoundAlertImagesResponse(),
 			Species = foundAnimalAlert.Species.ToSpeciesResponse(),
 			Breed = foundAnimalAlert.Breed?.ToBreedResponse(),
 			Owner = foundAnimalAlert.User.ToUserDataResponse(),
 			Gender = foundAnimalAlert.Gender.ToString(),
 			Colors = foundAnimalAlert.Colors.ToListOfColorResponse()
 		};
+	}
+
+	private static List<string> ToFoundAlertImagesResponse(this IEnumerable<FoundAnimalAlertImage> images)
+	{
+		return images.Select(alertImage => alertImage.ImageUrl).ToList();
 	}
 }

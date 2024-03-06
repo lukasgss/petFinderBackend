@@ -11,4 +11,5 @@ public interface IAwsS3Client
 		MemoryStream imageStream, IFormFile imageFile, string hashedAlertId);
 
 	Task<AwsS3ImageResponse> DeletePetImageAsync(string hashedPetId);
+	Task<AwsS3ImageResponse> DeleteFoundAlertImageAsync(string hashedAlertId);
 }

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Tests.EntityGenerators;
 using Tests.Fakes.Files;
@@ -18,8 +20,14 @@ public static partial class Constants
 		public const double FoundLocationLongitude = 44.322;
 		public static readonly DateTime RegistrationDate = new(2020, 1, 1);
 		public static readonly DateOnly? RecoveryDate = null;
-		public const string Image = "Image";
-		public static readonly IFormFile ImageFile = new EmptyFormFile();
+		public static readonly List<string> ImageUrls = new(1) { "Image" };
+		public static readonly List<IFormFile> ImageFiles = new(1) { new EmptyFormFile() };
+
+		public static readonly List<FoundAnimalAlertImage> FoundAnimalAlertImages = new()
+		{
+			new FoundAnimalAlertImage() { Id = 1, ImageUrl = ImageUrls.First(), FoundAnimalAlertId = Id }
+		};
+
 		public static readonly Species Species = SpeciesGenerator.GenerateSpecies();
 		public static readonly int SpeciesId = Species.Id;
 		public static readonly Breed Breed = BreedGenerator.GenerateBreed();

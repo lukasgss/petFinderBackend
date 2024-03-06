@@ -15,6 +15,7 @@ using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
 using Tests.EntityGenerators.Alerts;
+using Tests.TestUtils.Constants;
 
 namespace Tests.UnitTests;
 
@@ -172,8 +173,8 @@ public class FoundAnimalAlertServiceTests
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
 		_valueProviderMock.NewGuid().Returns(FoundAnimalAlert.Id);
 		_imageSubmissionServiceMock
-			.UploadFoundAlertImageAsync(FoundAnimalAlert.Id, CreateFoundAnimalAlertRequest.Image)
-			.Returns(FoundAnimalAlert.Image);
+			.UploadImagesAsync(FoundAnimalAlert.Id, CreateFoundAnimalAlertRequest.Images)
+			.Returns(Constants.FoundAnimalAlertData.ImageUrls);
 		_valueProviderMock.UtcNow().Returns(FoundAnimalAlert.RegistrationDate);
 
 		var createdAlertResponse = await _sut.CreateAsync(CreateFoundAnimalAlertRequest, User.Id);
@@ -267,8 +268,9 @@ public class FoundAnimalAlertServiceTests
 		_speciesRepositoryMock.GetSpeciesByIdAsync(EditFoundAnimalAlertRequest.SpeciesId).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditFoundAnimalAlertRequest.ColorIds).Returns(Colors);
 		_breedRepositoryMock.GetBreedByIdAsync((int)EditFoundAnimalAlertRequest.BreedId!).Returns(Breed);
-		_imageSubmissionServiceMock.UploadFoundAlertImageAsync(EditFoundAnimalAlertRequest.Id,
-			EditFoundAnimalAlertRequest.Image).Returns(FoundAnimalAlert.Image);
+		_imageSubmissionServiceMock.UpdateImagesAsync(EditFoundAnimalAlertRequest.Id,
+				EditFoundAnimalAlertRequest.Images, EditFoundAnimalAlertRequest.Images.Count)
+			.Returns(Constants.FoundAnimalAlertData.ImageUrls);
 
 		FoundAnimalAlertResponse foundAnimalAlertResponse =
 			await _sut.EditAsync(EditFoundAnimalAlertRequest, User.Id, EditFoundAnimalAlertRequest.Id);

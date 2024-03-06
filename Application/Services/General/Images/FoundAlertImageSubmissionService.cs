@@ -24,16 +24,23 @@ public class FoundAlertImageSubmissionService : IFoundAlertImageSubmissionServic
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
 	}
 
-	public async Task<string> UploadFoundAlertImageAsync(Guid foundAlertId, IFormFile alertImage)
+	// TODO: Add multiple images
+	public async Task<string> UploadFoundAlertImageAsync(Guid alertId, IFormFile alertImage)
 	{
-		MemoryStream compressedImage = await _imageProcessingService.CompressImageAsync(alertImage.OpenReadStream());
+		return await UploadImage(alertId, alertImage);
+	}
 
-		string hashedAlertId = _idConverterService.ConvertGuidToShortId(foundAlertId);
+	private async Task<string> UploadImage(Guid id, IFormFile image)
+	{
+		await using MemoryStream compressedImage =
+			await _imageProcessingService.CompressImageAsync(image.OpenReadStream());
 
-		AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadUserImageAsync(
+		string hashedPetId = _idConverterService.ConvertGuidToShortId(id);
+
+		AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadFoundAlertImageAsync(
 			imageStream: compressedImage,
-			imageFile: alertImage,
-			hashedAlertId);
+			imageFile: image,
+			hashedPetId);
 
 		if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
 		{

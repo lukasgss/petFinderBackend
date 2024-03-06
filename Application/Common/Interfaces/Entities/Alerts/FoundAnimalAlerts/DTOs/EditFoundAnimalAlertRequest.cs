@@ -20,7 +20,7 @@ public class EditFoundAnimalAlertRequest
 	public double FoundLocationLongitude { get; set; }
 
 	[Required(ErrorMessage = "Campo de imagem é obrigatório.")]
-	public IFormFile Image { get; set; } = null!;
+	public List<IFormFile> Images { get; set; } = null!;
 
 	[Required(ErrorMessage = "Campo de espécie é obrigatório.")]
 	public int SpeciesId { get; set; }

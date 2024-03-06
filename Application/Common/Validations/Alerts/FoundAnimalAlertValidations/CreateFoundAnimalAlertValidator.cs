@@ -23,9 +23,9 @@ public class CreateFoundAnimalAlertValidator : AbstractValidator<CreateFoundAnim
 			.NotNull()
 			.WithMessage("Campo de longitude é obrigatório.");
 
-		RuleFor(alert => alert.Image)
+		RuleFor(alert => alert.Images)
 			.NotEmpty()
-			.WithMessage("Campo de imagem é obrigatório.");
+			.WithMessage("Campo de imagens é obrigatório.");
 
 		RuleFor(alert => alert.SpeciesId)
 			.NotNull()

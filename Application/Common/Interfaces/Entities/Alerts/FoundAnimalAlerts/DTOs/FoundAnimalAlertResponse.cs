@@ -14,7 +14,7 @@ public class FoundAnimalAlertResponse
 	public double FoundLocationLongitude { get; set; }
 	public DateTime RegistrationDate { get; set; }
 	public DateOnly? RecoveryDate { get; set; }
-	public string Image { get; set; } = null!;
+	public List<string> Images { get; set; } = null!;
 	public SpeciesResponse Species { get; set; } = null!;
 	public BreedResponse? Breed { get; set; } = null!;
 	public UserDataResponse Owner { get; set; } = null!;

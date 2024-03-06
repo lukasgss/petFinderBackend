@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Enums;
+using Domain.ValueObjects;
 
 namespace Domain.Entities.Alerts;
 
@@ -25,10 +26,6 @@ public class FoundAnimalAlert
 
 	public DateOnly? RecoveryDate { get; set; }
 
-	// TODO: Add the functionality of adding multiple images
-	[MaxLength(100)]
-	public string Image { get; set; } = null!;
-
 	[Required, ForeignKey("SpeciesId")]
 	public virtual Species Species { get; set; } = null!;
 
@@ -47,4 +44,5 @@ public class FoundAnimalAlert
 	public Gender? Gender { get; set; }
 
 	public virtual ICollection<Color> Colors { get; set; } = null!;
+	public virtual List<FoundAnimalAlertImage> Images { get; set; } = null!;
 }

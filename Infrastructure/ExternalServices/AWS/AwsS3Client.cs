@@ -175,6 +175,34 @@ public class AwsS3Client : IAwsS3Client
 		}
 	}
 
+	public async Task<AwsS3ImageResponse> DeleteFoundAlertImageAsync(string hashedAlertId)
+	{
+		try
+		{
+			DeleteObjectRequest deleteObjectRequest = new()
+			{
+				BucketName = _awsData.BucketName,
+				Key = $"Images/{_awsData.FoundAlertImagesFolder}/{hashedAlertId}.webp",
+			};
+			await _s3Client.DeleteObjectAsync(deleteObjectRequest);
+
+			return new AwsS3ImageResponse()
+			{
+				Success = true,
+				PublicUrl = null
+			};
+		}
+		catch (AmazonS3Exception exception)
+		{
+			_logger.LogError(exception, exception.Message);
+			return new AwsS3ImageResponse()
+			{
+				Success = false,
+				PublicUrl = null
+			};
+		}
+	}
+
 	private string FormatPublicUrlString(string imageKey)
 	{
 		return $"https://{_awsData.BucketName}.s3.{_awsData.Region}.amazonaws.com/{imageKey}";

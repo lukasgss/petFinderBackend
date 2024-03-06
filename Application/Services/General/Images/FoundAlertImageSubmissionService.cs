@@ -24,30 +24,64 @@ public class FoundAlertImageSubmissionService : IFoundAlertImageSubmissionServic
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
 	}
 
-	// TODO: Add multiple images
-	public async Task<string> UploadFoundAlertImageAsync(Guid alertId, IFormFile alertImage)
+	public async Task<IReadOnlyList<string>> UploadImagesAsync(Guid alertId, List<IFormFile> alertImages)
 	{
-		return await UploadImage(alertId, alertImage);
+		return await UploadImages(alertId, alertImages);
 	}
 
-	private async Task<string> UploadImage(Guid id, IFormFile image)
+	public async Task<IReadOnlyList<string>> UpdateImagesAsync(
+		Guid petId, List<IFormFile> newlyAddedImages, int previousImageCount)
 	{
-		await using MemoryStream compressedImage =
-			await _imageProcessingService.CompressImageAsync(image.OpenReadStream());
+		List<string> uploadedImages = await UploadImages(petId, newlyAddedImages);
 
-		string hashedPetId = _idConverterService.ConvertGuidToShortId(id);
-
-		AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadFoundAlertImageAsync(
-			imageStream: compressedImage,
-			imageFile: image,
-			hashedPetId);
-
-		if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
+		if (uploadedImages.Count < previousImageCount)
 		{
-			throw new InternalServerErrorException(
-				"Não foi possível fazer upload da imagem, tente novamente mais tarde.");
+			await DeletePreviousImagesAsync(petId, uploadedImages.Count, previousImageCount);
 		}
 
-		return uploadedImage.PublicUrl;
+		return uploadedImages;
+	}
+
+	private async Task DeletePreviousImagesAsync(Guid id, int currentImageCount, int previousImageCount)
+	{
+		for (int index = currentImageCount; index < previousImageCount; index++)
+		{
+			string hashedId = _idConverterService.ConvertGuidToShortId(id, index);
+
+			AwsS3ImageResponse response = await _awsS3Client.DeleteFoundAlertImageAsync(hashedId);
+			if (!response.Success)
+			{
+				throw new InternalServerErrorException(
+					"Não foi possível excluir a imagem, tente novamente mais tarde.");
+			}
+		}
+	}
+
+	private async Task<List<string>> UploadImages(Guid id, List<IFormFile> images)
+	{
+		List<string> uploadedImages = new(images.Count);
+
+		for (int index = 0; index < images.Count; index++)
+		{
+			await using MemoryStream compressedImage =
+				await _imageProcessingService.CompressImageAsync(images[index].OpenReadStream());
+
+			string hashedAlertId = _idConverterService.ConvertGuidToShortId(id, index);
+
+			AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadFoundAlertImageAsync(
+				imageStream: compressedImage,
+				imageFile: images[index],
+				hashedAlertId);
+
+			if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
+			{
+				throw new InternalServerErrorException(
+					"Não foi possível fazer upload da imagem, tente novamente mais tarde.");
+			}
+
+			uploadedImages.Add(uploadedImage.PublicUrl);
+		}
+
+		return uploadedImages;
 	}
 }

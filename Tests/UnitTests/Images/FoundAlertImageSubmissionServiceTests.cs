@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
@@ -42,12 +44,12 @@ public class FoundAlertImageSubmissionServiceTests
 	public async Task Failed_Found_Alert_Image_Upload_Throws_InternalServerErrorException()
 	{
 		_awsS3ClientMock
-			.UploadFoundAlertImageAsync(Arg.Any<MemoryStream>(), CreateFoundAnimalAlertRequest.Image,
+			.UploadFoundAlertImageAsync(Arg.Any<MemoryStream>(), CreateFoundAnimalAlertRequest.Images.First(),
 				Arg.Any<string>())
 			.Returns(S3FailImageResponse);
 
 		async Task Result() =>
-			await _sut.UploadFoundAlertImageAsync(FoundAnimalAlert.Id, CreateFoundAnimalAlertRequest.Image);
+			await _sut.UploadImagesAsync(FoundAnimalAlert.Id, CreateFoundAnimalAlertRequest.Images);
 
 		var exception = await Assert.ThrowsAsync<InternalServerErrorException>(Result);
 		Assert.Equal("Não foi possível fazer upload da imagem, tente novamente mais tarde.", exception.Message);
@@ -57,13 +59,14 @@ public class FoundAlertImageSubmissionServiceTests
 	public async Task Found_Alert_Image_Upload_Returns_Uploaded_Image_Url()
 	{
 		_awsS3ClientMock
-			.UploadFoundAlertImageAsync(Arg.Any<MemoryStream>(), CreateFoundAnimalAlertRequest.Image,
+			.UploadFoundAlertImageAsync(Arg.Any<MemoryStream>(), CreateFoundAnimalAlertRequest.Images.First(),
 				Arg.Any<string>())
 			.Returns(S3SuccessImageResponse);
+		IReadOnlyList<string> expectedUrls = new List<string>() { S3SuccessImageResponse.PublicUrl! };
 
-		string uploadedUrl =
-			await _sut.UploadFoundAlertImageAsync(FoundAnimalAlert.Id, CreateFoundAnimalAlertRequest.Image);
+		var uploadedUrls =
+			await _sut.UploadImagesAsync(FoundAnimalAlert.Id, CreateFoundAnimalAlertRequest.Images);
 
-		Assert.Equal(S3SuccessImageResponse.PublicUrl, uploadedUrl);
+		Assert.Equal(expectedUrls, uploadedUrls);
 	}
 }

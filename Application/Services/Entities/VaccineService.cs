@@ -1,6 +1,6 @@
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.Vaccines;
-using Application.Common.Interfaces.Entities.Vaccines.DTOs;
+using Application.Common.Interfaces.FrontendDropdownData;
 using Domain.Entities;
 
 namespace Application.Services.Entities;
@@ -14,10 +14,10 @@ public class VaccineService : IVaccineService
 		_vaccineRepository = vaccineRepository ?? throw new ArgumentNullException(nameof(vaccineRepository));
 	}
 
-	public async Task<List<VaccineResponse>> GetVaccinesOfSpecies(int speciesId)
+	public async Task<List<DropdownDataResponse<int>>> GetVaccinesOfSpecies(int speciesId)
 	{
 		List<Vaccine> vaccines = await _vaccineRepository.GetVaccinesOfSpecies(speciesId);
 
-		return vaccines.ToVaccineResponseList();
+		return vaccines.ToVaccineDropdownResponseList();
 	}
 }

@@ -32,7 +32,7 @@ public class UserServiceTests
 	private static readonly User User = UserGenerator.GenerateUser();
 	private static readonly UserDataResponse UserDataResponse = User.ToUserDataResponse();
 	private static readonly UserResponse UserResponse = User.ToUserResponse(Constants.UserData.JwtToken);
-	private static readonly CreateUserRequest CreateUserRequest = UserGenerator.GenerateCreateUserRequestWithImage();
+	private static readonly CreateUserRequest CreateUserRequest = UserGenerator.GenerateCreateUserRequest();
 	private static readonly LoginUserRequest LoginUserRequest = UserGenerator.GenerateLoginUserRequest();
 	private static readonly EditUserRequest EditUserRequest = UserGenerator.GenerateEditUserRequest();
 

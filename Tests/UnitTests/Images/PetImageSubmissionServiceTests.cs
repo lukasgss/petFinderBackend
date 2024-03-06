@@ -27,6 +27,9 @@ public class PetImageSubmissionServiceTests
 	private static readonly AwsS3ImageResponse S3FailImageResponse =
 		AwsS3ImageGenerator.GenerateFailS3ImageResponse();
 
+	private static readonly AwsS3ImageResponse S3SuccessImageResponse =
+		AwsS3ImageGenerator.GenerateSuccessS3ImageResponse();
+
 	public PetImageSubmissionServiceTests()
 	{
 		IImageProcessingService imageProcessingServiceMock = Substitute.For<IImageProcessingService>();
@@ -63,5 +66,19 @@ public class PetImageSubmissionServiceTests
 
 		var exception = await Assert.ThrowsAsync<InternalServerErrorException>(Result);
 		Assert.Equal("Não foi possível excluir a imagem do animal, tente novamente mais tarde.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Pet_Image_Upload_Returns_Uploaded_Image_Url()
+	{
+		_awsS3ClientMock
+			.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Images.First(),
+				Arg.Any<string>())
+			.Returns(S3SuccessImageResponse);
+		List<string> expectedUrls = new() { S3SuccessImageResponse.PublicUrl! };
+
+		var uploadedUrls = await _sut.UploadPetImageAsync(Pet.Id, CreatePetRequest.Images);
+
+		Assert.Equal(expectedUrls, uploadedUrls);
 	}
 }

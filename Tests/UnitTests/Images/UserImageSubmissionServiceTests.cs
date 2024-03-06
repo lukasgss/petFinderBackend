@@ -1,6 +1,7 @@
 using System.IO;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Converters;
+using Application.Common.Interfaces.Entities.Users.DTOs;
 using Application.Common.Interfaces.ExternalServices;
 using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.General.Images;
@@ -18,9 +19,13 @@ public class UserImageSubmissionServiceTests
 	private readonly IUserImageSubmissionService _sut;
 
 	private static readonly User User = UserGenerator.GenerateUser();
+	private static readonly CreateUserRequest CreateUserRequest = UserGenerator.GenerateCreateUserRequest();
 
 	private static readonly AwsS3ImageResponse S3FailImageResponse =
 		AwsS3ImageGenerator.GenerateFailS3ImageResponse();
+
+	private static readonly AwsS3ImageResponse S3SuccessImageResponse =
+		AwsS3ImageGenerator.GenerateSuccessS3ImageResponse();
 
 	public UserImageSubmissionServiceTests()
 	{
@@ -41,5 +46,18 @@ public class UserImageSubmissionServiceTests
 
 		var exception = await Assert.ThrowsAsync<InternalServerErrorException>(Result);
 		Assert.Equal("Não foi possível fazer upload da imagem, tente novamente mais tarde.", exception.Message);
+	}
+
+	[Fact]
+	public async Task User_Image_Upload_Returns_Uploaded_Image_Url()
+	{
+		_awsS3ClientMock
+			.UploadUserImageAsync(Arg.Any<MemoryStream>(), CreateUserRequest.Image,
+				Arg.Any<string>())
+			.Returns(S3SuccessImageResponse);
+
+		string uploadedUrl = await _sut.UploadUserImageAsync(User.Id, CreateUserRequest.Image);
+
+		Assert.Equal(S3SuccessImageResponse.PublicUrl, uploadedUrl);
 	}
 }

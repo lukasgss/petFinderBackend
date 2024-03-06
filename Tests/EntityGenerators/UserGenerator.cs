@@ -43,7 +43,7 @@ public static class UserGenerator
 		};
 	}
 
-	public static CreateUserRequest GenerateCreateUserRequestWithImage()
+	public static CreateUserRequest GenerateCreateUserRequest()
 	{
 		return new CreateUserRequest()
 		{

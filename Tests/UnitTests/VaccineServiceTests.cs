@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Application.Common.Interfaces.Entities.Vaccines;
-using Application.Common.Interfaces.Entities.Vaccines.DTOs;
+using Application.Common.Interfaces.FrontendDropdownData;
 using Application.Services.Entities;
 using Domain.Entities;
 using NSubstitute;
@@ -13,6 +13,7 @@ public class VaccineServiceTests
 	private readonly IVaccineService _sut;
 
 	private const int SpeciesId = 1;
+	private const int VaccineId = 1;
 	private const string NomeVacina = "Antirrábica";
 
 	public VaccineServiceTests()
@@ -27,11 +28,11 @@ public class VaccineServiceTests
 	{
 		List<Vaccine> vaccines = new()
 		{
-			new Vaccine() { Id = SpeciesId, Name = NomeVacina }
+			new Vaccine() { Id = VaccineId, Name = NomeVacina }
 		};
-		List<VaccineResponse> expectedResponse = new()
+		List<DropdownDataResponse<int>> expectedResponse = new()
 		{
-			new VaccineResponse() { Name = NomeVacina }
+			new DropdownDataResponse<int>() { Text = NomeVacina, Value = VaccineId }
 		};
 		_vaccineRepositoryMock.GetVaccinesOfSpecies(SpeciesId).Returns(vaccines);
 

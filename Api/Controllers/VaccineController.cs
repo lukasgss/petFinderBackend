@@ -1,5 +1,5 @@
 using Application.Common.Interfaces.Entities.Vaccines;
-using Application.Common.Interfaces.Entities.Vaccines.DTOs;
+using Application.Common.Interfaces.FrontendDropdownData;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -16,7 +16,7 @@ public class VaccineController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<ActionResult<List<VaccineResponse>>> GetVaccines(int speciesId)
+	public async Task<ActionResult<List<DropdownDataResponse<int>>>> GetVaccines(int speciesId)
 	{
 		return await _vaccineService.GetVaccinesOfSpecies(speciesId);
 	}

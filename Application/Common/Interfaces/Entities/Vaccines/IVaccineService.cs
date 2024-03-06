@@ -1,8 +1,8 @@
-using Application.Common.Interfaces.Entities.Vaccines.DTOs;
+using Application.Common.Interfaces.FrontendDropdownData;
 
 namespace Application.Common.Interfaces.Entities.Vaccines;
 
 public interface IVaccineService
 {
-	Task<List<VaccineResponse>> GetVaccinesOfSpecies(int speciesId);
+	Task<List<DropdownDataResponse<int>>> GetVaccinesOfSpecies(int speciesId);
 }

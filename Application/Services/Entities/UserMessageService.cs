@@ -46,12 +46,10 @@ public class UserMessageService : IUserMessageService
 	{
 		if (currentUserId != senderId && currentUserId != receiverId)
 		{
-			throw new NotFoundException(
-				"Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.");
+			throw new ForbiddenException("Você não possui permissão para ler mensagens de outros usuários.");
 		}
 
-		var messages = await _userMessageRepository.GetAllFromUserAsync(
-			senderId, receiverId, pageNumber, pageSize);
+		var messages = await _userMessageRepository.GetAllFromUserAsync(senderId, receiverId, pageNumber, pageSize);
 
 		if (currentUserId == receiverId)
 		{

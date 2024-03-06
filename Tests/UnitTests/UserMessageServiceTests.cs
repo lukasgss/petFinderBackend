@@ -86,6 +86,18 @@ public class UserMessageServiceTests
 	}
 
 	[Fact]
+	public async Task Get_Messages_From_Other_User_Throws_ForbiddenException()
+	{
+		Guid differentUserId = Guid.NewGuid();
+
+		async Task Result() => await _sut.GetMessagesAsync(
+			UserMessage.SenderId, UserMessage.ReceiverId, differentUserId, pageNumber: 1, pageSize: 25);
+
+		var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
+		Assert.Equal("Você não possui permissão para ler mensagens de outros usuários.", exception.Message);
+	}
+
+	[Fact]
 	public async Task Get_Messages_From_Sender_Returns_Messages()
 	{
 		PagedList<UserMessage> pagedUserMessages = PagedListGenerator.GeneratePagedUserMessages();

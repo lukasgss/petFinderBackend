@@ -34,6 +34,7 @@ public class UserServiceTests
 	private static readonly UserResponse UserResponse = User.ToUserResponse(Constants.UserData.JwtToken);
 	private static readonly CreateUserRequest CreateUserRequest = UserGenerator.GenerateCreateUserRequestWithImage();
 	private static readonly LoginUserRequest LoginUserRequest = UserGenerator.GenerateLoginUserRequest();
+	private static readonly EditUserRequest EditUserRequest = UserGenerator.GenerateEditUserRequest();
 
 	public UserServiceTests()
 	{
@@ -105,6 +106,52 @@ public class UserServiceTests
 		async Task Result() => await _sut.RegisterAsync(CreateUserRequest);
 
 		await Assert.ThrowsAsync<InternalServerErrorException>(Result);
+	}
+
+	[Fact]
+	public async Task Edit_User_With_Id_Different_Than_Route_Throws_BadRequestException()
+	{
+		Guid differentRouteId = Guid.NewGuid();
+
+		async Task Result() => await _sut.EditAsync(EditUserRequest, User.Id, differentRouteId);
+
+		var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+		Assert.Equal("Id da rota não coincide com o id especificado.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Edit_Another_User_Throws_ForbiddenException()
+	{
+		Guid differentUserId = Guid.NewGuid();
+
+		async Task Result() => await _sut.EditAsync(EditUserRequest, differentUserId, EditUserRequest.Id);
+
+		var exception = await Assert.ThrowsAsync<ForbiddenException>(Result);
+		Assert.Equal("Você não possui permissão para editar este usuário.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Edit_Non_Existent_User_Throws_NotFoundException()
+	{
+		_userRepositoryMock.GetUserByIdAsync(EditUserRequest.Id).ReturnsNull();
+
+		async Task Result() => await _sut.EditAsync(EditUserRequest, User.Id, EditUserRequest.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Usuário com o id especificado não existe.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Edit_User_Returns_Edited_user()
+	{
+		_userRepositoryMock.GetUserByIdAsync(EditUserRequest.Id).Returns(User);
+		UserDataResponse expectedUserResponse = UserGenerator.GenerateUserDataResponse();
+		_userImageSubmissionServiceMock.UploadUserImageAsync(User.Id, EditUserRequest.Image)
+			.Returns(expectedUserResponse.Image);
+
+		UserDataResponse editedUser = await _sut.EditAsync(EditUserRequest, User.Id, EditUserRequest.Id);
+
+		Assert.Equivalent(expectedUserResponse, editedUser);
 	}
 
 	[Fact]

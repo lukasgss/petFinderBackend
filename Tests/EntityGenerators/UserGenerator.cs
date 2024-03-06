@@ -55,4 +55,27 @@ public static class UserGenerator
 			ConfirmPassword = Constants.UserData.Password,
 		};
 	}
+
+	public static EditUserRequest GenerateEditUserRequest()
+	{
+		return new EditUserRequest()
+		{
+			Id = Constants.UserData.Id,
+			FullName = Constants.UserData.FullName,
+			PhoneNumber = Constants.UserData.PhoneNumber,
+			Image = Constants.UserData.ImageFile,
+		};
+	}
+
+	public static UserDataResponse GenerateUserDataResponse()
+	{
+		return new UserDataResponse()
+		{
+			Id = Constants.UserData.Id,
+			FullName = Constants.UserData.FullName,
+			PhoneNumber = Constants.UserData.PhoneNumber,
+			Image = Constants.UserData.ImageUrl,
+			Email = Constants.UserData.Email
+		};
+	}
 }

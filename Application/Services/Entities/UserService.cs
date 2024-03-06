@@ -98,6 +98,36 @@ public class UserService : IUserService
 		return userToCreate.ToUserResponse(jwtToken);
 	}
 
+	public async Task<UserDataResponse> EditAsync(EditUserRequest editUserRequest, Guid userId, Guid routeId)
+	{
+		if (editUserRequest.Id != routeId)
+		{
+			throw new BadRequestException("Id da rota não coincide com o id especificado.");
+		}
+
+		if (editUserRequest.Id != userId)
+		{
+			throw new ForbiddenException("Você não possui permissão para editar este usuário.");
+		}
+
+		User? user = await _userRepository.GetUserByIdAsync(editUserRequest.Id);
+		if (user is null)
+		{
+			throw new NotFoundException("Usuário com o id especificado não existe.");
+		}
+
+		string userImageUrl = await _userImageSubmissionService.UploadUserImageAsync(userId, editUserRequest.Image);
+
+		user.FullName = editUserRequest.FullName;
+		// TODO: Later on, add some kind of phone validation with SMS
+		user.PhoneNumber = editUserRequest.PhoneNumber;
+		user.Image = userImageUrl;
+
+		await _userRepository.CommitAsync();
+
+		return user.ToUserDataResponse();
+	}
+
 	public async Task<UserResponse> LoginAsync(LoginUserRequest loginUserRequest)
 	{
 		User? userToLogin = await _userRepository.GetUserByEmailAsync(loginUserRequest.Email);

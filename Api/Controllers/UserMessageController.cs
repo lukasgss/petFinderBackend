@@ -18,74 +18,76 @@ namespace Api.Controllers;
 [Route("/api/user-messages")]
 public class UserMessageController : ControllerBase
 {
-    private readonly IUserMessageService _userMessageService;
-    private readonly IUserAuthorizationService _userAuthorizationService;
+	private readonly IUserMessageService _userMessageService;
+	private readonly IUserAuthorizationService _userAuthorizationService;
 
-    public UserMessageController(IUserMessageService userMessageService,
-        IUserAuthorizationService userAuthorizationService)
-    {
-        _userMessageService = userMessageService ?? throw new ArgumentNullException(nameof(userMessageService));
-        _userAuthorizationService = userAuthorizationService ??
-                                    throw new ArgumentNullException(nameof(userAuthorizationService));
-    }
+	public UserMessageController(IUserMessageService userMessageService,
+		IUserAuthorizationService userAuthorizationService)
+	{
+		_userMessageService = userMessageService ?? throw new ArgumentNullException(nameof(userMessageService));
+		_userAuthorizationService = userAuthorizationService ??
+		                            throw new ArgumentNullException(nameof(userAuthorizationService));
+	}
 
-    [HttpGet]
-    public async Task<ActionResult<PaginatedEntity<UserMessageResponse>>> GetAllMessages(
-        [Required] Guid senderId, [Required] Guid receiverId, int pageNumber = 1,
-        int pageSize = PagedList<UserMessage>.MaxPageSize)
-    {
-        Guid currentUserId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+	[HttpGet]
+	public async Task<ActionResult<PaginatedEntity<UserMessageResponse>>> GetAllMessages(
+		[Required] Guid senderId,
+		[Required] Guid receiverId,
+		int pageNumber = 1,
+		int pageSize = PagedList<UserMessage>.MaxPageSize)
+	{
+		Guid currentUserId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-        return await _userMessageService.GetMessagesAsync(
-            senderId, receiverId, currentUserId, pageNumber, pageSize);
-    }
+		return await _userMessageService.GetMessagesAsync(
+			senderId, receiverId, currentUserId, pageNumber, pageSize);
+	}
 
-    [HttpPost("send")]
-    public async Task<ActionResult<UserMessageResponse>> SendAsync(SendUserMessageRequest messageRequest)
-    {
-        SendUserMessageValidator requestValidator = new();
-        ValidationResult validationResult = requestValidator.Validate(messageRequest);
-        if (!validationResult.IsValid)
-        {
-            var errors = validationResult.Errors.Select(e =>
-                new ValidationError(e.PropertyName, e.ErrorMessage));
-            return BadRequest(errors);
-        }
+	[HttpPost("send")]
+	public async Task<ActionResult<UserMessageResponse>> SendAsync(SendUserMessageRequest messageRequest)
+	{
+		SendUserMessageValidator requestValidator = new();
+		ValidationResult validationResult = requestValidator.Validate(messageRequest);
+		if (!validationResult.IsValid)
+		{
+			var errors = validationResult.Errors.Select(e =>
+				new ValidationError(e.PropertyName, e.ErrorMessage));
+			return BadRequest(errors);
+		}
 
-        Guid senderId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+		Guid senderId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-        UserMessageResponse message = await _userMessageService.SendAsync(messageRequest, senderId);
+		UserMessageResponse message = await _userMessageService.SendAsync(messageRequest, senderId);
 
-        return new ObjectResult(message)
-        {
-            StatusCode = StatusCodes.Status201Created
-        };
-    }
+		return new ObjectResult(message)
+		{
+			StatusCode = StatusCodes.Status201Created
+		};
+	}
 
-    [HttpPut("{messageId:long}")]
-    public async Task<ActionResult<UserMessageResponse>> EditAsync(
-        long messageId, EditUserMessageRequest userMessage)
-    {
-        EditUserMessageValidator requestValidator = new();
-        ValidationResult validationResult = requestValidator.Validate(userMessage);
-        if (!validationResult.IsValid)
-        {
-            var errors = validationResult.Errors.Select(e =>
-                new ValidationError(e.PropertyName, e.ErrorMessage));
-            return BadRequest(errors);
-        }
+	[HttpPut("{messageId:long}")]
+	public async Task<ActionResult<UserMessageResponse>> EditAsync(
+		long messageId, EditUserMessageRequest userMessage)
+	{
+		EditUserMessageValidator requestValidator = new();
+		ValidationResult validationResult = requestValidator.Validate(userMessage);
+		if (!validationResult.IsValid)
+		{
+			var errors = validationResult.Errors.Select(e =>
+				new ValidationError(e.PropertyName, e.ErrorMessage));
+			return BadRequest(errors);
+		}
 
-        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-        return await _userMessageService.EditAsync(messageId, userMessage, userId, messageId);
-    }
+		return await _userMessageService.EditAsync(messageId, userMessage, userId, messageId);
+	}
 
-    [HttpDelete("{messageId:long}")]
-    public async Task<ActionResult> DeleteAsync(long messageId)
-    {
-        Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+	[HttpDelete("{messageId:long}")]
+	public async Task<ActionResult> DeleteAsync(long messageId)
+	{
+		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-        await _userMessageService.DeleteAsync(messageId, userId);
-        return Ok();
-    }
+		await _userMessageService.DeleteAsync(messageId, userId);
+		return Ok();
+	}
 }

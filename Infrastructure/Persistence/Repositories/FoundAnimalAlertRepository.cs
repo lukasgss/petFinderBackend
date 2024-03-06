@@ -29,7 +29,7 @@ public class FoundAnimalAlertRepository : GenericRepository<FoundAnimalAlert>, I
 			.FirstOrDefaultAsync(alert => alert.Id == alertId);
 	}
 
-	public async Task<PagedList<FoundAnimalAlert>> ListMissingAlerts(
+	public async Task<PagedList<FoundAnimalAlert>> ListAlertsAsync(
 		FoundAnimalAlertFilters filters, int pageNumber, int pageSize)
 	{
 		var query = _dbContext.FoundAnimalAlerts

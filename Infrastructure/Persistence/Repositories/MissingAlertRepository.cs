@@ -23,6 +23,8 @@ public class MissingAlertRepository : GenericRepository<MissingAlert>, IMissingA
 	{
 		return await _dbContext.MissingAlerts
 			.Include(alert => alert.Pet)
+			.ThenInclude(pet => pet.Images)
+			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Breed)
 			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Colors)
@@ -35,9 +37,13 @@ public class MissingAlertRepository : GenericRepository<MissingAlert>, IMissingA
 	{
 		var query = _dbContext.MissingAlerts
 			.Include(alert => alert.Pet)
+			.ThenInclude(pet => pet.Images)
+			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Colors)
 			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Breed)
+			.Include(alert => alert.Pet)
+			.ThenInclude(pet => pet.Vaccines)
 			.Include(alert => alert.User)
 			// filters records based if it should show only missing alerts
 			// (RecoveryDate != null), show only non recovered alerts

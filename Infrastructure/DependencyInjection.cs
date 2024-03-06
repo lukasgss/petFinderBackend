@@ -49,7 +49,7 @@ public static class DependencyInjection
 		services.ConfigureAws(configuration);
 
 		services.AddDbContext<AppDbContext>(options =>
-			options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+			options.UseNpgsql(configuration.GetConnectionString("DefaultConnection") ?? string.Empty)
 				.UseEnumCheckConstraints());
 
 		return services;

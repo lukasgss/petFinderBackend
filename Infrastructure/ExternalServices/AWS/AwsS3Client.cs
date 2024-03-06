@@ -109,6 +109,44 @@ public class AwsS3Client : IAwsS3Client
 		}
 	}
 
+	public async Task<AwsS3ImageResponse> UploadFoundAlertImageAsync(
+		MemoryStream imageStream, IFormFile imageFile, string hashedAlertId)
+	{
+		try
+		{
+			PutObjectRequest putObjectRequest = new()
+			{
+				BucketName = _awsData.BucketName,
+				// Content type and image extension is always set to webp, since
+				// the image service always encodes the image as webp format
+				Key = $"Images/{_awsData.FoundAlertImagesFolder}/{hashedAlertId}.webp",
+				ContentType = "image/webp",
+				InputStream = imageStream,
+				Metadata =
+				{
+					["x-amz-meta-originalname"] = imageFile.FileName,
+					["x-amz-meta-extension"] = ".webp"
+				}
+			};
+			await _s3Client.PutObjectAsync(putObjectRequest);
+
+			return new AwsS3ImageResponse()
+			{
+				Success = true,
+				PublicUrl = FormatPublicUrlString(putObjectRequest.Key),
+			};
+		}
+		catch (AmazonS3Exception exception)
+		{
+			_logger.LogError(exception, exception.Message);
+			return new AwsS3ImageResponse()
+			{
+				Success = false,
+				PublicUrl = null
+			};
+		}
+	}
+
 	public async Task<AwsS3ImageResponse> DeletePetImageAsync(string hashedPetId)
 	{
 		try

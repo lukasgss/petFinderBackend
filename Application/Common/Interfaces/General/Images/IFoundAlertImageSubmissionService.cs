@@ -4,5 +4,5 @@ namespace Application.Common.Interfaces.General.Images;
 
 public interface IFoundAlertImageSubmissionService
 {
-	Task<string> UploadFoundAlertImageAsync(Guid foundAlertId, IFormFile alertImage);
+	Task<string> UploadFoundAlertImageAsync(Guid alertId, IFormFile alertImage);
 }

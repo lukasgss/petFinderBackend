@@ -117,7 +117,7 @@ public class FoundAnimalAlertServiceTests
 	{
 		var pagedAlerts = PagedListGenerator.GeneratePagedFoundAnimalAlerts();
 		var expectedAlerts = PaginatedEntityGenerator.GeneratePaginatedFoundAnimalAlertResponse();
-		_foundAnimalAlertRepositoryMock.ListMissingAlerts(FoundAnimalAlertFilters, Page, PageSize)
+		_foundAnimalAlertRepositoryMock.ListAlertsAsync(FoundAnimalAlertFilters, Page, PageSize)
 			.Returns(pagedAlerts);
 
 		var foundAnimalAlerts = await _sut.ListFoundAnimalAlerts(FoundAnimalAlertFilters, Page, PageSize);

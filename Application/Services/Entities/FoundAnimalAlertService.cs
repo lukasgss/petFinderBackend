@@ -67,7 +67,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 
 		filters.Name = filters.Name.ToStrWithoutDiacritics();
 
-		var filteredAlerts = await _foundAnimalAlertRepository.ListMissingAlerts(filters, page, pageSize);
+		var filteredAlerts = await _foundAnimalAlertRepository.ListAlertsAsync(filters, page, pageSize);
 
 		return filteredAlerts.ToFoundAnimalAlertResponsePagedList();
 	}

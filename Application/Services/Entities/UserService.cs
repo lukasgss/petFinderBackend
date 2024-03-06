@@ -158,6 +158,6 @@ public class UserService : IUserService
 			values:
 			new { userId = hashedUserId, token })!;
 
-		await _messagingService.SendAccountConfirmationMessageAsync(userToCreate.Email, confirmationLink);
+		await _messagingService.SendAccountConfirmationMessageAsync(userToCreate.Email!, confirmationLink);
 	}
 }

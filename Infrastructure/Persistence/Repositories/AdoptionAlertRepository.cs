@@ -23,9 +23,13 @@ public class AdoptionAlertRepository : GenericRepository<AdoptionAlert>, IAdopti
 	{
 		return await _dbContext.AdoptionAlerts
 			.Include(alert => alert.Pet)
+			.ThenInclude(pet => pet.Images)
+			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Colors)
 			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Breed)
+			.Include(alert => alert.Pet)
+			.ThenInclude(pet => pet.Vaccines)
 			.Include(alert => alert.User)
 			.SingleOrDefaultAsync(alert => alert.Id == alertId);
 	}
@@ -35,9 +39,13 @@ public class AdoptionAlertRepository : GenericRepository<AdoptionAlert>, IAdopti
 	{
 		var query = _dbContext.AdoptionAlerts
 			.Include(alert => alert.Pet)
+			.ThenInclude(pet => pet.Images)
+			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Colors)
 			.Include(alert => alert.Pet)
 			.ThenInclude(pet => pet.Breed)
+			.Include(alert => alert.Pet)
+			.ThenInclude(pet => pet.Vaccines)
 			.Include(alert => alert.User)
 			// filters records based if it should show only adopted alerts
 			// (AdoptionDate != null), show only non adopted alerts

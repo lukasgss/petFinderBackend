@@ -9,6 +9,5 @@ public interface IFoundAnimalAlertRepository : IGenericRepository<FoundAnimalAle
 {
 	Task<FoundAnimalAlert?> GetByIdAsync(Guid alertId);
 
-	Task<PagedList<FoundAnimalAlert>> ListMissingAlerts(
-		FoundAnimalAlertFilters filters, int pageNumber, int pageSize);
+	Task<PagedList<FoundAnimalAlert>> ListAlertsAsync(FoundAnimalAlertFilters filters, int pageNumber, int pageSize);
 }

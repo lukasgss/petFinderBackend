@@ -5,6 +5,7 @@ using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
+using Application.Common.Interfaces.Entities.Alerts.UserPreferences;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Pets;
@@ -52,6 +53,7 @@ public static class DependencyInjection
 		services.AddScoped<IUserImageSubmissionService, UserImageSubmissionService>();
 		services.AddScoped<IPetImageSubmissionService, PetImageSubmissionService>();
 		services.AddScoped<IFoundAlertImageSubmissionService, FoundAlertImageSubmissionService>();
+		services.AddScoped<IFoundAnimalUserPreferencesService, FoundAnimalUserPreferencesService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

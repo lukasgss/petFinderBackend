@@ -1,5 +1,6 @@
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Domain.Entities.Alerts.UserPreferences;
 using Domain.ValueObjects;
 using Infrastructure.Persistence.DataSeed;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +28,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	public DbSet<Vaccine> Vaccines { get; set; } = null!;
 	public DbSet<PetImage> PetImage { get; set; } = null!;
 	public DbSet<FoundAnimalAlertImage> FoundAnimalAlertImages { get; set; } = null!;
+	public DbSet<FoundAnimalUserPreferences> FoundAnimalUserPreferences { get; set; } = null!;
 
 	protected override void OnModelCreating(ModelBuilder builder)
 	{

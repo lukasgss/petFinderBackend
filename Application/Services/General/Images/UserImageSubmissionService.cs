@@ -10,17 +10,17 @@ namespace Application.Services.General.Images;
 public class UserImageSubmissionService : IUserImageSubmissionService
 {
 	private readonly IImageProcessingService _imageProcessingService;
-	private readonly IAwsS3Client _awsS3Client;
+	private readonly IFileUploadClient _fileUploadClient;
 	private readonly IIdConverterService _idConverterService;
 
 	public UserImageSubmissionService(
 		IImageProcessingService imageProcessingService,
-		IAwsS3Client awsS3Client,
+		IFileUploadClient fileUploadClient,
 		IIdConverterService idConverterService)
 	{
 		_imageProcessingService =
 			imageProcessingService ?? throw new ArgumentNullException(nameof(imageProcessingService));
-		_awsS3Client = awsS3Client ?? throw new ArgumentNullException(nameof(awsS3Client));
+		_fileUploadClient = fileUploadClient ?? throw new ArgumentNullException(nameof(fileUploadClient));
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
 	}
 
@@ -32,7 +32,7 @@ public class UserImageSubmissionService : IUserImageSubmissionService
 
 		string hashedUserId = _idConverterService.ConvertGuidToShortId(userId);
 
-		AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadUserImageAsync(
+		AwsS3ImageResponse uploadedImage = await _fileUploadClient.UploadUserImageAsync(
 			imageStream: compressedImage,
 			imageFile: userImage,
 			hashedUserId);

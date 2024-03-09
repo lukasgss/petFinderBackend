@@ -24,7 +24,8 @@ using Application.Services.Converters;
 using Application.Services.Entities;
 using Application.Services.Entities.Comments;
 using Application.Services.General.Images;
-using Application.Services.General.Notifications;
+using Application.Services.General.MessageNotifications;
+using Application.Services.General.Messages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
@@ -45,7 +46,7 @@ public static class DependencyInjection
 		services.AddScoped<IUserMessageService, UserMessageService>();
 		services.AddScoped<IIdConverterService, IdConverterService>();
 		services.AddScoped<IImageProcessingService, ImageProcessingService>();
-		services.AddScoped<INotificationService, NotificationService>();
+		services.AddScoped<INotificationService, MessageNotificationService>();
 		services.AddScoped<IMissingAlertCommentService, MissingAlertCommentService>();
 		services.AddScoped<IAdoptionAlertCommentService, AdoptionAlertCommentService>();
 		services.AddScoped<IFoundAnimalAlertService, FoundAnimalAlertService>();
@@ -54,6 +55,7 @@ public static class DependencyInjection
 		services.AddScoped<IPetImageSubmissionService, PetImageSubmissionService>();
 		services.AddScoped<IFoundAlertImageSubmissionService, FoundAlertImageSubmissionService>();
 		services.AddScoped<IFoundAnimalUserPreferencesService, FoundAnimalUserPreferencesService>();
+		services.AddScoped<IAlertsMessagingService, AlertsMessagingService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

@@ -9,16 +9,16 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.ExternalServices.AWS;
 
-public class AwsS3Client : IAwsS3Client
+public class FileUploadClient : IFileUploadClient
 {
 	private readonly IAmazonS3 _s3Client;
 	private readonly AwsData _awsData;
-	private readonly ILogger<AwsS3Client> _logger;
+	private readonly ILogger<FileUploadClient> _logger;
 
-	public AwsS3Client(
+	public FileUploadClient(
 		IAmazonS3 s3Client,
 		IOptions<AwsData> awsData,
-		ILogger<AwsS3Client> logger)
+		ILogger<FileUploadClient> logger)
 	{
 		_s3Client = s3Client ?? throw new ArgumentNullException(nameof(s3Client));
 		_awsData = awsData.Value ?? throw new ArgumentNullException(nameof(awsData));

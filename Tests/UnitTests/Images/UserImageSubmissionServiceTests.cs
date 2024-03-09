@@ -15,7 +15,7 @@ namespace Tests.UnitTests.Images;
 
 public class UserImageSubmissionServiceTests
 {
-	private readonly IAwsS3Client _awsS3ClientMock;
+	private readonly IFileUploadClient _fileUploadClientMock;
 	private readonly IUserImageSubmissionService _sut;
 
 	private static readonly User User = UserGenerator.GenerateUser();
@@ -30,15 +30,16 @@ public class UserImageSubmissionServiceTests
 	public UserImageSubmissionServiceTests()
 	{
 		IImageProcessingService imageProcessingServiceMock = Substitute.For<IImageProcessingService>();
-		_awsS3ClientMock = Substitute.For<IAwsS3Client>();
+		_fileUploadClientMock = Substitute.For<IFileUploadClient>();
 		IIdConverterService idConverterServiceMock = Substitute.For<IIdConverterService>();
-		_sut = new UserImageSubmissionService(imageProcessingServiceMock, _awsS3ClientMock, idConverterServiceMock);
+		_sut = new UserImageSubmissionService(imageProcessingServiceMock, _fileUploadClientMock,
+			idConverterServiceMock);
 	}
 
 	[Fact]
 	public async Task Failed_User_Image_Upload_Throws_InternalServerErrorException()
 	{
-		_awsS3ClientMock
+		_fileUploadClientMock
 			.UploadUserImageAsync(Arg.Any<MemoryStream>(), Constants.UserData.ImageFile, Arg.Any<string>())
 			.Returns(S3FailImageResponse);
 
@@ -51,7 +52,7 @@ public class UserImageSubmissionServiceTests
 	[Fact]
 	public async Task User_Image_Upload_Returns_Uploaded_Image_Url()
 	{
-		_awsS3ClientMock
+		_fileUploadClientMock
 			.UploadUserImageAsync(Arg.Any<MemoryStream>(), CreateUserRequest.Image,
 				Arg.Any<string>())
 			.Returns(S3SuccessImageResponse);

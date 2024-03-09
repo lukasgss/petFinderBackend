@@ -17,7 +17,7 @@ namespace Tests.UnitTests.Images;
 
 public class PetImageSubmissionServiceTests
 {
-	private readonly IAwsS3Client _awsS3ClientMock;
+	private readonly IFileUploadClient _fileUploadClientMock;
 	private readonly IIdConverterService _idConverterServiceMock;
 	private readonly IPetImageSubmissionService _sut;
 
@@ -33,15 +33,16 @@ public class PetImageSubmissionServiceTests
 	public PetImageSubmissionServiceTests()
 	{
 		IImageProcessingService imageProcessingServiceMock = Substitute.For<IImageProcessingService>();
-		_awsS3ClientMock = Substitute.For<IAwsS3Client>();
+		_fileUploadClientMock = Substitute.For<IFileUploadClient>();
 		_idConverterServiceMock = Substitute.For<IIdConverterService>();
-		_sut = new PetImageSubmissionService(imageProcessingServiceMock, _awsS3ClientMock, _idConverterServiceMock);
+		_sut = new PetImageSubmissionService(imageProcessingServiceMock, _fileUploadClientMock,
+			_idConverterServiceMock);
 	}
 
 	[Fact]
 	public async Task Failed_Pet_Image_Upload_Throws_InternalServerErrorException()
 	{
-		_awsS3ClientMock
+		_fileUploadClientMock
 			.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Images.First(), Arg.Any<string>())
 			.Returns(S3FailImageResponse);
 
@@ -56,7 +57,7 @@ public class PetImageSubmissionServiceTests
 	{
 		const string hashedId = "hashedId";
 		_idConverterServiceMock.ConvertGuidToShortId(Pet.Id, Arg.Any<int>()).Returns(hashedId);
-		_awsS3ClientMock.DeletePetImageAsync(hashedId).Returns(S3FailImageResponse);
+		_fileUploadClientMock.DeletePetImageAsync(hashedId).Returns(S3FailImageResponse);
 		List<PetImage> petImages = new()
 		{
 			new PetImage() { Id = 1, Pet = PetGenerator.GeneratePet(), ImageUrl = "imageUrl" }
@@ -71,7 +72,7 @@ public class PetImageSubmissionServiceTests
 	[Fact]
 	public async Task Pet_Image_Upload_Returns_Uploaded_Image_Url()
 	{
-		_awsS3ClientMock
+		_fileUploadClientMock
 			.UploadPetImageAsync(Arg.Any<MemoryStream>(), CreatePetRequest.Images.First(),
 				Arg.Any<string>())
 			.Returns(S3SuccessImageResponse);

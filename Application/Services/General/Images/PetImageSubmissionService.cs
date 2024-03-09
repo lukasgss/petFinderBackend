@@ -11,17 +11,17 @@ namespace Application.Services.General.Images;
 public class PetImageSubmissionService : IPetImageSubmissionService
 {
 	private readonly IImageProcessingService _imageProcessingService;
-	private readonly IAwsS3Client _awsS3Client;
+	private readonly IFileUploadClient _fileUploadClient;
 	private readonly IIdConverterService _idConverterService;
 
 	public PetImageSubmissionService(
 		IImageProcessingService imageProcessingService,
-		IAwsS3Client awsS3Client,
+		IFileUploadClient fileUploadClient,
 		IIdConverterService idConverterService)
 	{
 		_imageProcessingService =
 			imageProcessingService ?? throw new ArgumentNullException(nameof(imageProcessingService));
-		_awsS3Client = awsS3Client ?? throw new ArgumentNullException(nameof(awsS3Client));
+		_fileUploadClient = fileUploadClient ?? throw new ArgumentNullException(nameof(fileUploadClient));
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
 	}
 
@@ -49,7 +49,7 @@ public class PetImageSubmissionService : IPetImageSubmissionService
 		{
 			string hashedPetId = _idConverterService.ConvertGuidToShortId(petId, index);
 
-			AwsS3ImageResponse response = await _awsS3Client.DeletePetImageAsync(hashedPetId);
+			AwsS3ImageResponse response = await _fileUploadClient.DeletePetImageAsync(hashedPetId);
 			if (!response.Success)
 			{
 				throw new InternalServerErrorException(
@@ -69,7 +69,7 @@ public class PetImageSubmissionService : IPetImageSubmissionService
 
 			string hashedPetId = _idConverterService.ConvertGuidToShortId(id, index);
 
-			AwsS3ImageResponse uploadedImage = await _awsS3Client.UploadPetImageAsync(
+			AwsS3ImageResponse uploadedImage = await _fileUploadClient.UploadPetImageAsync(
 				imageStream: compressedImage,
 				imageFile: images[index],
 				hashedPetId);
@@ -92,7 +92,7 @@ public class PetImageSubmissionService : IPetImageSubmissionService
 		{
 			string hashedId = _idConverterService.ConvertGuidToShortId(id, index);
 
-			AwsS3ImageResponse response = await _awsS3Client.DeletePetImageAsync(hashedId);
+			AwsS3ImageResponse response = await _fileUploadClient.DeletePetImageAsync(hashedId);
 			if (!response.Success)
 			{
 				throw new InternalServerErrorException(

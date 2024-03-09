@@ -17,7 +17,7 @@ namespace Tests.UnitTests.Images;
 
 public class FoundAlertImageSubmissionServiceTests
 {
-	private readonly IAwsS3Client _awsS3ClientMock;
+	private readonly IFileUploadClient _fileUploadClientMock;
 	private readonly IFoundAlertImageSubmissionService _sut;
 
 	private static readonly FoundAnimalAlert FoundAnimalAlert = FoundAnimalAlertGenerator.GenerateFoundAnimalAlert();
@@ -34,16 +34,16 @@ public class FoundAlertImageSubmissionServiceTests
 	public FoundAlertImageSubmissionServiceTests()
 	{
 		IImageProcessingService imageProcessingServiceMock = Substitute.For<IImageProcessingService>();
-		_awsS3ClientMock = Substitute.For<IAwsS3Client>();
+		_fileUploadClientMock = Substitute.For<IFileUploadClient>();
 		IIdConverterService idConverterServiceMock = Substitute.For<IIdConverterService>();
 		_sut = new FoundAlertImageSubmissionService(
-			imageProcessingServiceMock, _awsS3ClientMock, idConverterServiceMock);
+			imageProcessingServiceMock, _fileUploadClientMock, idConverterServiceMock);
 	}
 
 	[Fact]
 	public async Task Failed_Found_Alert_Image_Upload_Throws_InternalServerErrorException()
 	{
-		_awsS3ClientMock
+		_fileUploadClientMock
 			.UploadFoundAlertImageAsync(Arg.Any<MemoryStream>(), CreateFoundAnimalAlertRequest.Images.First(),
 				Arg.Any<string>())
 			.Returns(S3FailImageResponse);
@@ -58,7 +58,7 @@ public class FoundAlertImageSubmissionServiceTests
 	[Fact]
 	public async Task Found_Alert_Image_Upload_Returns_Uploaded_Image_Url()
 	{
-		_awsS3ClientMock
+		_fileUploadClientMock
 			.UploadFoundAlertImageAsync(Arg.Any<MemoryStream>(), CreateFoundAnimalAlertRequest.Images.First(),
 				Arg.Any<string>())
 			.Returns(S3SuccessImageResponse);

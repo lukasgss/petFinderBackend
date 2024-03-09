@@ -10,8 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers(options => { options.Filters.Add<CustomModelValidationAttribute>(); })
-    .ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = true; })
-    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter()); });
+	.ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = true; })
+	.AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter()); });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.ConfigureSwagger();
@@ -21,7 +21,7 @@ builder.Services.ConfigureIdentity();
 builder.Services.ConfigureJwt(builder.Configuration);
 
 builder.Services.AddApplication(builder.Configuration)
-    .AddInfrastructure(builder.Configuration);
+	.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -30,8 +30,8 @@ app.UseMiddleware<ErrorHandlerMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

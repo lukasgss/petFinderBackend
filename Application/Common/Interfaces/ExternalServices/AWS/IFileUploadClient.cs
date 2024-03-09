@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Common.Interfaces.ExternalServices.AWS;
 
-public interface IAwsS3Client
+public interface IFileUploadClient
 {
 	Task<AwsS3ImageResponse> UploadPetImageAsync(MemoryStream imageStream, IFormFile imageFile, string hashedPetId);
 	Task<AwsS3ImageResponse> UploadUserImageAsync(MemoryStream? imageStream, IFormFile? imageFile, string hashedUserId);

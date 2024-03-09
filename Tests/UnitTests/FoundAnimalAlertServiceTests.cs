@@ -9,6 +9,7 @@ using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
+using Application.Services.General.Messages;
 using Domain.Entities;
 using Domain.Entities.Alerts;
 using NSubstitute;
@@ -28,6 +29,7 @@ public class FoundAnimalAlertServiceTests
 	private readonly IColorRepository _colorRepositoryMock;
 	private readonly IValueProvider _valueProviderMock;
 	private readonly IFoundAlertImageSubmissionService _imageSubmissionServiceMock;
+	private readonly IAlertsMessagingService _alertsMessagingServiceMock;
 	private readonly IFoundAnimalAlertService _sut;
 
 	private static readonly FoundAnimalAlert FoundAnimalAlert = FoundAnimalAlertGenerator.GenerateFoundAnimalAlert();
@@ -60,6 +62,7 @@ public class FoundAnimalAlertServiceTests
 		_userRepositoryMock = Substitute.For<IUserRepository>();
 		_colorRepositoryMock = Substitute.For<IColorRepository>();
 		_imageSubmissionServiceMock = Substitute.For<IFoundAlertImageSubmissionService>();
+		_alertsMessagingServiceMock = Substitute.For<IAlertsMessagingService>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new FoundAnimalAlertService(
@@ -69,6 +72,7 @@ public class FoundAnimalAlertServiceTests
 			_userRepositoryMock,
 			_colorRepositoryMock,
 			_imageSubmissionServiceMock,
+			_alertsMessagingServiceMock,
 			_valueProviderMock);
 	}
 

@@ -11,6 +11,7 @@ using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.Providers;
 using Application.Extensions;
+using Application.Services.General.Messages;
 using Domain.Entities;
 using Domain.Entities.Alerts;
 using Domain.ValueObjects;
@@ -26,6 +27,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 	private readonly IUserRepository _userRepository;
 	private readonly IColorRepository _colorRepository;
 	private readonly IFoundAlertImageSubmissionService _imageSubmissionService;
+	private readonly IAlertsMessagingService _alertsMessagingService;
 	private readonly IValueProvider _valueProvider;
 
 	public FoundAnimalAlertService(
@@ -35,6 +37,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		IUserRepository userRepository,
 		IColorRepository colorRepository,
 		IFoundAlertImageSubmissionService imageSubmissionService,
+		IAlertsMessagingService alertsMessagingService,
 		IValueProvider valueProvider)
 	{
 		_foundAnimalAlertRepository = foundAnimalAlertRepository ??
@@ -45,6 +48,8 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		_speciesRepository = speciesRepository ?? throw new ArgumentNullException(nameof(speciesRepository));
 		_breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+		_alertsMessagingService =
+			alertsMessagingService ?? throw new ArgumentNullException(nameof(alertsMessagingService));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
@@ -110,6 +115,8 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 
 		_foundAnimalAlertRepository.Add(alertToBeCreated);
 		await _foundAnimalAlertRepository.CommitAsync();
+
+		_alertsMessagingService.PublishFoundAlert(alertToBeCreated);
 
 		return alertToBeCreated.ToFoundAnimalAlertResponse();
 	}

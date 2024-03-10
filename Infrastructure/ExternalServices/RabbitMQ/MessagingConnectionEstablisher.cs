@@ -7,16 +7,16 @@ namespace Infrastructure.ExternalServices.RabbitMQ;
 public class MessagingConnectionEstablisher : IMessagingConnectionEstablisher
 {
 	private readonly RabbitMqData _rabbitMqData;
-	private readonly IConnection? _connection = null;
+	private IConnection? _connection;
 
 	public MessagingConnectionEstablisher(IOptions<RabbitMqData> rabbitMqData)
 	{
-		_rabbitMqData = rabbitMqData.Value;
+		_rabbitMqData = rabbitMqData.Value ?? throw new ArgumentNullException(nameof(rabbitMqData));
 	}
 
 	public IConnection EstablishConnection()
 	{
-		if (_connection is not null)
+		if (_connection is not null && _connection.IsOpen)
 		{
 			return _connection;
 		}
@@ -28,7 +28,8 @@ public class MessagingConnectionEstablisher : IMessagingConnectionEstablisher
 			Password = _rabbitMqData.Password,
 			Port = _rabbitMqData.Port,
 		};
+		_connection = factory.CreateConnection();
 
-		return factory.CreateConnection();
+		return _connection;
 	}
 }

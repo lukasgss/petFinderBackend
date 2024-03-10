@@ -15,13 +15,14 @@ public class MessagePublisherClient : IMessagePublisherClient
 	public MessagePublisherClient(IMessagingConnectionEstablisher messagingConnectionEstablisher,
 		IOptions<RabbitMqData> rabbitMqData)
 	{
-		_messagingConnectionEstablisher = messagingConnectionEstablisher;
-		_rabbitMqData = rabbitMqData.Value;
+		_messagingConnectionEstablisher = messagingConnectionEstablisher ??
+		                                  throw new ArgumentNullException(nameof(messagingConnectionEstablisher));
+		_rabbitMqData = rabbitMqData.Value ?? throw new ArgumentNullException(nameof(rabbitMqData));
 	}
 
 	public void PublishMessage<T>(T message) where T : class
 	{
-		using IConnection connection = _messagingConnectionEstablisher.EstablishConnection();
+		IConnection connection = _messagingConnectionEstablisher.EstablishConnection();
 		using IModel channel = connection.CreateModel();
 
 		SetupRouting(channel);

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Entities.Alerts.Notifications;
 using Domain.Enums;
 using Domain.ValueObjects;
 
@@ -45,4 +46,5 @@ public class FoundAnimalAlert
 
 	public virtual ICollection<Color> Colors { get; set; } = null!;
 	public virtual List<FoundAnimalAlertImage> Images { get; set; } = null!;
+	public virtual ICollection<FoundAnimalAlertNotifications> FoundAnimalAlertNotifications { get; set; } = null!;
 }

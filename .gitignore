@@ -7,3 +7,4 @@
 .vscode
 .idea
 backend.sln.DotSettings.user
+nuget.config

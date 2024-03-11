@@ -2,7 +2,7 @@ using Domain.Enums;
 
 namespace Application.Common.Interfaces.Entities.Alerts.UserPreferences.DTOs;
 
-public class EditFoundAnimalUserPreferences
+public class CreateAlertsUserPreferences
 {
 	public double? FoundLocationLatitude { get; set; }
 	public double? FoundLocationLongitude { get; set; }

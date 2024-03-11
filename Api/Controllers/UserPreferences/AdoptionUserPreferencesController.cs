@@ -1,6 +1,6 @@
 using Application.Common.Interfaces.Authorization;
+using Application.Common.Interfaces.Entities.Alerts.UserPreferences.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.UserPreferences.DTOs;
-using Application.Common.Interfaces.Entities.Alerts.UserPreferences.FoundAnimalAlerts;
 using Application.Common.Validations.Alerts.UserPreferences;
 using Application.Common.Validations.Errors;
 using FluentValidation.Results;
@@ -10,28 +10,29 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers.UserPreferences;
 
 [ApiController]
-[Route("/api/user-preferences/found-animals")]
-public class FoundAnimalUserPreferencesController : ControllerBase
+[Route("/api/user-preferences/adoptions")]
+public class AdoptionUserPreferencesController : ControllerBase
 {
-	private readonly IFoundAnimalUserPreferencesService _foundAnimalUserPreferencesService;
+	private readonly IAdoptionAlertUserPreferencesService _adoptionAlertUserPreferencesService;
 	private readonly IUserAuthorizationService _userAuthorizationService;
 
-	public FoundAnimalUserPreferencesController(IFoundAnimalUserPreferencesService foundAnimalUserPreferencesService,
+	public AdoptionUserPreferencesController(IAdoptionAlertUserPreferencesService adoptionAlertUserPreferencesService,
 		IUserAuthorizationService userAuthorizationService)
 	{
-		_foundAnimalUserPreferencesService = foundAnimalUserPreferencesService ??
-		                                     throw new ArgumentNullException(nameof(foundAnimalUserPreferencesService));
+		_adoptionAlertUserPreferencesService = adoptionAlertUserPreferencesService ??
+		                                       throw new ArgumentNullException(
+			                                       nameof(adoptionAlertUserPreferencesService));
 		_userAuthorizationService = userAuthorizationService ??
 		                            throw new ArgumentNullException(nameof(userAuthorizationService));
 	}
 
 	[Authorize]
-	[HttpGet(Name = "GetFoundAnimalUserPreferences")]
-	public async Task<ActionResult<UserPreferencesResponse>> GetFoundAnimalUserPreferences()
+	[HttpGet(Name = "GetAdoptionUserPreferences")]
+	public async Task<ActionResult<UserPreferencesResponse>> GetAdoptionUserPreferences()
 	{
 		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-		return await _foundAnimalUserPreferencesService.GetUserPreferences(userId);
+		return await _adoptionAlertUserPreferencesService.GetUserPreferences(userId);
 	}
 
 	[Authorize]
@@ -50,9 +51,10 @@ public class FoundAnimalUserPreferencesController : ControllerBase
 
 		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-		var userPreferences = await _foundAnimalUserPreferencesService.CreatePreferences(createUserPreferences, userId);
+		UserPreferencesResponse userPreferences =
+			await _adoptionAlertUserPreferencesService.CreatePreferences(createUserPreferences, userId);
 
-		return new CreatedAtRouteResult(nameof(GetFoundAnimalUserPreferences), null, userPreferences);
+		return new CreatedAtRouteResult(nameof(GetAdoptionUserPreferences), null, userPreferences);
 	}
 
 	[Authorize]
@@ -71,6 +73,6 @@ public class FoundAnimalUserPreferencesController : ControllerBase
 
 		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
 
-		return await _foundAnimalUserPreferencesService.EditPreferences(editUserPreferences, userId);
+		return await _adoptionAlertUserPreferencesService.EditPreferences(editUserPreferences, userId);
 	}
 }

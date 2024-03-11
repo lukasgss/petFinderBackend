@@ -1,23 +1,23 @@
-using Application.Common.Interfaces.Entities.Alerts.UserPreferences.FoundAnimalAlerts;
+using Application.Common.Interfaces.Entities.Alerts.UserPreferences.AdoptionAlerts;
 using Domain.Entities.Alerts.UserPreferences;
 using Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
 
-public class FoundAnimalUserPreferencesRepository : GenericRepository<FoundAnimalUserPreferences>,
-	IFoundAnimalUserPreferencesRepository
+public class AdoptionUserPreferencesRepository : GenericRepository<AdoptionUserPreferences>,
+	IAdoptionUserPreferencesRepository
 {
 	private readonly AppDbContext _dbContext;
 
-	public FoundAnimalUserPreferencesRepository(AppDbContext dbContext) : base(dbContext)
+	public AdoptionUserPreferencesRepository(AppDbContext dbContext) : base(dbContext)
 	{
 		_dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 	}
 
-	public async Task<FoundAnimalUserPreferences?> GetUserPreferences(Guid userId)
+	public async Task<AdoptionUserPreferences?> GetUserPreferences(Guid userId)
 	{
-		return await _dbContext.FoundAnimalUserPreferences
+		return await _dbContext.AdoptionUserPreferences
 			.Include(preferences => preferences.Breed)
 			.Include(preferences => preferences.User)
 			.Include(preferences => preferences.Colors)

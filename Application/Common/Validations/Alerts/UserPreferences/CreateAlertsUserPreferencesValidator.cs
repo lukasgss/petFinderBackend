@@ -4,9 +4,9 @@ using FluentValidation;
 
 namespace Application.Common.Validations.Alerts.UserPreferences;
 
-public class CreateFoundAnimalUserPreferencesValidator : AbstractValidator<CreateFoundAnimalUserPreferences>
+public class CreateAlertsUserPreferencesValidator : AbstractValidator<CreateAlertsUserPreferences>
 {
-	public CreateFoundAnimalUserPreferencesValidator()
+	public CreateAlertsUserPreferencesValidator()
 	{
 		RuleFor(alert => alert.FoundLocationLatitude)
 			.NotNull()

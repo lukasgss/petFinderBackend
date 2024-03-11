@@ -2,7 +2,8 @@ using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
-using Application.Common.Interfaces.Entities.Alerts.UserPreferences;
+using Application.Common.Interfaces.Entities.Alerts.UserPreferences.AdoptionAlerts;
+using Application.Common.Interfaces.Entities.Alerts.UserPreferences.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
@@ -48,6 +49,7 @@ public static class DependencyInjection
 		services.AddScoped<IVaccineRepository, VaccineRepository>();
 		services.AddScoped<IFoundAnimalUserPreferencesRepository, FoundAnimalUserPreferencesRepository>();
 		services.AddScoped<IMessagePublisherClient, MessagePublisherClient>();
+		services.AddScoped<IAdoptionUserPreferencesRepository, AdoptionUserPreferencesRepository>();
 
 		services.AddScoped<IFileUploadClient, FileUploadClient>();
 		services.Configure<AwsData>(configuration.GetSection("AWS"));

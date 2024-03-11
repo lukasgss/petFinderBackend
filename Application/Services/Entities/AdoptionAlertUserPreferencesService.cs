@@ -1,7 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping.Alerts.UserPreferences;
+using Application.Common.Interfaces.Entities.Alerts.UserPreferences.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.UserPreferences.DTOs;
-using Application.Common.Interfaces.Entities.Alerts.UserPreferences.FoundAnimalAlerts;
 using Application.Common.Interfaces.General.UserPreferences;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
@@ -9,21 +9,20 @@ using Domain.Entities.Alerts.UserPreferences;
 
 namespace Application.Services.Entities;
 
-public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesService
+public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferencesService
 {
-	private readonly IFoundAnimalUserPreferencesRepository _foundAnimalUserPreferencesRepository;
+	private readonly IAdoptionUserPreferencesRepository _adoptionUserPreferencesRepository;
 	private readonly IUserPreferencesValidations _userPreferencesValidations;
 	private readonly IValueProvider _valueProvider;
 
 
-	public FoundAnimalUserPreferencesService(
-		IFoundAnimalUserPreferencesRepository foundAnimalUserPreferencesRepository,
+	public AdoptionAlertUserPreferencesService(
+		IAdoptionUserPreferencesRepository adoptionUserPreferencesRepository,
 		IUserPreferencesValidations userPreferencesValidations,
 		IValueProvider valueProvider)
 	{
-		_foundAnimalUserPreferencesRepository = foundAnimalUserPreferencesRepository ??
-		                                        throw new ArgumentNullException(
-			                                        nameof(foundAnimalUserPreferencesRepository));
+		_adoptionUserPreferencesRepository = adoptionUserPreferencesRepository ??
+		                                     throw new ArgumentNullException(nameof(adoptionUserPreferencesRepository));
 		_userPreferencesValidations = userPreferencesValidations ??
 		                              throw new ArgumentNullException(nameof(userPreferencesValidations));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
@@ -31,24 +30,25 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 
 	public async Task<UserPreferencesResponse> GetUserPreferences(Guid currentUserId)
 	{
-		FoundAnimalUserPreferences? userPreferences =
-			await _foundAnimalUserPreferencesRepository.GetUserPreferences(currentUserId);
+		AdoptionUserPreferences? userPreferences =
+			await _adoptionUserPreferencesRepository.GetUserPreferences(currentUserId);
 		if (userPreferences is null)
 		{
-			throw new NotFoundException("Ainda não foram definidas preferências para este usuário.");
+			throw new NotFoundException(
+				"Ainda não foram definidas preferências desse tipo de alerta para este usuário.");
 		}
 
-		return userPreferences.ToFoundAnimalUserPreferencesResponse();
+		return userPreferences.ToAdoptionUserPreferencesResponse();
 	}
 
-	public async Task<UserPreferencesResponse> CreatePreferences(
-		CreateAlertsUserPreferences createUserPreferences, Guid userId)
+	public async Task<UserPreferencesResponse> CreatePreferences(CreateAlertsUserPreferences createUserPreferences,
+		Guid userId)
 	{
-		FoundAnimalUserPreferences? dbUserPreferences =
-			await _foundAnimalUserPreferencesRepository.GetUserPreferences(userId);
+		AdoptionUserPreferences? dbUserPreferences =
+			await _adoptionUserPreferencesRepository.GetUserPreferences(userId);
 		if (dbUserPreferences is not null)
 		{
-			throw new BadRequestException("Usuário já possui preferências cadastradas.");
+			throw new BadRequestException("Usuário já possui preferências cadastradas para esse tipo de alerta.");
 		}
 
 		Species? species =
@@ -59,7 +59,7 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 			await _userPreferencesValidations.ValidateAndAssignColorsAsync(createUserPreferences.ColorIds);
 		User user = await _userPreferencesValidations.AssignUserAsync(userId);
 
-		FoundAnimalUserPreferences foundAnimalUserPreferences = new()
+		AdoptionUserPreferences adoptionUserPreferences = new()
 		{
 			Id = _valueProvider.NewGuid(),
 			User = user,
@@ -75,20 +75,20 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 			RadiusDistanceInKm = createUserPreferences.RadiusDistanceInKm
 		};
 
-		_foundAnimalUserPreferencesRepository.Add(foundAnimalUserPreferences);
-		await _foundAnimalUserPreferencesRepository.CommitAsync();
+		_adoptionUserPreferencesRepository.Add(adoptionUserPreferences);
+		await _adoptionUserPreferencesRepository.CommitAsync();
 
-		return foundAnimalUserPreferences.ToFoundAnimalUserPreferencesResponse();
+		return adoptionUserPreferences.ToAdoptionUserPreferencesResponse();
 	}
 
 	public async Task<UserPreferencesResponse> EditPreferences(
 		EditAlertsUserPreferences editUserPreferences, Guid userId)
 	{
-		FoundAnimalUserPreferences? dbUserPreferences =
-			await _foundAnimalUserPreferencesRepository.GetUserPreferences(userId);
+		AdoptionUserPreferences? dbUserPreferences =
+			await _adoptionUserPreferencesRepository.GetUserPreferences(userId);
 		if (dbUserPreferences is null)
 		{
-			throw new BadRequestException("Usuário não possui preferências cadastradas.");
+			throw new BadRequestException("Usuário não possui preferências cadastradas para esse tipo de alerta.");
 		}
 
 		Species? species =
@@ -111,8 +111,8 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 		dbUserPreferences.FoundLocationLongitude = editUserPreferences.FoundLocationLongitude;
 		dbUserPreferences.RadiusDistanceInKm = editUserPreferences.RadiusDistanceInKm;
 
-		await _foundAnimalUserPreferencesRepository.CommitAsync();
+		await _adoptionUserPreferencesRepository.CommitAsync();
 
-		return dbUserPreferences.ToFoundAnimalUserPreferencesResponse();
+		return dbUserPreferences.ToAdoptionUserPreferencesResponse();
 	}
 }

@@ -29,6 +29,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	public DbSet<PetImage> PetImage { get; set; } = null!;
 	public DbSet<FoundAnimalAlertImage> FoundAnimalAlertImages { get; set; } = null!;
 	public DbSet<FoundAnimalUserPreferences> FoundAnimalUserPreferences { get; set; } = null!;
+	public DbSet<AdoptionUserPreferences> AdoptionUserPreferences { get; set; } = null!;
 
 	protected override void OnModelCreating(ModelBuilder builder)
 	{

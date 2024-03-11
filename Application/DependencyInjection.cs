@@ -5,7 +5,8 @@ using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
-using Application.Common.Interfaces.Entities.Alerts.UserPreferences;
+using Application.Common.Interfaces.Entities.Alerts.UserPreferences.AdoptionAlerts;
+using Application.Common.Interfaces.Entities.Alerts.UserPreferences.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Pets;
@@ -14,6 +15,7 @@ using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Entities.Vaccines;
 using Application.Common.Interfaces.General.Images;
 using Application.Common.Interfaces.General.Notifications;
+using Application.Common.Interfaces.General.UserPreferences;
 using Application.Common.Interfaces.Messaging;
 using Application.Common.Interfaces.Providers;
 using Application.Common.Providers;
@@ -26,6 +28,7 @@ using Application.Services.Entities.Comments;
 using Application.Services.General.Images;
 using Application.Services.General.MessageNotifications;
 using Application.Services.General.Messages;
+using Application.Services.General.UserPreferences;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
@@ -56,6 +59,8 @@ public static class DependencyInjection
 		services.AddScoped<IFoundAlertImageSubmissionService, FoundAlertImageSubmissionService>();
 		services.AddScoped<IFoundAnimalUserPreferencesService, FoundAnimalUserPreferencesService>();
 		services.AddScoped<IAlertsMessagingService, AlertsMessagingService>();
+		services.AddScoped<IUserPreferencesValidations, UserPreferencesValidations>();
+		services.AddScoped<IAdoptionAlertUserPreferencesService, AdoptionAlertUserPreferencesService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

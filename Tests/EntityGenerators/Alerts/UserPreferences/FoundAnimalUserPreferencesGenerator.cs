@@ -25,9 +25,9 @@ public static class FoundAnimalUserPreferencesGenerator
 		};
 	}
 
-	public static CreateFoundAnimalUserPreferences GenerateCreateFoundAnimalUserPreferences()
+	public static CreateAlertsUserPreferences GenerateCreateFoundAnimalUserPreferences()
 	{
-		return new CreateFoundAnimalUserPreferences()
+		return new CreateAlertsUserPreferences()
 		{
 			ColorIds = Constants.FoundAnimalUserPreferencesData.ColorIds,
 			SpeciesId = Constants.FoundAnimalUserPreferencesData.SpeciesId,

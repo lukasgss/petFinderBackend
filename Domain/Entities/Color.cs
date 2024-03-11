@@ -18,4 +18,5 @@ public class Color
 
 	public virtual ICollection<FoundAnimalAlert> FoundAnimalAlerts { get; set; } = null!;
 	public virtual ICollection<FoundAnimalUserPreferences> FoundAnimalUserPreferences { get; set; } = null!;
+	public virtual ICollection<AdoptionUserPreferences> AdoptionUserPreferences { get; set; } = null!;
 }

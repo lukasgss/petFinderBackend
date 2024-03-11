@@ -5,7 +5,7 @@ using Application.Common.Interfaces.Entities.Users.DTOs;
 
 namespace Application.Common.Interfaces.Entities.Alerts.UserPreferences.DTOs;
 
-public class FoundAnimalUserPreferencesResponse
+public class UserPreferencesResponse
 {
 	public required Guid Id { get; set; }
 

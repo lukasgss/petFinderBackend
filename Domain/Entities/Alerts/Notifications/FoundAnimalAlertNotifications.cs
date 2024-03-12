@@ -5,7 +5,7 @@ namespace Domain.Entities.Alerts.Notifications;
 
 public class FoundAnimalAlertNotifications
 {
-	public required long Id { get; set; }
+	public long Id { get; set; }
 
 	[Required]
 	public required DateTime TimeStampUtc { get; set; }

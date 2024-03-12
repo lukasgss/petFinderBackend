@@ -21,9 +21,9 @@ public class AlertsMessagingService : IAlertsMessagingService
 			foundAlert.FoundLocationLatitude,
 			foundAlert.FoundLocationLongitude,
 			foundAlert.Gender,
-			speciesId = foundAlert.Species.Id,
-			breedId = foundAlert.Breed?.Id,
-			colors = foundAlert.Colors.Select(color => color.Id)
+			SpeciesId = foundAlert.Species.Id,
+			BreedId = foundAlert.Breed?.Id,
+			ColorIds = foundAlert.Colors.Select(color => color.Id)
 		};
 
 		_messagePublisherClient.PublishMessage(data);

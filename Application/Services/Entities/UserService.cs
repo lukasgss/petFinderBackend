@@ -195,11 +195,6 @@ public class UserService : IUserService
 			}
 		}
 
-		if (user is null)
-		{
-			throw new BadRequestException("External authentication is invalid.");
-		}
-
 		string token = _jwtTokenGenerator.GenerateToken(user.Id, user.FullName);
 
 		return user.ToUserResponse(token);

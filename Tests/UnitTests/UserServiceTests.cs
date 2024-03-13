@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Authentication;
+using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Entities.Users.DTOs;
@@ -26,15 +27,28 @@ public class UserServiceTests
 	private readonly IJwtTokenGenerator _jwtTokenGeneratorMock;
 	private readonly IIdConverterService _idConverterServiceMock;
 	private readonly IUserImageSubmissionService _userImageSubmissionServiceMock;
+	private readonly IExternalAuthHandler _externalAuthHandlerMock;
 	private readonly IValueProvider _valueProviderMock;
 	private readonly IUserService _sut;
 
 	private static readonly User User = UserGenerator.GenerateUser();
 	private static readonly UserDataResponse UserDataResponse = User.ToUserDataResponse();
-	private static readonly UserResponse UserResponse = User.ToUserResponse(Constants.UserData.JwtToken);
+	private static readonly UserResponse ExpectedUserResponse = User.ToUserResponse(Constants.UserData.JwtToken);
+
+	private static readonly UserResponse ExpectedUserResponseWithoutPhoneNumber =
+		UserGenerator.GenerateUserResponseWithoutPhoneNumber();
+
 	private static readonly CreateUserRequest CreateUserRequest = UserGenerator.GenerateCreateUserRequest();
 	private static readonly LoginUserRequest LoginUserRequest = UserGenerator.GenerateLoginUserRequest();
 	private static readonly EditUserRequest EditUserRequest = UserGenerator.GenerateEditUserRequest();
+
+	private static readonly ExternalAuthRequest
+		ExternalAuthRequest = new() { Provider = "Google", IdToken = "IdToken" };
+
+	private static readonly GooglePayload GooglePayload = new()
+	{
+		Email = User.Email!, Subject = "subject", Image = User.Image, FullName = User.FullName
+	};
 
 	public UserServiceTests()
 	{
@@ -45,6 +59,7 @@ public class UserServiceTests
 		LinkGenerator linkGeneratorMock = Substitute.For<LinkGenerator>();
 		_idConverterServiceMock = Substitute.For<IIdConverterService>();
 		_userImageSubmissionServiceMock = Substitute.For<IUserImageSubmissionService>();
+		_externalAuthHandlerMock = Substitute.For<IExternalAuthHandler>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new UserService(
@@ -55,6 +70,7 @@ public class UserServiceTests
 			linkGeneratorMock,
 			_idConverterServiceMock,
 			_userImageSubmissionServiceMock,
+			_externalAuthHandlerMock,
 			_valueProviderMock);
 	}
 
@@ -107,6 +123,61 @@ public class UserServiceTests
 
 		await Assert.ThrowsAsync<InternalServerErrorException>(Result);
 	}
+
+	[Fact]
+	public async Task External_Login_With_Invalid_Request_Throws_BadRequestException()
+	{
+		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).ReturnsNull();
+
+		async Task Result() => await _sut.ExternalLoginAsync(ExternalAuthRequest);
+
+		var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
+		Assert.Equal("External authentication is invalid.", exception.Message);
+	}
+
+	[Fact]
+	public async Task Login_With_Existing_Oauth_User_Returns_User_Data()
+	{
+		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).Returns(GooglePayload);
+		UserLoginInfo info = new(ExternalAuthRequest.Provider, GooglePayload.Subject, ExternalAuthRequest.Provider);
+		_userRepositoryMock.FindByLoginAsync(info.LoginProvider, info.ProviderKey).Returns(User);
+		_jwtTokenGeneratorMock.GenerateToken(User.Id, User.FullName).Returns(ExpectedUserResponse.Token);
+
+		UserResponse userResponse = await _sut.ExternalLoginAsync(ExternalAuthRequest);
+
+		Assert.Equivalent(ExpectedUserResponse, userResponse);
+	}
+
+	[Fact]
+	public async Task Login_With_Non_Existent_Oauth_User_Returns_User_Data()
+	{
+		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).Returns(GooglePayload);
+		UserLoginInfo info = new(ExternalAuthRequest.Provider, GooglePayload.Subject, ExternalAuthRequest.Provider);
+		_userRepositoryMock.FindByLoginAsync(info.LoginProvider, info.ProviderKey).ReturnsNull();
+		_userRepositoryMock.FindByEmailAsync(GooglePayload.Email).ReturnsNull();
+		_valueProviderMock.NewGuid().Returns(User.Id);
+		_jwtTokenGeneratorMock.GenerateToken(User.Id, User.FullName)
+			.Returns(ExpectedUserResponseWithoutPhoneNumber.Token);
+
+		UserResponse userResponse = await _sut.ExternalLoginAsync(ExternalAuthRequest);
+
+		Assert.Equivalent(ExpectedUserResponseWithoutPhoneNumber, userResponse);
+	}
+
+	[Fact]
+	public async Task Login_With_Existing_User_Registered_Without_Oauth_Returns_User_Data()
+	{
+		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).Returns(GooglePayload);
+		UserLoginInfo info = new(ExternalAuthRequest.Provider, GooglePayload.Subject, ExternalAuthRequest.Provider);
+		_userRepositoryMock.FindByLoginAsync(info.LoginProvider, info.ProviderKey).ReturnsNull();
+		_userRepositoryMock.FindByEmailAsync(GooglePayload.Email).Returns(User);
+		_jwtTokenGeneratorMock.GenerateToken(User.Id, User.FullName).Returns(ExpectedUserResponse.Token);
+
+		UserResponse userResponse = await _sut.ExternalLoginAsync(ExternalAuthRequest);
+
+		Assert.Equivalent(ExpectedUserResponse, userResponse);
+	}
+
 
 	[Fact]
 	public async Task Edit_User_With_Id_Different_Than_Route_Throws_BadRequestException()
@@ -174,7 +245,7 @@ public class UserServiceTests
 		UserResponse userResponse = await _sut.RegisterAsync(CreateUserRequest);
 
 		// Assert
-		Assert.Equivalent(UserResponse, userResponse);
+		Assert.Equivalent(ExpectedUserResponse, userResponse);
 	}
 
 	[Fact]
@@ -216,7 +287,7 @@ public class UserServiceTests
 
 		UserResponse userResponse = await _sut.LoginAsync(LoginUserRequest);
 
-		Assert.Equivalent(UserResponse, userResponse);
+		Assert.Equivalent(ExpectedUserResponse, userResponse);
 	}
 
 	[Fact]

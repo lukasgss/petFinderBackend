@@ -1,12 +1,13 @@
-﻿using Application.Common.Interfaces.Entities.Alerts;
+﻿using Application.Common.Calculators;
+using Application.Common.Converters;
+using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 using Application.Common.Pagination;
 using Domain.Entities.Alerts;
-using GeoCoordinatePortable;
 using Infrastructure.Persistence.DataContext;
-using Infrastructure.Persistence.QueryLogics;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
 
 namespace Infrastructure.Persistence.Repositories;
 
@@ -52,9 +53,11 @@ public class FoundAnimalAlertRepository : GenericRepository<FoundAnimalAlert>, I
 	{
 		if (AlertFilters.HasGeoFilters(filters))
 		{
-			query = query.Where(CoordinatesCalculator.FoundAnimalAlertIsWithinRadiusDistance(
-				new GeoCoordinate((double)filters.Latitude!, (double)filters.Longitude!),
-				(double)filters.RadiusDistanceInKm!));
+			Point filtersLocation =
+				CoordinatesCalculator.CreatePointBasedOnCoordinates(filters.Latitude!.Value, filters.Longitude!.Value);
+			double filteredDistanceInMeters = ConvertDistances.ConvertKmToMeters(filters.RadiusDistanceInKm!.Value);
+
+			query = query.Where(alert => alert.Location.Distance(filtersLocation) <= filteredDistanceInMeters);
 		}
 
 		if (filters.Name is not null)

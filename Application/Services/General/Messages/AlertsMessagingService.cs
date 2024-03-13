@@ -18,9 +18,9 @@ public class AlertsMessagingService : IAlertsMessagingService
 		var data = new
 		{
 			foundAlert.Id,
-			foundAlert.FoundLocationLatitude,
-			foundAlert.FoundLocationLongitude,
 			foundAlert.Gender,
+			FoundLocationLatitude = foundAlert.Location.Y,
+			FoundLocationLongitude = foundAlert.Location.X,
 			SpeciesId = foundAlert.Species.Id,
 			BreedId = foundAlert.Breed?.Id,
 			ColorIds = foundAlert.Colors.Select(color => color.Id)

@@ -1,3 +1,4 @@
+using Application.Common.Calculators;
 using Application.Common.Interfaces.Entities.Alerts.UserPreferences.DTOs;
 using Domain.Entities.Alerts.UserPreferences;
 using Tests.TestUtils.Constants;
@@ -14,8 +15,9 @@ public static class FoundAnimalUserPreferencesGenerator
 			User = Constants.FoundAnimalUserPreferencesData.User,
 			UserId = Constants.FoundAnimalUserPreferencesData.User.Id,
 			Colors = Constants.FoundAnimalUserPreferencesData.Colors,
-			FoundLocationLatitude = Constants.FoundAnimalUserPreferencesData.FoundLocationLatitude,
-			FoundLocationLongitude = Constants.FoundAnimalUserPreferencesData.FoundLocationLongitude,
+			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+				Constants.FoundAnimalUserPreferencesData.FoundLocationLatitude!.Value,
+				Constants.FoundAnimalUserPreferencesData.FoundLocationLongitude!.Value),
 			RadiusDistanceInKm = Constants.FoundAnimalUserPreferencesData.RadiusDistanceInKm,
 			Species = Constants.FoundAnimalUserPreferencesData.Species,
 			SpeciesId = Constants.FoundAnimalUserPreferencesData.SpeciesId,

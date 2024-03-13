@@ -17,7 +17,7 @@ public static partial class Constants
 		public const string Name = "Name";
 		public const string Description = "Description";
 		public const double FoundLocationLatitude = 32;
-		public const double FoundLocationLongitude = 44.322;
+		public const double FoundLocationLongitude = 44;
 		public static readonly DateTime RegistrationDate = new(2020, 1, 1);
 		public static readonly DateOnly? RecoveryDate = null;
 		public static readonly List<string> ImageUrls = new(1) { "Image" };

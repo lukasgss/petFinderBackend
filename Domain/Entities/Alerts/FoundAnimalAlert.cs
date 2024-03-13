@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Entities.Alerts.Notifications;
 using Domain.Enums;
 using Domain.ValueObjects;
+using NetTopologySuite.Geometries;
 
 namespace Domain.Entities.Alerts;
 
@@ -16,11 +17,8 @@ public class FoundAnimalAlert
 	[MaxLength(500)]
 	public string? Description { get; set; }
 
-	[Required, Column(TypeName = "decimal(6, 3)")]
-	public double FoundLocationLatitude { get; set; }
-
-	[Required, Column(TypeName = "decimal(6, 3)")]
-	public double FoundLocationLongitude { get; set; }
+	[Required]
+	public required Point Location { get; set; } = null!;
 
 	[Required]
 	public DateTime RegistrationDate { get; set; }

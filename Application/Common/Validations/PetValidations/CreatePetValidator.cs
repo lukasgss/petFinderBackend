@@ -35,9 +35,5 @@ public class CreatePetValidator : AbstractValidator<CreatePetRequest>
 		RuleFor(pet => pet.ColorIds)
 			.NotEmpty()
 			.WithMessage("Campo de cores é obrigatório.");
-
-		RuleFor(pet => pet.VaccineIds)
-			.NotNull()
-			.WithMessage("Campo de vacinações é obrigatório.");
 	}
 }

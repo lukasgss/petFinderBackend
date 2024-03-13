@@ -11,8 +11,8 @@ public static class MissingAlertMappings
 		{
 			Id = missingAlert.Id,
 			RegistrationDate = missingAlert.RegistrationDate,
-			LastSeenLocationLatitude = missingAlert.LastSeenLocationLatitude,
-			LastSeenLocationLongitude = missingAlert.LastSeenLocationLongitude,
+			LastSeenLocationLatitude = missingAlert.Location.Y,
+			LastSeenLocationLongitude = missingAlert.Location.X,
 			Description = missingAlert.Description,
 			RecoveryDate = missingAlert.RecoveryDate,
 			Pet = missingAlert.Pet.ToPetResponseNoOwner(

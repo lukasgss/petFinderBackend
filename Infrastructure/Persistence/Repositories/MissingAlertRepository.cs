@@ -1,12 +1,13 @@
+using Application.Common.Converters;
 using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Application.Common.Pagination;
 using Domain.Entities.Alerts;
-using GeoCoordinatePortable;
 using Infrastructure.Persistence.DataContext;
-using Infrastructure.Persistence.QueryLogics;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
+using CoordinatesCalculator = Application.Common.Calculators.CoordinatesCalculator;
 
 namespace Infrastructure.Persistence.Repositories;
 
@@ -61,9 +62,11 @@ public class MissingAlertRepository : GenericRepository<MissingAlert>, IMissingA
 	{
 		if (AlertFilters.HasGeoFilters(filters))
 		{
-			query = query.Where(CoordinatesCalculator.MissingAlertIsWithinRadiusDistance(
-				new GeoCoordinate((double)filters.Latitude!, (double)filters.Longitude!),
-				(double)filters.RadiusDistanceInKm!));
+			Point filterLocation =
+				CoordinatesCalculator.CreatePointBasedOnCoordinates(filters.Latitude!.Value, filters.Longitude!.Value);
+			double filteredDistanceInMeters = UnitsConverter.ConvertKmToMeters(filters.RadiusDistanceInKm!.Value);
+
+			query = query.Where(alert => alert.Location.Distance(filterLocation) <= filteredDistanceInMeters);
 		}
 
 		if (filters.BreedId is not null)

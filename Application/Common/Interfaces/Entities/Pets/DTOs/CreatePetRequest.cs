@@ -28,6 +28,5 @@ public class CreatePetRequest
 	[Required(ErrorMessage = "Campo de cores é obrigatório.")]
 	public List<int> ColorIds { get; set; } = null!;
 
-	[Required(ErrorMessage = "Campo de vacinações é obrigatório.")]
-	public List<int> VaccineIds { get; set; } = null!;
+	public List<int>? VaccineIds { get; set; }
 }

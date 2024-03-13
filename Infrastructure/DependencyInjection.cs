@@ -59,7 +59,8 @@ public static class DependencyInjection
 		services.Configure<RabbitMqData>(configuration.GetSection("RabbitMQ"));
 
 		services.AddDbContext<AppDbContext>(options =>
-			options.UseNpgsql(configuration.GetConnectionString("DefaultConnection") ?? string.Empty)
+			options.UseNpgsql(configuration.GetConnectionString("DefaultConnection") ?? string.Empty,
+					opt => opt.UseNetTopologySuite())
 				.UseEnumCheckConstraints());
 
 		return services;

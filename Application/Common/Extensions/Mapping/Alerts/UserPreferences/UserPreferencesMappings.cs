@@ -16,8 +16,8 @@ public static class UserPreferencesMappings
 			Species = userPreferences.Species?.ToSpeciesResponse(),
 			Breed = userPreferences.Breed?.ToBreedResponse(),
 			Gender = userPreferences.Gender?.ToString(),
-			FoundLocationLatitude = userPreferences.FoundLocationLatitude,
-			FoundLocationLongitude = userPreferences.FoundLocationLongitude,
+			FoundLocationLatitude = userPreferences.Location?.Y,
+			FoundLocationLongitude = userPreferences.Location?.X,
 			RadiusDistanceInKm = userPreferences.RadiusDistanceInKm
 		};
 	}

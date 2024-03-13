@@ -38,20 +38,4 @@ public static class CoordinatesCalculator
 				Math.Sin(Math.PI / 180 * alert.LastSeenLocationLatitude)
 			) <= radiusDistanceInKm;
 	}
-
-	public static Expression<Func<FoundAnimalAlert, bool>> FoundAnimalAlertIsWithinRadiusDistance(
-		GeoCoordinate sourceCoordinates, double radiusDistanceInKm)
-	{
-		// Uses the haversine formula to calculate the great-circle distance between two points
-		// on a sphere given their latitudes and longitudes, assuming a spherical Earth
-		return alert =>
-			EarthRadiusInKm * Math.Acos(
-				Math.Cos(Math.PI / 180 * sourceCoordinates.Latitude) *
-				Math.Cos(Math.PI / 180 * alert.FoundLocationLatitude) *
-				Math.Cos(Math.PI / 180 * alert.FoundLocationLongitude -
-				         Math.PI / 180 * sourceCoordinates.Longitude) +
-				Math.Sin(Math.PI / 180 * sourceCoordinates.Latitude) *
-				Math.Sin(Math.PI / 180 * alert.FoundLocationLatitude)
-			) <= radiusDistanceInKm;
-	}
 }

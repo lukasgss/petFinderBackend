@@ -1,4 +1,5 @@
-﻿using Application.Common.Exceptions;
+﻿using Application.Common.Calculators;
+using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
@@ -16,6 +17,7 @@ using Domain.Entities;
 using Domain.Entities.Alerts;
 using Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
+using NetTopologySuite.Geometries;
 
 namespace Application.Services.Entities;
 
@@ -93,13 +95,15 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		User? userCreating = await _userRepository.GetUserByIdAsync(userId);
 		Guid foundAlertId = _valueProvider.NewGuid();
 
+		Point location = CoordinatesCalculator.CreatePointBasedOnCoordinates(createAlertRequest.FoundLocationLatitude,
+			createAlertRequest.FoundLocationLongitude);
+
 		FoundAnimalAlert alertToBeCreated = new()
 		{
 			Id = foundAlertId,
 			Name = createAlertRequest.Name,
 			Description = createAlertRequest.Description,
-			FoundLocationLatitude = createAlertRequest.FoundLocationLatitude,
-			FoundLocationLongitude = createAlertRequest.FoundLocationLongitude,
+			Location = location,
 			RegistrationDate = _valueProvider.UtcNow(),
 			RecoveryDate = null,
 			Gender = createAlertRequest.Gender,
@@ -152,10 +156,12 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 
 		var uploadedImageUrls = await UpdateAlertImages(alertToBeEdited, editAlertRequest.Images);
 
+		Point location = CoordinatesCalculator.CreatePointBasedOnCoordinates(editAlertRequest.FoundLocationLatitude,
+			editAlertRequest.FoundLocationLongitude);
+
 		alertToBeEdited.Name = editAlertRequest.Name;
 		alertToBeEdited.Description = editAlertRequest.Description;
-		alertToBeEdited.FoundLocationLatitude = editAlertRequest.FoundLocationLatitude;
-		alertToBeEdited.FoundLocationLongitude = editAlertRequest.FoundLocationLongitude;
+		alertToBeEdited.Location = location;
 		alertToBeEdited.Images = uploadedImageUrls;
 		alertToBeEdited.Species = species;
 		alertToBeEdited.Breed = breed;

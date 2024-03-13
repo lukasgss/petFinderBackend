@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Enums;
+using NetTopologySuite.Geometries;
 
 namespace Domain.Entities.Alerts.UserPreferences;
 
@@ -8,11 +9,7 @@ public class FoundAnimalUserPreferences
 {
 	public required Guid Id { get; set; }
 
-	[Column(TypeName = "decimal(6, 3)")]
-	public double? FoundLocationLatitude { get; set; }
-
-	[Column(TypeName = "decimal(6, 3)")]
-	public double? FoundLocationLongitude { get; set; }
+	public Point? Location { get; set; }
 
 	public double? RadiusDistanceInKm { get; set; }
 

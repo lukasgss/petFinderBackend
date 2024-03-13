@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Application.Common.Calculators;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 using Domain.Entities.Alerts;
@@ -16,8 +17,9 @@ public static class FoundAnimalAlertGenerator
 			Id = Constants.FoundAnimalAlertData.Id,
 			Name = Constants.FoundAnimalAlertData.Name,
 			Description = Constants.FoundAnimalAlertData.Description,
-			FoundLocationLatitude = Constants.FoundAnimalAlertData.FoundLocationLatitude,
-			FoundLocationLongitude = Constants.FoundAnimalAlertData.FoundLocationLongitude,
+			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+				Constants.FoundAnimalAlertData.FoundLocationLatitude,
+				Constants.FoundAnimalAlertData.FoundLocationLongitude),
 			RegistrationDate = Constants.FoundAnimalAlertData.RegistrationDate,
 			RecoveryDate = Constants.FoundAnimalAlertData.RecoveryDate,
 			Images = Constants.FoundAnimalAlertData.FoundAnimalAlertImages,

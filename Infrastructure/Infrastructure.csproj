@@ -6,6 +6,7 @@
         <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.300"/>
         <PackageReference Include="AWSSDK.S3" Version="3.7.305.30"/>
         <PackageReference Include="EFCore.CheckConstraints" Version="8.0.1"/>
+        <PackageReference Include="Google.Apis.Auth" Version="1.67.0"/>
         <PackageReference Include="MailKit" Version="4.4.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.2"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2"/>

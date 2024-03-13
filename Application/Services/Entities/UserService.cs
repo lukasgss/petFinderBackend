@@ -1,6 +1,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Authentication;
+using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Entities.Users.DTOs;
@@ -24,6 +25,7 @@ public class UserService : IUserService
 	private readonly LinkGenerator _linkGenerator;
 	private readonly IIdConverterService _idConverterService;
 	private readonly IUserImageSubmissionService _userImageSubmissionService;
+	private readonly IExternalAuthHandler _externalAuthHandler;
 	private readonly IValueProvider _valueProvider;
 
 	public UserService(
@@ -34,6 +36,7 @@ public class UserService : IUserService
 		LinkGenerator linkGenerator,
 		IIdConverterService idConverterService,
 		IUserImageSubmissionService userImageSubmissionService,
+		IExternalAuthHandler externalAuthHandler,
 		IValueProvider valueProvider)
 	{
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -44,6 +47,7 @@ public class UserService : IUserService
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
 		_userImageSubmissionService =
 			userImageSubmissionService ?? throw new ArgumentNullException(nameof(userImageSubmissionService));
+		_externalAuthHandler = externalAuthHandler ?? throw new ArgumentNullException(nameof(externalAuthHandler));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
@@ -157,6 +161,48 @@ public class UserService : IUserService
 		string jwtToken = _jwtTokenGenerator.GenerateToken(userToLogin.Id, userToLogin.FullName);
 
 		return userToLogin.ToUserResponse(jwtToken);
+	}
+
+	public async Task<UserResponse> ExternalLoginAsync(ExternalAuthRequest externalAuth)
+	{
+		GooglePayload? payload = await _externalAuthHandler.ValidateGoogleToken(externalAuth);
+		if (payload is null)
+		{
+			throw new BadRequestException("External authentication is invalid.");
+		}
+
+		UserLoginInfo info = new(externalAuth.Provider, payload.Subject, externalAuth.Provider);
+		User? user = await _userRepository.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+		if (user is null)
+		{
+			user = await _userRepository.FindByEmailAsync(payload.Email);
+			if (user is null)
+			{
+				user = new User
+				{
+					Id = _valueProvider.NewGuid(),
+					Email = payload.Email,
+					UserName = payload.Email,
+					FullName = payload.FullName,
+					Image = payload.Image
+				};
+				await _userRepository.RegisterUserAsync(user);
+				await _userRepository.AddLoginAsync(user, info);
+			}
+			else
+			{
+				await _userRepository.AddLoginAsync(user, info);
+			}
+		}
+
+		if (user is null)
+		{
+			throw new BadRequestException("External authentication is invalid.");
+		}
+
+		string token = _jwtTokenGenerator.GenerateToken(user.Id, user.FullName);
+
+		return user.ToUserResponse(token);
 	}
 
 	public async Task ConfirmEmailAsync(string hashedUserId, string token)

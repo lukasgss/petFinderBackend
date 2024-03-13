@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
@@ -16,6 +17,7 @@ using Application.Common.Interfaces.ExternalServices.MessagePublisher;
 using Application.Common.Interfaces.Messaging;
 using Application.Services.General.MessageNotifications;
 using Infrastructure.DependencyInjections;
+using Infrastructure.ExternalServices.Auth;
 using Infrastructure.ExternalServices.AWS;
 using Infrastructure.ExternalServices.Configs;
 using Infrastructure.ExternalServices.RabbitMQ;
@@ -50,6 +52,7 @@ public static class DependencyInjection
 		services.AddScoped<IFoundAnimalUserPreferencesRepository, FoundAnimalUserPreferencesRepository>();
 		services.AddScoped<IMessagePublisherClient, MessagePublisherClient>();
 		services.AddScoped<IAdoptionUserPreferencesRepository, AdoptionUserPreferencesRepository>();
+		services.AddScoped<IExternalAuthHandler, ExternalAuthHandler>();
 
 		services.AddScoped<IFileUploadClient, FileUploadClient>();
 		services.Configure<AwsData>(configuration.GetSection("AWS"));

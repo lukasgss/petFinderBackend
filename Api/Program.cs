@@ -18,9 +18,7 @@ builder.Services.AddControllers(options => { options.Filters.Add<CustomModelVali
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.ConfigureSwagger();
 
-builder.Services.ConfigureIdentity();
-
-builder.Services.ConfigureJwt(builder.Configuration);
+builder.Services.ConfigureAuth(builder.Configuration);
 
 builder.Services.AddApplication(builder.Configuration)
 	.AddInfrastructure(builder.Configuration);

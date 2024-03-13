@@ -66,7 +66,6 @@ public static class DependencyInjection
 
 		services.AddSingleton<IValueProvider, ValueProvider>();
 
-		services.Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
 		services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
 		services.Configure<MessagingSettings>(configuration.GetSection("MessagingSettings"));

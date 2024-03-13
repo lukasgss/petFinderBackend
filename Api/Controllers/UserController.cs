@@ -63,6 +63,12 @@ public class UserController : ControllerBase
 		return Ok(loggedInUser);
 	}
 
+	[HttpPost("external-login")]
+	public async Task<ActionResult<UserResponse>> ExternalLogin(ExternalAuthRequest externalAuth)
+	{
+		return await _userService.ExternalLoginAsync(externalAuth);
+	}
+
 	[HttpPost("confirm-email")]
 	public async Task<ActionResult> ConfirmEmail(string userId, string token)
 	{

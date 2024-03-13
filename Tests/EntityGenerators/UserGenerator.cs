@@ -78,4 +78,17 @@ public static class UserGenerator
 			Email = Constants.UserData.Email
 		};
 	}
+
+	public static UserResponse GenerateUserResponseWithoutPhoneNumber()
+	{
+		return new UserResponse()
+		{
+			Id = Constants.UserData.Id,
+			FullName = Constants.UserData.FullName,
+			PhoneNumber = null,
+			Image = Constants.UserData.ImageUrl,
+			Email = Constants.UserData.Email,
+			Token = Constants.UserData.JwtToken
+		};
+	}
 }

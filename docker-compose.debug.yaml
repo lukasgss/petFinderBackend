@@ -7,18 +7,5 @@ services:
       dockerfile: Api/Dockerfile
     ports:
       - 7219:7219
-    depends_on:
-      - postgres
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-
-  postgres:
-    image: postgres:latest
-    restart: always
-    ports:
-      - 5333:5432
-    volumes:
-      - database-data:/var/lib/postgresql/data
-
-volumes:
-  database-data:

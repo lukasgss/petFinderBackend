@@ -4,6 +4,8 @@ using Api.Extensions;
 using Application;
 using Application.Middlewares;
 using Infrastructure;
+using Infrastructure.Persistence.DataContext;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,10 @@ builder.Services.AddApplication(builder.Configuration)
 	.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
+await using AppDbContext db = scope.ServiceProvider.GetService<AppDbContext>()!;
+await db.Database.MigrateAsync();
 
 app.UseMiddleware<ErrorHandlerMiddleware>();
 

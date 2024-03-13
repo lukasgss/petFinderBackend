@@ -22,20 +22,4 @@ public static class CoordinatesCalculator
 				Math.Sin(Math.PI / 180 * alert.LocationLatitude)
 			) <= radiusDistanceInKm;
 	}
-
-	public static Expression<Func<MissingAlert, bool>> MissingAlertIsWithinRadiusDistance(
-		GeoCoordinate sourceCoordinates, double radiusDistanceInKm)
-	{
-		// Uses the haversine formula to calculate the great-circle distance between two points
-		// on a sphere given their latitudes and longitudes, assuming a spherical Earth
-		return alert =>
-			EarthRadiusInKm * Math.Acos(
-				Math.Cos(Math.PI / 180 * sourceCoordinates.Latitude) *
-				Math.Cos(Math.PI / 180 * alert.LastSeenLocationLatitude) *
-				Math.Cos(Math.PI / 180 * alert.LastSeenLocationLongitude -
-				         Math.PI / 180 * sourceCoordinates.Longitude) +
-				Math.Sin(Math.PI / 180 * sourceCoordinates.Latitude) *
-				Math.Sin(Math.PI / 180 * alert.LastSeenLocationLatitude)
-			) <= radiusDistanceInKm;
-	}
 }

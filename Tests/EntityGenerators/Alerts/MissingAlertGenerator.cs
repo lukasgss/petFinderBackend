@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Application.Common.Calculators;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.Alerts.MissingAlerts.DTOs;
 using Domain.Entities.Alerts;
@@ -14,8 +15,9 @@ public static class MissingAlertGenerator
 		{
 			Id = Constants.MissingAlertData.Id,
 			RegistrationDate = Constants.MissingAlertData.RegistrationDate,
-			LastSeenLocationLatitude = Constants.MissingAlertData.LastSeenLocationLatitude,
-			LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
+			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+				Constants.MissingAlertData.LastSeenLocationLatitude,
+				Constants.MissingAlertData.LastSeenLocationLongitude),
 			RecoveryDate = Constants.MissingAlertData.NonRecoveredRecoveryDate,
 			Description = Constants.MissingAlertData.Description,
 			Pet = Constants.MissingAlertData.Pet,

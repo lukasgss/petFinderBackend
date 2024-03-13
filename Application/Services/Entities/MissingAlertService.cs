@@ -1,3 +1,4 @@
+using Application.Common.Calculators;
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
@@ -9,6 +10,7 @@ using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using NetTopologySuite.Geometries;
 
 namespace Application.Services.Entities;
 
@@ -51,22 +53,25 @@ public class MissingAlertService : IMissingAlertService
 		return filteredAlerts.ToMissingAlertResponsePagedList();
 	}
 
-	public async Task<MissingAlertResponse> CreateAsync(CreateMissingAlertRequest createMissingAlertRequest,
+	public async Task<MissingAlertResponse> CreateAsync(CreateMissingAlertRequest createAlertRequest,
 		Guid userId)
 	{
-		Pet missingPet = await ValidateAndAssignPetAsync(createMissingAlertRequest.PetId);
+		Pet missingPet = await ValidateAndAssignPetAsync(createAlertRequest.PetId);
 
 		CheckUserPermissionToCreate(missingPet.Owner.Id, userId);
 
 		User petOwner = await ValidateAndAssignUserAsync(userId);
 
+		Point location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+			createAlertRequest.LastSeenLocationLatitude,
+			createAlertRequest.LastSeenLocationLongitude);
+
 		MissingAlert missingAlertToCreate = new()
 		{
 			Id = _valueProvider.NewGuid(),
 			RegistrationDate = _valueProvider.UtcNow(),
-			LastSeenLocationLatitude = createMissingAlertRequest.LastSeenLocationLatitude,
-			LastSeenLocationLongitude = createMissingAlertRequest.LastSeenLocationLongitude,
-			Description = createMissingAlertRequest.Description,
+			Location = location,
+			Description = createAlertRequest.Description,
 			RecoveryDate = null,
 			Pet = missingPet,
 			User = petOwner,
@@ -78,25 +83,27 @@ public class MissingAlertService : IMissingAlertService
 		return missingAlertToCreate.ToMissingAlertResponse();
 	}
 
-	public async Task<MissingAlertResponse> EditAsync(EditMissingAlertRequest editMissingAlertRequest,
-		Guid userId,
-		Guid routeId)
+	public async Task<MissingAlertResponse> EditAsync(
+		EditMissingAlertRequest editAlertRequest, Guid userId, Guid routeId)
 	{
-		if (editMissingAlertRequest.Id != routeId)
+		if (editAlertRequest.Id != routeId)
 		{
 			throw new BadRequestException("Id da rota não coincide com o id especificado.");
 		}
 
-		MissingAlert dbMissingAlert = await ValidateAndAssignMissingAlertAsync(editMissingAlertRequest.Id);
-		Pet pet = await ValidateAndAssignPetAsync(editMissingAlertRequest.PetId);
+		MissingAlert dbMissingAlert = await ValidateAndAssignMissingAlertAsync(editAlertRequest.Id);
+		Pet pet = await ValidateAndAssignPetAsync(editAlertRequest.PetId);
 
 		CheckUserPermissionToEdit(dbMissingAlert.User.Id, userId);
 
 		User user = await ValidateAndAssignUserAsync(userId);
 
-		dbMissingAlert.LastSeenLocationLatitude = editMissingAlertRequest.LastSeenLocationLatitude;
-		dbMissingAlert.LastSeenLocationLongitude = editMissingAlertRequest.LastSeenLocationLongitude;
-		dbMissingAlert.Description = editMissingAlertRequest.Description;
+		Point location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+			editAlertRequest.LastSeenLocationLatitude,
+			editAlertRequest.LastSeenLocationLongitude);
+
+		dbMissingAlert.Location = location;
+		dbMissingAlert.Description = editAlertRequest.Description;
 		dbMissingAlert.Pet = pet;
 		dbMissingAlert.User = user;
 

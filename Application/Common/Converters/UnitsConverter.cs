@@ -1,6 +1,6 @@
 namespace Application.Common.Converters;
 
-public static class ConvertDistances
+public static class UnitsConverter
 {
 	public static double ConvertKmToMeters(double measurementInKm)
 	{

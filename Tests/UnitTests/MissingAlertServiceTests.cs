@@ -144,7 +144,7 @@ public class MissingAlertServiceTests
 	public async Task Edit_Alert_With_Route_Id_Different_Than_Specified_On_Request_Throws_BadRequestException()
 	{
 		async Task Result() => await _sut.EditAsync(
-			editMissingAlertRequest: EditMissingAlertRequest,
+			editAlertRequest: EditMissingAlertRequest,
 			userId: Constants.UserData.Id,
 			routeId: Guid.NewGuid());
 
@@ -158,7 +158,7 @@ public class MissingAlertServiceTests
 		_missingAlertRepositoryMock.GetByIdAsync(EditMissingAlertRequest.Id).ReturnsNull();
 
 		async Task Result() => await _sut.EditAsync(
-			editMissingAlertRequest: EditMissingAlertRequest,
+			editAlertRequest: EditMissingAlertRequest,
 			userId: User.Id,
 			routeId: EditMissingAlertRequest.Id);
 
@@ -173,7 +173,7 @@ public class MissingAlertServiceTests
 		_petRepositoryMock.GetPetByIdAsync(EditMissingAlertRequest.PetId).ReturnsNull();
 
 		async Task Result() => await _sut.EditAsync(
-			editMissingAlertRequest: EditMissingAlertRequest,
+			editAlertRequest: EditMissingAlertRequest,
 			userId: User.Id,
 			routeId: EditMissingAlertRequest.Id);
 
@@ -188,7 +188,7 @@ public class MissingAlertServiceTests
 		_petRepositoryMock.GetPetByIdAsync(EditMissingAlertRequest.PetId).Returns(Pet);
 
 		async Task Result() => await _sut.EditAsync(
-			editMissingAlertRequest: EditMissingAlertRequest,
+			editAlertRequest: EditMissingAlertRequest,
 			userId: Guid.NewGuid(),
 			routeId: EditMissingAlertRequest.Id);
 
@@ -204,7 +204,7 @@ public class MissingAlertServiceTests
 		_userRepositoryMock.GetUserByIdAsync(User.Id).ReturnsNull();
 
 		async Task Result() => await _sut.EditAsync(
-			editMissingAlertRequest: EditMissingAlertRequest,
+			editAlertRequest: EditMissingAlertRequest,
 			userId: User.Id,
 			routeId: EditMissingAlertRequest.Id);
 
@@ -220,7 +220,7 @@ public class MissingAlertServiceTests
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
 
 		MissingAlertResponse missingAlertResponse = await _sut.EditAsync(
-			editMissingAlertRequest: EditMissingAlertRequest,
+			editAlertRequest: EditMissingAlertRequest,
 			userId: User.Id,
 			routeId: EditMissingAlertRequest.Id);
 

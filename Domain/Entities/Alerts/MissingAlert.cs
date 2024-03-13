@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NetTopologySuite.Geometries;
 
 namespace Domain.Entities.Alerts;
 
@@ -10,11 +11,8 @@ public class MissingAlert
 	[Required]
 	public DateTime RegistrationDate { get; set; }
 
-	[Required, Column(TypeName = "decimal(6, 3)")]
-	public double LastSeenLocationLatitude { get; set; }
-
-	[Required, Column(TypeName = "decimal(6, 3)")]
-	public double LastSeenLocationLongitude { get; set; }
+	[Required]
+	public required Point Location { get; set; }
 
 	[MaxLength(500)]
 	public string? Description { get; set; }

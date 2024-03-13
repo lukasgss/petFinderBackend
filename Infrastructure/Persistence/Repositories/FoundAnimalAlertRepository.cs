@@ -55,7 +55,7 @@ public class FoundAnimalAlertRepository : GenericRepository<FoundAnimalAlert>, I
 		{
 			Point filtersLocation =
 				CoordinatesCalculator.CreatePointBasedOnCoordinates(filters.Latitude!.Value, filters.Longitude!.Value);
-			double filteredDistanceInMeters = ConvertDistances.ConvertKmToMeters(filters.RadiusDistanceInKm!.Value);
+			double filteredDistanceInMeters = UnitsConverter.ConvertKmToMeters(filters.RadiusDistanceInKm!.Value);
 
 			query = query.Where(alert => alert.Location.Distance(filtersLocation) <= filteredDistanceInMeters);
 		}

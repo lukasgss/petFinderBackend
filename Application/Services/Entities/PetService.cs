@@ -244,8 +244,13 @@ public class PetService : IPetService
 		return colors;
 	}
 
-	private async Task<List<Vaccine>> ValidateAndAssignVaccinesAsync(List<int> vaccineIds, int speciesId)
+	private async Task<List<Vaccine>> ValidateAndAssignVaccinesAsync(List<int>? vaccineIds, int speciesId)
 	{
+		if (vaccineIds is null)
+		{
+			return new List<Vaccine>(0);
+		}
+
 		List<Vaccine> vaccines = await _vaccineRepository.GetMultipleByIdAsync(vaccineIds);
 		if (vaccines.Count != vaccineIds.Count || vaccines.Count == 0)
 		{

@@ -1,3 +1,5 @@
+using Application.Common.Calculators;
+using Application.Common.Converters;
 using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
@@ -5,8 +7,7 @@ using Application.Common.Pagination;
 using Domain.Entities.Alerts;
 using Infrastructure.Persistence.DataContext;
 using Microsoft.EntityFrameworkCore;
-using GeoCoordinatePortable;
-using Infrastructure.Persistence.QueryLogics;
+using NetTopologySuite.Geometries;
 
 namespace Infrastructure.Persistence.Repositories;
 
@@ -63,9 +64,11 @@ public class AdoptionAlertRepository : GenericRepository<AdoptionAlert>, IAdopti
 	{
 		if (AlertFilters.HasGeoFilters(filters))
 		{
-			query = query.Where(CoordinatesCalculator.AdoptionAlertIsWithinRadiusDistance(
-				new GeoCoordinate((double)filters.Latitude!, (double)filters.Longitude!),
-				(double)filters.RadiusDistanceInKm!));
+			Point filtersLocation =
+				CoordinatesCalculator.CreatePointBasedOnCoordinates(filters.Latitude!.Value, filters.Longitude!.Value);
+			double filteredDistanceInMeters = UnitsConverter.ConvertKmToMeters(filters.RadiusDistanceInKm!.Value);
+
+			query = query.Where(alert => alert.Location.Distance(filtersLocation) <= filteredDistanceInMeters);
 		}
 
 		if (filters.BreedId is not null)

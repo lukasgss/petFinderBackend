@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Application.Common.Calculators;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
 using Domain.Entities.Alerts;
@@ -15,8 +16,9 @@ public static class AdoptionAlertGenerator
 		{
 			Id = Constants.AdoptionAlertData.Id,
 			OnlyForScreenedProperties = Constants.AdoptionAlertData.OnlyForScreenedProperties,
-			LocationLatitude = Constants.AdoptionAlertData.LocationLatitude,
-			LocationLongitude = Constants.AdoptionAlertData.LocationLongitude,
+			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+				Constants.AdoptionAlertData.LocationLatitude,
+				Constants.AdoptionAlertData.LocationLongitude),
 			Description = Constants.AdoptionAlertData.Description,
 			RegistrationDate = Constants.AdoptionAlertData.RegistrationDate,
 			AdoptionDate = Constants.AdoptionAlertData.AdoptedAdoptionDate,
@@ -33,8 +35,9 @@ public static class AdoptionAlertGenerator
 		{
 			Id = Constants.AdoptionAlertData.Id,
 			OnlyForScreenedProperties = Constants.AdoptionAlertData.OnlyForScreenedProperties,
-			LocationLatitude = Constants.AdoptionAlertData.LocationLatitude,
-			LocationLongitude = Constants.AdoptionAlertData.LocationLongitude,
+			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+				Constants.AdoptionAlertData.LocationLatitude,
+				Constants.AdoptionAlertData.LocationLongitude),
 			Description = Constants.AdoptionAlertData.Description,
 			RegistrationDate = Constants.AdoptionAlertData.RegistrationDate,
 			AdoptionDate = null,
@@ -51,8 +54,9 @@ public static class AdoptionAlertGenerator
 		{
 			Id = Constants.AdoptionAlertData.Id,
 			OnlyForScreenedProperties = Constants.AdoptionAlertData.OnlyForScreenedProperties,
-			LocationLatitude = Constants.AdoptionAlertData.LocationLatitude,
-			LocationLongitude = Constants.AdoptionAlertData.LocationLongitude,
+			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+				Constants.AdoptionAlertData.LocationLatitude,
+				Constants.AdoptionAlertData.LocationLongitude),
 			Description = Constants.AdoptionAlertData.Description,
 			RegistrationDate = Constants.AdoptionAlertData.RegistrationDate,
 			AdoptionDate = null,

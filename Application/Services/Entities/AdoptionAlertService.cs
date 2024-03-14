@@ -1,7 +1,7 @@
+using Application.Common.Calculators;
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
-using Application.Common.Interfaces.Entities.Alerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Paginated;
@@ -10,6 +10,7 @@ using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using NetTopologySuite.Geometries;
 
 namespace Application.Services.Entities;
 
@@ -62,12 +63,15 @@ public class AdoptionAlertService : IAdoptionAlertService
 
 		User alertOwner = await ValidateAndAssignUserAsync(userId);
 
+		Point location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+			createAlertRequest.LocationLatitude,
+			createAlertRequest.LocationLongitude);
+
 		AdoptionAlert adoptionAlertToCreate = new()
 		{
 			Id = _valueProvider.NewGuid(),
 			OnlyForScreenedProperties = createAlertRequest.OnlyForScreenedProperties,
-			LocationLatitude = createAlertRequest.LocationLatitude,
-			LocationLongitude = createAlertRequest.LocationLongitude,
+			Location = location,
 			Description = createAlertRequest.Description,
 			RegistrationDate = _valueProvider.UtcNow(),
 			AdoptionDate = null,
@@ -95,9 +99,12 @@ public class AdoptionAlertService : IAdoptionAlertService
 		Pet pet = await ValidateAndAssignPetAsync(editAlertRequest.PetId);
 		ValidateIfUserIsOwnerOfPet(pet.Owner.Id, userId);
 
+		Point location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+			editAlertRequest.LocationLatitude,
+			editAlertRequest.LocationLongitude);
+
 		adoptionAlertDb.OnlyForScreenedProperties = editAlertRequest.OnlyForScreenedProperties;
-		adoptionAlertDb.LocationLatitude = editAlertRequest.LocationLatitude;
-		adoptionAlertDb.LocationLongitude = editAlertRequest.LocationLongitude;
+		adoptionAlertDb.Location = location;
 		adoptionAlertDb.Description = editAlertRequest.Description;
 		adoptionAlertDb.Pet = adoptionAlertDb.Pet;
 

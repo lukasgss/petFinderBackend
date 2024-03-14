@@ -1,8 +1,8 @@
 using System.Linq;
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping.Alerts.UserPreferences;
+using Application.Common.Interfaces.Entities.Alerts.UserPreferences.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.UserPreferences.DTOs;
-using Application.Common.Interfaces.Entities.Alerts.UserPreferences.FoundAnimalAlerts;
 using Application.Common.Interfaces.General.UserPreferences;
 using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
@@ -16,40 +16,38 @@ using Tests.EntityGenerators.Alerts.UserPreferences.Common;
 
 namespace Tests.UnitTests;
 
-public class FoundAnimalUserPreferencesServiceTests
+public class AdoptionAlertUserPreferencesServiceTests
 {
-	private readonly IFoundAnimalUserPreferencesRepository _foundAnimalUserPreferencesRepositoryMock;
+	private readonly IAdoptionUserPreferencesRepository _adoptionUserPreferencesRepositoryMock;
 	private readonly IUserPreferencesValidations _userPreferencesValidationsMock;
 	private readonly IValueProvider _valueProviderMock;
-	private readonly IFoundAnimalUserPreferencesService _sut;
+	private readonly IAdoptionAlertUserPreferencesService _sut;
 
-	private static readonly FoundAnimalUserPreferences UserPreferences =
-		FoundAnimalUserPreferencesGenerator.GenerateFoundAnimalUserPreferences();
+	private static readonly AdoptionUserPreferences UserPreferences =
+		AdoptionUserPreferencesGenerator.GenerateAdoptionUserPreferences();
 
 	private static readonly UserPreferencesResponse ExpectedUserPreferencesResponse =
-		FoundAnimalUserPreferencesGenerator.GenerateFoundAnimalUserPreferences()
-			.ToFoundAnimalUserPreferencesResponse();
+		AdoptionUserPreferencesGenerator.GenerateAdoptionUserPreferences()
+			.ToAdoptionUserPreferencesResponse();
 
 	private static readonly CreateAlertsUserPreferences CreateAlertsUserPreferences =
 		UserPreferencesGenerator.GenerateCreateFoundAnimalUserPreferences();
 
 	private static readonly User User = UserGenerator.GenerateUser();
 
-	public FoundAnimalUserPreferencesServiceTests()
+	public AdoptionAlertUserPreferencesServiceTests()
 	{
-		_foundAnimalUserPreferencesRepositoryMock = Substitute.For<IFoundAnimalUserPreferencesRepository>();
+		_adoptionUserPreferencesRepositoryMock = Substitute.For<IAdoptionUserPreferencesRepository>();
 		_userPreferencesValidationsMock = Substitute.For<IUserPreferencesValidations>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
-		_sut = new FoundAnimalUserPreferencesService(
-			_foundAnimalUserPreferencesRepositoryMock,
-			_userPreferencesValidationsMock,
-			_valueProviderMock);
+		_sut = new AdoptionAlertUserPreferencesService(_adoptionUserPreferencesRepositoryMock,
+			_userPreferencesValidationsMock, _valueProviderMock);
 	}
 
 	[Fact]
 	public async Task Get_User_Preferences_Of_User_With_No_Preferences_Throws_NotFoundException()
 	{
-		_foundAnimalUserPreferencesRepositoryMock.GetUserPreferences(User.Id).ReturnsNull();
+		_adoptionUserPreferencesRepositoryMock.GetUserPreferences(User.Id).ReturnsNull();
 
 		async Task Result() => await _sut.GetUserPreferences(User.Id);
 
@@ -61,7 +59,7 @@ public class FoundAnimalUserPreferencesServiceTests
 	[Fact]
 	public async Task Get_User_Preferences_Returns_User_Preferences()
 	{
-		_foundAnimalUserPreferencesRepositoryMock.GetUserPreferences(User.Id).Returns(UserPreferences);
+		_adoptionUserPreferencesRepositoryMock.GetUserPreferences(User.Id).Returns(UserPreferences);
 
 		UserPreferencesResponse userPreferencesResponse = await _sut.GetUserPreferences(User.Id);
 
@@ -71,7 +69,7 @@ public class FoundAnimalUserPreferencesServiceTests
 	[Fact]
 	public async Task Create_User_Preferences_When_Already_Registered_Throws_BadRequestException()
 	{
-		_foundAnimalUserPreferencesRepositoryMock.GetUserPreferences(User.Id).Returns(UserPreferences);
+		_adoptionUserPreferencesRepositoryMock.GetUserPreferences(User.Id).Returns(UserPreferences);
 
 		async Task Result() => await _sut.CreatePreferences(CreateAlertsUserPreferences, User.Id);
 
@@ -82,7 +80,7 @@ public class FoundAnimalUserPreferencesServiceTests
 	[Fact]
 	public async Task Create_User_Preferences_Returns_Created_Preferences()
 	{
-		_foundAnimalUserPreferencesRepositoryMock.GetUserPreferences(User.Id).ReturnsNull();
+		_adoptionUserPreferencesRepositoryMock.GetUserPreferences(User.Id).ReturnsNull();
 		_userPreferencesValidationsMock.ValidateAndAssignSpeciesAsync((int)CreateAlertsUserPreferences.SpeciesId!)
 			.Returns(UserPreferences.Species);
 		_userPreferencesValidationsMock

@@ -37,7 +37,8 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 			await _foundAnimalUserPreferencesRepository.GetUserPreferences(currentUserId);
 		if (userPreferences is null)
 		{
-			throw new NotFoundException("Ainda não foram definidas preferências para este usuário.");
+			throw new NotFoundException(
+				"Ainda não foram definidas preferências desse tipo de alerta para este usuário.");
 		}
 
 		return userPreferences.ToFoundAnimalUserPreferencesResponse();
@@ -50,7 +51,7 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 			await _foundAnimalUserPreferencesRepository.GetUserPreferences(userId);
 		if (dbUserPreferences is not null)
 		{
-			throw new BadRequestException("Usuário já possui preferências cadastradas.");
+			throw new BadRequestException("Usuário já possui preferências cadastradas para esse tipo de alerta.");
 		}
 
 		Species? species =
@@ -99,7 +100,7 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 			await _foundAnimalUserPreferencesRepository.GetUserPreferences(userId);
 		if (dbUserPreferences is null)
 		{
-			throw new BadRequestException("Usuário não possui preferências cadastradas.");
+			throw new BadRequestException("Usuário não possui preferências cadastradas para esse tipo de alerta.");
 		}
 
 		Species? species =

@@ -2,7 +2,6 @@ using Domain.Entities;
 using Domain.Entities.Alerts;
 using Tests.EntityGenerators;
 using Tests.EntityGenerators.Alerts;
-using Tests.EntityGenerators.Alerts.Comments;
 
 namespace Tests.TestUtils.Constants;
 

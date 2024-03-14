@@ -5,7 +5,7 @@
         <Nullable>enable</Nullable>
 
         <PackageId>PetFinder.Domain</PackageId>
-        <Version>3.0.0-alpha.1</Version>
+        <Version>4.0.0-alpha.1</Version>
         <Authors>Lucas Silva</Authors>
         <Product>PetFinder.Domain</Product>
     </PropertyGroup>

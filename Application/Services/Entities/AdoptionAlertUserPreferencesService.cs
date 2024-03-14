@@ -1,3 +1,4 @@
+using Application.Common.Calculators;
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping.Alerts.UserPreferences;
 using Application.Common.Interfaces.Entities.Alerts.UserPreferences.AdoptionAlerts;
@@ -6,6 +7,7 @@ using Application.Common.Interfaces.General.UserPreferences;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
 using Domain.Entities.Alerts.UserPreferences;
+using NetTopologySuite.Geometries;
 
 namespace Application.Services.Entities;
 
@@ -59,6 +61,16 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			await _userPreferencesValidations.ValidateAndAssignColorsAsync(createUserPreferences.ColorIds);
 		User user = await _userPreferencesValidations.AssignUserAsync(userId);
 
+		Point? location = null;
+		if (createUserPreferences.FoundLocationLatitude is not null &&
+		    createUserPreferences.FoundLocationLongitude is not null &&
+		    createUserPreferences.RadiusDistanceInKm is not null)
+		{
+			location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+				createUserPreferences.FoundLocationLatitude.Value,
+				createUserPreferences.FoundLocationLongitude!.Value);
+		}
+
 		AdoptionUserPreferences adoptionUserPreferences = new()
 		{
 			Id = _valueProvider.NewGuid(),
@@ -70,8 +82,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			Species = species,
 			SpeciesId = species?.Id,
 			Gender = createUserPreferences.Gender,
-			FoundLocationLatitude = createUserPreferences.FoundLocationLatitude,
-			FoundLocationLongitude = createUserPreferences.FoundLocationLongitude,
+			Location = location,
 			RadiusDistanceInKm = createUserPreferences.RadiusDistanceInKm
 		};
 
@@ -99,6 +110,16 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			await _userPreferencesValidations.ValidateAndAssignColorsAsync(editUserPreferences.ColorIds);
 		User user = await _userPreferencesValidations.AssignUserAsync(userId);
 
+		Point? location = null;
+		if (editUserPreferences.FoundLocationLatitude is not null &&
+		    editUserPreferences.FoundLocationLongitude is not null &&
+		    editUserPreferences.RadiusDistanceInKm is not null)
+		{
+			location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
+				editUserPreferences.FoundLocationLatitude.Value,
+				editUserPreferences.FoundLocationLongitude!.Value);
+		}
+
 		dbUserPreferences.User = user;
 		dbUserPreferences.UserId = user.Id;
 		dbUserPreferences.Colors = colors;
@@ -107,8 +128,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 		dbUserPreferences.Species = species;
 		dbUserPreferences.SpeciesId = species?.Id;
 		dbUserPreferences.Gender = editUserPreferences.Gender;
-		dbUserPreferences.FoundLocationLatitude = editUserPreferences.FoundLocationLatitude;
-		dbUserPreferences.FoundLocationLongitude = editUserPreferences.FoundLocationLongitude;
+		dbUserPreferences.Location = location;
 		dbUserPreferences.RadiusDistanceInKm = editUserPreferences.RadiusDistanceInKm;
 
 		await _adoptionUserPreferencesRepository.CommitAsync();

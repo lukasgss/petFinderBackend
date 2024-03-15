@@ -1,3 +1,4 @@
+using Application.Common.Interfaces.Entities.AdoptionFavoriteAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Alerts.Comments.DTOs;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
@@ -6,6 +7,7 @@ using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.UserMessages.DTOs;
 using Tests.EntityGenerators.Alerts;
 using Tests.EntityGenerators.Alerts.Comments;
+using Tests.EntityGenerators.Alerts.UserFavorites;
 
 namespace Tests.EntityGenerators;
 
@@ -79,6 +81,18 @@ public static class PaginatedEntityGenerator
 			Data = alertCommentResponse,
 			CurrentPage = 1,
 			CurrentPageCount = alertCommentResponse.Count,
+			TotalPages = 1
+		};
+	}
+
+	public static PaginatedEntity<AdoptionFavoriteResponse> GeneratePaginatedAdoptionFavoriteResponse()
+	{
+		var adoptionFavoriteResponse = AdoptionFavoritesGenerator.GenerateListOfResponse();
+		return new PaginatedEntity<AdoptionFavoriteResponse>()
+		{
+			Data = adoptionFavoriteResponse,
+			CurrentPage = 1,
+			CurrentPageCount = adoptionFavoriteResponse.Count,
 			TotalPages = 1
 		};
 	}

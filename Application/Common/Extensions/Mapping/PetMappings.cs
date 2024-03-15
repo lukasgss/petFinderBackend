@@ -42,6 +42,19 @@ public static class PetMappings
 		};
 	}
 
+	public static SimplifiedPetResponse ToSimplifiedPetResponse(this Pet pet)
+	{
+		return new SimplifiedPetResponse()
+		{
+			Id = pet.Id,
+			Name = pet.Name,
+			Observations = pet.Observations,
+			AgeInMonths = pet.AgeInMonths,
+			Images = pet.Images.ToPetImagesResponse(),
+			Gender = pet.Gender.ToString(),
+		};
+	}
+
 	private static List<string> ToPetImagesResponse(this IEnumerable<PetImage> images)
 	{
 		List<string> imageUrls = new();

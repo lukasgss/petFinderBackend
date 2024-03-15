@@ -1,6 +1,7 @@
 using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Converters;
+using Application.Common.Interfaces.Entities.AdoptionFavoriteAlerts;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
@@ -25,6 +26,7 @@ using Application.Services.Authorization;
 using Application.Services.Converters;
 using Application.Services.Entities;
 using Application.Services.Entities.Comments;
+using Application.Services.Entities.UserFavorites;
 using Application.Services.General.Images;
 using Application.Services.General.MessageNotifications;
 using Application.Services.General.Messages;
@@ -61,6 +63,7 @@ public static class DependencyInjection
 		services.AddScoped<IAlertsMessagingService, AlertsMessagingService>();
 		services.AddScoped<IUserPreferencesValidations, UserPreferencesValidations>();
 		services.AddScoped<IAdoptionAlertUserPreferencesService, AdoptionAlertUserPreferencesService>();
+		services.AddScoped<IAdoptionFavoritesService, AdoptionFavoritesService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

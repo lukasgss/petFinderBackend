@@ -15,9 +15,7 @@ public static class MissingAlertMappings
 			LastSeenLocationLongitude = missingAlert.Location.X,
 			Description = missingAlert.Description,
 			RecoveryDate = missingAlert.RecoveryDate,
-			Pet = missingAlert.Pet.ToPetResponseNoOwner(
-				missingAlert.Pet.Colors,
-				missingAlert.Pet.Breed),
+			Pet = missingAlert.Pet.ToPetResponseNoOwner(),
 			Owner = missingAlert.User.ToOwnerResponse()
 		};
 	}

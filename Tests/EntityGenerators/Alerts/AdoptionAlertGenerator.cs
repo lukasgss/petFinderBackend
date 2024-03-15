@@ -103,9 +103,7 @@ public static class AdoptionAlertGenerator
 			Description = Constants.AdoptionAlertData.Description,
 			RegistrationDate = Constants.AdoptionAlertData.RegistrationDate,
 			AdoptionDate = Constants.AdoptionAlertData.AdoptedAdoptionDate,
-			Pet = Constants.AdoptionAlertData.Pet.ToPetResponseNoOwner(
-				Constants.PetData.Colors,
-				Constants.PetData.Breed),
+			Pet = Constants.AdoptionAlertData.Pet.ToPetResponseNoOwner(),
 			Owner = Constants.AdoptionAlertData.User.ToUserDataResponse(),
 		};
 	}
@@ -121,9 +119,7 @@ public static class AdoptionAlertGenerator
 			Description = Constants.AdoptionAlertData.Description,
 			RegistrationDate = Constants.AdoptionAlertData.RegistrationDate,
 			AdoptionDate = null,
-			Pet = Constants.AdoptionAlertData.Pet.ToPetResponseNoOwner(
-				Constants.PetData.Colors,
-				Constants.PetData.Breed),
+			Pet = Constants.AdoptionAlertData.Pet.ToPetResponseNoOwner(),
 			Owner = Constants.AdoptionAlertData.User.ToUserDataResponse(),
 		};
 	}

@@ -16,7 +16,7 @@ public static class AdoptionAlertMappings
 			Description = adoptionAlert.Description,
 			RegistrationDate = adoptionAlert.RegistrationDate,
 			AdoptionDate = adoptionAlert.AdoptionDate,
-			Pet = adoptionAlert.Pet.ToPetResponseNoOwner(adoptionAlert.Pet.Colors, adoptionAlert.Pet.Breed),
+			Pet = adoptionAlert.Pet.ToPetResponseNoOwner(),
 			Owner = adoptionAlert.User.ToUserDataResponse()
 		};
 	}

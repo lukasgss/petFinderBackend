@@ -48,9 +48,7 @@ public static class MissingAlertGenerator
 			LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
 			Description = Constants.MissingAlertData.Description,
 			RecoveryDate = Constants.MissingAlertData.NonRecoveredRecoveryDate,
-			Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
-				ColorGenerator.GenerateListOfColors(),
-				BreedGenerator.GenerateBreed()),
+			Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(),
 			Owner = Constants.MissingAlertData.User.ToOwnerResponse()
 		};
 	}
@@ -76,9 +74,7 @@ public static class MissingAlertGenerator
 			LastSeenLocationLongitude = Constants.MissingAlertData.LastSeenLocationLongitude,
 			Description = Constants.MissingAlertData.Description,
 			RecoveryDate = Constants.MissingAlertData.RecoveryDate,
-			Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(
-				ColorGenerator.GenerateListOfColors(),
-				BreedGenerator.GenerateBreed()),
+			Pet = Constants.MissingAlertData.Pet.ToPetResponseNoOwner(),
 			Owner = Constants.MissingAlertData.User.ToOwnerResponse()
 		};
 	}

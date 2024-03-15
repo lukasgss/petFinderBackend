@@ -5,6 +5,7 @@ using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
+using Application.Services.General.Messages;
 using Domain.Entities;
 using Domain.Entities.Alerts;
 using NSubstitute;
@@ -20,6 +21,7 @@ public class AdoptionAlertServiceTests
 	private readonly IAdoptionAlertRepository _adoptionAlertRepositoryMock;
 	private readonly IPetRepository _petRepositoryMock;
 	private readonly IUserRepository _userRepositoryMock;
+	private readonly IAlertsMessagingService _alertsMessagingServiceMock;
 	private readonly IValueProvider _valueProviderMock;
 	private readonly IAdoptionAlertService _sut;
 
@@ -53,12 +55,14 @@ public class AdoptionAlertServiceTests
 		_adoptionAlertRepositoryMock = Substitute.For<IAdoptionAlertRepository>();
 		_petRepositoryMock = Substitute.For<IPetRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
+		_alertsMessagingServiceMock = Substitute.For<IAlertsMessagingService>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new AdoptionAlertService(
 			_adoptionAlertRepositoryMock,
 			_petRepositoryMock,
 			_userRepositoryMock,
+			_alertsMessagingServiceMock,
 			_valueProviderMock);
 	}
 

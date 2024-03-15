@@ -20,4 +20,19 @@ public static class AdoptionAlertMappings
 			Owner = adoptionAlert.User.ToUserDataResponse()
 		};
 	}
+
+	public static SimplifiedAdoptionAlertResponse ToSimplifiedAdoptionAlertResponse(this AdoptionAlert adoptionAlert)
+	{
+		return new SimplifiedAdoptionAlertResponse()
+		{
+			Id = adoptionAlert.Id,
+			OnlyForScreenedProperties = adoptionAlert.OnlyForScreenedProperties,
+			LocationLatitude = adoptionAlert.Location.Y,
+			LocationLongitude = adoptionAlert.Location.X,
+			Description = adoptionAlert.Description,
+			RegistrationDate = adoptionAlert.RegistrationDate,
+			AdoptionDate = adoptionAlert.AdoptionDate,
+			Pet = adoptionAlert.Pet.ToSimplifiedPetResponse(),
+		};
+	}
 }

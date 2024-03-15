@@ -1,5 +1,6 @@
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Domain.Entities.Alerts.UserFavorites;
 using Domain.Entities.Alerts.UserPreferences;
 using Domain.ValueObjects;
 using Infrastructure.Persistence.DataSeed;
@@ -30,6 +31,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	public DbSet<FoundAnimalAlertImage> FoundAnimalAlertImages { get; set; } = null!;
 	public DbSet<FoundAnimalUserPreferences> FoundAnimalUserPreferences { get; set; } = null!;
 	public DbSet<AdoptionUserPreferences> AdoptionUserPreferences { get; set; } = null!;
+	public DbSet<AdoptionFavorite> AdoptionFavorites { get; set; } = null!;
 
 	protected override void OnModelCreating(ModelBuilder builder)
 	{

@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using Application.Common.Pagination;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Domain.Entities.Alerts.UserFavorites;
 using Tests.EntityGenerators.Alerts;
 using Tests.EntityGenerators.Alerts.Comments;
+using Tests.EntityGenerators.Alerts.UserFavorites;
 
 namespace Tests.EntityGenerators;
 
@@ -43,5 +45,11 @@ public static class PagedListGenerator
 	{
 		List<AdoptionAlertComment> alertComments = AdoptionAlertCommentGenerator.GenerateListOfAdoptionAlertComments();
 		return new PagedList<AdoptionAlertComment>(alertComments, alertComments.Count, pageNumber: 1, pageSize: 50);
+	}
+
+	public static PagedList<AdoptionFavorite> GeneratePagedAdoptionFavorites()
+	{
+		List<AdoptionFavorite> adoptionFavorites = AdoptionFavoritesGenerator.GenerateList();
+		return new PagedList<AdoptionFavorite>(adoptionFavorites, adoptionFavorites.Count, pageNumber: 1, pageSize: 50);
 	}
 }

@@ -55,7 +55,7 @@ public class UserPreferencesValidationsTests
 	{
 		Breed? returnedBreed = await _sut.ValidateAndAssignBreedAsync(breedId: null, Species.Id);
 
-		Assert.Equal(null, returnedBreed);
+		Assert.Null(returnedBreed);
 	}
 
 	[Fact]
@@ -106,7 +106,7 @@ public class UserPreferencesValidationsTests
 	{
 		Species? returnedSpecies = await _sut.ValidateAndAssignSpeciesAsync(null);
 
-		Assert.Equal(null, returnedSpecies);
+		Assert.Null(returnedSpecies);
 	}
 
 	[Fact]

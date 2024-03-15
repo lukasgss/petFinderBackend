@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Domain.Entities.Alerts.Notifications;
+using Domain.Entities.Alerts.UserFavorites;
 using Domain.Entities.Alerts.UserPreferences;
 using Microsoft.AspNetCore.Identity;
 
@@ -17,4 +18,5 @@ public class User : IdentityUser<Guid>
 	public virtual AdoptionUserPreferences? AdoptionUserPreferences { get; set; }
 	public ICollection<MissingAlertComment> MissingAlertComments { get; set; } = null!;
 	public ICollection<FoundAnimalAlertNotifications> FoundAnimalAlertNotifications { get; set; } = null!;
+	public virtual ICollection<AdoptionFavorite> AdoptionFavorites { get; set; } = null!;
 }

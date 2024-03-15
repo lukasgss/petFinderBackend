@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Entities.Alerts.UserFavorites;
 using NetTopologySuite.Geometries;
 
 namespace Domain.Entities.Alerts;
@@ -30,4 +31,6 @@ public class AdoptionAlert
 	public virtual User User { get; set; } = null!;
 
 	public Guid UserId { get; set; }
+
+	public virtual ICollection<AdoptionFavorite> AdoptionFavorites { get; set; } = null!;
 }

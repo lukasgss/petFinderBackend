@@ -1,4 +1,5 @@
 using Application.Common.Extensions.Mapping.Alerts;
+using Application.Common.Interfaces.Entities.AdoptionFavoriteAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts.DTOs;
 using Application.Common.Interfaces.Entities.Alerts.Comments.DTOs;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
@@ -8,6 +9,7 @@ using Application.Common.Interfaces.Entities.UserMessages.DTOs;
 using Application.Common.Pagination;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Domain.Entities.Alerts.UserFavorites;
 
 namespace Application.Common.Extensions.Mapping;
 
@@ -106,6 +108,22 @@ public static class PagedListMappings
 			CurrentPage = alertComments.CurrentPage,
 			CurrentPageCount = alertComments.CurrentPageCount,
 			TotalPages = alertComments.TotalPages
+		};
+	}
+
+	public static PaginatedEntity<AdoptionFavoriteResponse> ToAlertFavoritesResponse(
+		this PagedList<AdoptionFavorite> adoptionFavorites)
+	{
+		List<AdoptionFavoriteResponse> adoptionFavoritesResponses = adoptionFavorites
+			.Select(favorite => favorite.ToAdoptionFavoriteResponse())
+			.ToList();
+
+		return new PaginatedEntity<AdoptionFavoriteResponse>()
+		{
+			Data = adoptionFavoritesResponses,
+			CurrentPage = adoptionFavorites.CurrentPage,
+			CurrentPageCount = adoptionFavorites.CurrentPageCount,
+			TotalPages = adoptionFavorites.TotalPages
 		};
 	}
 }

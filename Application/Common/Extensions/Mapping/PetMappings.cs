@@ -24,9 +24,7 @@ public static class PetMappings
 		};
 	}
 
-	public static PetResponseNoOwner ToPetResponseNoOwner(this Pet pet,
-		IEnumerable<Color> colors,
-		Breed breed)
+	public static PetResponseNoOwner ToPetResponseNoOwner(this Pet pet)
 	{
 		return new PetResponseNoOwner()
 		{
@@ -36,8 +34,8 @@ public static class PetMappings
 			AgeInMonths = pet.AgeInMonths,
 			Images = pet.Images.ToPetImagesResponse(),
 			Gender = pet.Gender.ToString(),
-			Breed = breed.ToBreedResponse(),
-			Colors = colors.ToListOfColorResponse(),
+			Breed = pet.Breed.ToBreedResponse(),
+			Colors = pet.Colors.ToListOfColorResponse(),
 			Vaccines = pet.Vaccines.ToVaccineResponseList()
 		};
 	}

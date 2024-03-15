@@ -2,6 +2,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Application.Common.Interfaces.ExternalServices;
 using Application.Common.Interfaces.ExternalServices.AWS;
+using Application.Common.Interfaces.General.Images;
 using Infrastructure.ExternalServices.Configs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -13,15 +14,18 @@ public class FileUploadClient : IFileUploadClient
 {
 	private readonly IAmazonS3 _s3Client;
 	private readonly AwsData _awsData;
+	private readonly ImagesData _imagesData;
 	private readonly ILogger<FileUploadClient> _logger;
 
 	public FileUploadClient(
 		IAmazonS3 s3Client,
 		IOptions<AwsData> awsData,
+		IOptions<ImagesData> imagesData,
 		ILogger<FileUploadClient> logger)
 	{
 		_s3Client = s3Client ?? throw new ArgumentNullException(nameof(s3Client));
 		_awsData = awsData.Value ?? throw new ArgumentNullException(nameof(awsData));
+		_imagesData = imagesData.Value ?? throw new ArgumentNullException(nameof(imagesData));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
@@ -68,25 +72,26 @@ public class FileUploadClient : IFileUploadClient
 	{
 		try
 		{
-			string awsImageKey = imageFile is null
-				? _awsData.DefaultUserProfilePicture
-				: $"Images/{_awsData.UserImagesFolder}/{hashedUserId}.webp";
-
-			string fileNameMetadata = imageFile is null
-				? _awsData.DefaultUserProfilePictureMetadata
-				: imageFile.FileName;
+			if (imageFile is null)
+			{
+				return new AwsS3ImageResponse()
+				{
+					Success = true,
+					PublicUrl = _imagesData.DefaultUserProfilePicture
+				};
+			}
 
 			PutObjectRequest putObjectRequest = new()
 			{
 				BucketName = _awsData.BucketName,
 				// Content type and image extension is always set to webp, since
 				// the image service always encodes the image as webp format
-				Key = awsImageKey,
+				Key = $"Images/{_awsData.UserImagesFolder}/{hashedUserId}.webp",
 				ContentType = "image/webp",
 				InputStream = imageStream,
 				Metadata =
 				{
-					["x-amz-meta-originalname"] = fileNameMetadata,
+					["x-amz-meta-originalname"] = imageFile.FileName,
 					["x-amz-meta-extension"] = ".webp"
 				}
 			};
@@ -203,8 +208,14 @@ public class FileUploadClient : IFileUploadClient
 		}
 	}
 
-	private string FormatPublicUrlString(string imageKey)
+	public string FormatPublicUrlString(string? imageKey)
 	{
+		if (imageKey is null)
+		{
+			return
+				$"https://{_awsData.BucketName}.s3.{_awsData.Region}.amazonaws.com/{_imagesData.DefaultUserProfilePicture}";
+		}
+
 		return $"https://{_awsData.BucketName}.s3.{_awsData.Region}.amazonaws.com/{imageKey}";
 	}
 }

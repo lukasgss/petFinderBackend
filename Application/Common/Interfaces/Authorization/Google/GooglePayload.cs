@@ -1,4 +1,4 @@
-namespace Application.Common.Interfaces.Authorization;
+namespace Application.Common.Interfaces.Authorization.Google;
 
 public class GooglePayload
 {

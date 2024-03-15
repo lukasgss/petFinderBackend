@@ -2,6 +2,8 @@ using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Authorization;
+using Application.Common.Interfaces.Authorization.Facebook;
+using Application.Common.Interfaces.Authorization.Google;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Entities.Users.DTOs;
@@ -27,6 +29,9 @@ public class UserService : IUserService
 	private readonly IUserImageSubmissionService _userImageSubmissionService;
 	private readonly IExternalAuthHandler _externalAuthHandler;
 	private readonly IValueProvider _valueProvider;
+
+	private const string GoogleProvider = "GOOGLE";
+	private const string FacebookProvider = "FACEBOOK";
 
 	public UserService(
 		IUserRepository userRepository,
@@ -163,41 +168,15 @@ public class UserService : IUserService
 		return userToLogin.ToUserResponse(jwtToken);
 	}
 
+
 	public async Task<UserResponse> ExternalLoginAsync(ExternalAuthRequest externalAuth)
 	{
-		GooglePayload? payload = await _externalAuthHandler.ValidateGoogleToken(externalAuth);
-		if (payload is null)
+		return externalAuth.Provider.ToUpperInvariant() switch
 		{
-			throw new BadRequestException("External authentication is invalid.");
-		}
-
-		UserLoginInfo info = new(externalAuth.Provider, payload.Subject, externalAuth.Provider);
-		User? user = await _userRepository.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
-		if (user is null)
-		{
-			user = await _userRepository.FindByEmailAsync(payload.Email);
-			if (user is null)
-			{
-				user = new User
-				{
-					Id = _valueProvider.NewGuid(),
-					Email = payload.Email,
-					UserName = payload.Email,
-					FullName = payload.FullName,
-					Image = payload.Image
-				};
-				await _userRepository.RegisterUserAsync(user);
-				await _userRepository.AddLoginAsync(user, info);
-			}
-			else
-			{
-				await _userRepository.AddLoginAsync(user, info);
-			}
-		}
-
-		string token = _jwtTokenGenerator.GenerateToken(user.Id, user.FullName);
-
-		return user.ToUserResponse(token);
+			GoogleProvider => await GoogleLoginAsync(externalAuth),
+			FacebookProvider => await FacebookLoginAsync(externalAuth),
+			_ => throw new BadRequestException("Unsupported external authentication provider.")
+		};
 	}
 
 	public async Task ConfirmEmailAsync(string hashedUserId, string token)
@@ -215,6 +194,84 @@ public class UserService : IUserService
 		{
 			throw new BadRequestException("Não foi possível ativar o email com os dados informados.");
 		}
+	}
+
+	private async Task<User> RegisterUserFromExternalAuthProviderAsync(ExternalAuthPayload payload, UserLoginInfo info)
+	{
+		User? user = await _userRepository.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+		if (user is not null)
+		{
+			return user;
+		}
+
+		user = await _userRepository.FindByEmailAsync(payload.Email);
+		if (user is null)
+		{
+			string userImageUrl = _userImageSubmissionService.ValidateUserImage(payload.Image);
+			user = new User
+			{
+				Id = _valueProvider.NewGuid(),
+				Email = payload.Email,
+				UserName = payload.Email,
+				FullName = payload.FullName,
+				Image = userImageUrl,
+				EmailConfirmed = true
+			};
+			await _userRepository.RegisterUserAsync(user);
+			await _userRepository.AddLoginAsync(user, info);
+		}
+		else
+		{
+			await _userRepository.AddLoginAsync(user, info);
+		}
+
+		return user;
+	}
+
+	private async Task<UserResponse> GoogleLoginAsync(ExternalAuthRequest externalAuth)
+	{
+		GooglePayload? payload = await _externalAuthHandler.ValidateGoogleToken(externalAuth);
+		if (payload is null)
+		{
+			throw new BadRequestException("Não foi possível realizar o login com o Google.");
+		}
+
+		ExternalAuthPayload externalAuthPayload = new()
+		{
+			Email = payload.Email,
+			FullName = payload.FullName,
+			Image = payload.Image
+		};
+		UserLoginInfo info = new(GoogleProvider, payload.Subject, GoogleProvider);
+
+		User user = await RegisterUserFromExternalAuthProviderAsync(externalAuthPayload, info);
+
+		string token = _jwtTokenGenerator.GenerateToken(user.Id, user.FullName);
+
+		return user.ToUserResponse(token);
+	}
+
+	private async Task<UserResponse> FacebookLoginAsync(ExternalAuthRequest externalAuth)
+	{
+		FacebookPayload? payload = await _externalAuthHandler.ValidateFacebookToken(externalAuth);
+		if (payload is null)
+		{
+			throw new BadRequestException("Não foi possível realizar o login com o Facebook.");
+		}
+
+		ExternalAuthPayload externalAuthPayload = new()
+		{
+			Email = payload.Email,
+			FullName = payload.FullName,
+			Image = payload.Image
+		};
+		UserLoginInfo info = new(FacebookProvider, payload.UserId, FacebookProvider);
+
+		User user = await RegisterUserFromExternalAuthProviderAsync(externalAuthPayload, info);
+
+		string token = _jwtTokenGenerator.GenerateToken(user.Id, user.FullName);
+
+		return user.ToUserResponse(token);
 	}
 
 	private async Task GenerateAccountConfirmationMessage(User userToCreate)

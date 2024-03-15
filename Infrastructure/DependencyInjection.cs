@@ -66,6 +66,9 @@ public static class DependencyInjection
 					opt => opt.UseNetTopologySuite())
 				.UseEnumCheckConstraints());
 
+		services.AddHttpClient(FacebookGraphApiConfig.ClientKey,
+			client => { client.BaseAddress = FacebookGraphApiConfig.BaseUrl; });
+
 		return services;
 	}
 }

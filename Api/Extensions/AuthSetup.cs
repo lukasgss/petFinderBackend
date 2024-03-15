@@ -1,6 +1,8 @@
 using System.Text;
 using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Authorization;
+using Application.Common.Interfaces.Authorization.Facebook;
+using Application.Common.Interfaces.Authorization.Google;
 using Domain.Entities;
 using Infrastructure.Persistence.DataContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -51,5 +53,6 @@ public static class AuthSetup
 
 		services.Configure<JwtConfig>(configuration.GetSection(JwtConfig.SectionName));
 		services.Configure<GoogleAuthConfig>(configuration.GetSection("Authentication:Google"));
+		services.Configure<FacebookAuthConfig>(configuration.GetSection("Authentication:Facebook"));
 	}
 }

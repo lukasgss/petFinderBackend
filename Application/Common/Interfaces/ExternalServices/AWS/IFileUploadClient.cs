@@ -12,4 +12,5 @@ public interface IFileUploadClient
 
 	Task<AwsS3ImageResponse> DeletePetImageAsync(string hashedPetId);
 	Task<AwsS3ImageResponse> DeleteFoundAlertImageAsync(string hashedAlertId);
+	string FormatPublicUrlString(string? imageKey);
 }

@@ -26,6 +26,22 @@ public class AlertsMessagingService : IAlertsMessagingService
 			ColorIds = foundAlert.Colors.Select(color => color.Id)
 		};
 
-		_messagePublisherClient.PublishMessage(data);
+		_messagePublisherClient.PublishMessage(data, MessageType.FoundAnimal);
+	}
+
+	public void PublishAdoptionAlert(AdoptionAlert adoptionAlert)
+	{
+		var data = new
+		{
+			adoptionAlert.Id,
+			adoptionAlert.Pet.Gender,
+			FoundLocationLatitude = adoptionAlert.Location.Y,
+			FoundLocationLongitude = adoptionAlert.Location.X,
+			SpeciesId = adoptionAlert.Pet.Species.Id,
+			BreedId = adoptionAlert.Pet.Breed?.Id,
+			ColorIds = adoptionAlert.Pet.Colors.Select(color => color.Id)
+		};
+
+		_messagePublisherClient.PublishMessage(data, MessageType.AdoptionAnimal);
 	}
 }

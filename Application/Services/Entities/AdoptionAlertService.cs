@@ -8,6 +8,7 @@ using Application.Common.Interfaces.Entities.Paginated;
 using Application.Common.Interfaces.Entities.Pets;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
+using Application.Services.General.Messages;
 using Domain.Entities;
 using Domain.Entities.Alerts;
 using NetTopologySuite.Geometries;
@@ -19,18 +20,22 @@ public class AdoptionAlertService : IAdoptionAlertService
 	private readonly IAdoptionAlertRepository _adoptionAlertRepository;
 	private readonly IPetRepository _petRepository;
 	private readonly IUserRepository _userRepository;
+	private readonly IAlertsMessagingService _alertsMessagingService;
 	private readonly IValueProvider _valueProvider;
 
 	public AdoptionAlertService(
 		IAdoptionAlertRepository adoptionAlertRepository,
 		IPetRepository petRepository,
 		IUserRepository userRepository,
+		IAlertsMessagingService alertsMessagingService,
 		IValueProvider valueProvider)
 	{
 		_adoptionAlertRepository =
 			adoptionAlertRepository ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
 		_petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+		_alertsMessagingService =
+			alertsMessagingService ?? throw new ArgumentNullException(nameof(alertsMessagingService));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
@@ -67,7 +72,7 @@ public class AdoptionAlertService : IAdoptionAlertService
 			createAlertRequest.LocationLatitude,
 			createAlertRequest.LocationLongitude);
 
-		AdoptionAlert adoptionAlertToCreate = new()
+		AdoptionAlert alertToBeCreated = new()
 		{
 			Id = _valueProvider.NewGuid(),
 			OnlyForScreenedProperties = createAlertRequest.OnlyForScreenedProperties,
@@ -79,10 +84,12 @@ public class AdoptionAlertService : IAdoptionAlertService
 			User = alertOwner,
 		};
 
-		_adoptionAlertRepository.Add(adoptionAlertToCreate);
+		_adoptionAlertRepository.Add(alertToBeCreated);
 		await _adoptionAlertRepository.CommitAsync();
 
-		return adoptionAlertToCreate.ToAdoptionAlertResponse();
+		_alertsMessagingService.PublishAdoptionAlert(alertToBeCreated);
+
+		return alertToBeCreated.ToAdoptionAlertResponse();
 	}
 
 	public async Task<AdoptionAlertResponse> EditAsync(EditAdoptionAlertRequest editAlertRequest, Guid userId,

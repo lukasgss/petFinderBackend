@@ -2,10 +2,11 @@ namespace Application.Common.Interfaces.Entities.Users.DTOs;
 
 public class UserResponse
 {
-	public Guid Id { get; set; }
-	public string Email { get; set; } = null!;
-	public string FullName { get; set; } = null!;
-	public string Image { get; set; } = null!;
-	public string? PhoneNumber { get; set; }
-	public string Token { get; set; } = null!;
+	public required Guid Id { get; init; }
+	public required string Email { get; init; }
+	public required string FullName { get; init; }
+	public required string Image { get; init; }
+	public string? PhoneNumber { get; init; }
+	public required string AccessToken { get; init; }
+	public required string RefreshToken { get; init; }
 }

@@ -69,7 +69,7 @@ public static class DependencyInjection
 
 		services.AddSingleton<IValueProvider, ValueProvider>();
 
-		services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+		services.AddSingleton<ITokenGenerator, TokenGenerator>();
 
 		services.Configure<MessagingSettings>(configuration.GetSection("MessagingSettings"));
 		services.Configure<ImagesData>(configuration.GetSection("ImagesData"));

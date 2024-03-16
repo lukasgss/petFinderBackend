@@ -10,4 +10,5 @@ public interface IUserService
 	Task<UserResponse> LoginAsync(LoginUserRequest loginUserRequest);
 	Task<UserResponse> ExternalLoginAsync(ExternalAuthRequest externalAuth);
 	Task ConfirmEmailAsync(string hashedUserId, string token);
+	Task<TokensResponse> RefreshToken(Guid userId);
 }

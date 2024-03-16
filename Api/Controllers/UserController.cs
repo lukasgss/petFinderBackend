@@ -77,6 +77,16 @@ public class UserController : ControllerBase
 		return Ok();
 	}
 
+	// This endpoint is meant to be accessed with the refresh token instead of the access token
+	[Authorize]
+	[HttpPost("refresh")]
+	public async Task<ActionResult<TokensResponse>> Refresh()
+	{
+		Guid userId = _userAuthorizationService.GetUserIdFromJwtToken(User);
+
+		return await _userService.RefreshToken(userId);
+	}
+
 	[Authorize]
 	[HttpPut("{userRouteId:guid}")]
 	public async Task<ActionResult<UserDataResponse>> Update(EditUserRequest editUserRequest, Guid userRouteId)

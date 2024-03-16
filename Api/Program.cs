@@ -44,6 +44,8 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.UseMiddleware<CheckTokenTypeMiddleware>();
+
 app.MapControllers();
 
 app.Run();

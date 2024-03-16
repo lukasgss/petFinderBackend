@@ -79,4 +79,14 @@ public class UserRepository : GenericRepository<User>, IUserRepository
 	{
 		return await _dbContext.Users.SingleOrDefaultAsync(user => user.Email == email);
 	}
+
+	public async Task<bool> IsLockedOutAsync(User user)
+	{
+		return await _userManager.IsLockedOutAsync(user);
+	}
+
+	public async Task<bool> IsEmailConfirmedAsync(User user)
+	{
+		return await _userManager.IsEmailConfirmedAsync(user);
+	}
 }

@@ -25,7 +25,7 @@ namespace Tests.UnitTests;
 public class UserServiceTests
 {
 	private readonly IUserRepository _userRepositoryMock;
-	private readonly IJwtTokenGenerator _jwtTokenGeneratorMock;
+	private readonly ITokenGenerator _tokenGeneratorMock;
 	private readonly IIdConverterService _idConverterServiceMock;
 	private readonly IUserImageSubmissionService _userImageSubmissionServiceMock;
 	private readonly IExternalAuthHandler _externalAuthHandlerMock;
@@ -34,7 +34,7 @@ public class UserServiceTests
 
 	private static readonly User User = UserGenerator.GenerateUser();
 	private static readonly UserDataResponse UserDataResponse = User.ToUserDataResponse();
-	private static readonly UserResponse ExpectedUserResponse = User.ToUserResponse(Constants.UserData.JwtToken);
+	private static readonly UserResponse ExpectedUserResponse = User.ToUserResponse(Constants.UserData.Tokens);
 
 	private static readonly UserResponse ExpectedUserResponseWithoutPhoneNumber =
 		UserGenerator.GenerateUserResponseWithoutPhoneNumber();
@@ -61,7 +61,7 @@ public class UserServiceTests
 	public UserServiceTests()
 	{
 		_userRepositoryMock = Substitute.For<IUserRepository>();
-		_jwtTokenGeneratorMock = Substitute.For<IJwtTokenGenerator>();
+		_tokenGeneratorMock = Substitute.For<ITokenGenerator>();
 		IHttpContextAccessor httpRequestMock = Substitute.For<IHttpContextAccessor>();
 		IMessagingService messagingServiceMock = Substitute.For<IMessagingService>();
 		LinkGenerator linkGeneratorMock = Substitute.For<LinkGenerator>();
@@ -72,7 +72,7 @@ public class UserServiceTests
 
 		_sut = new UserService(
 			_userRepositoryMock,
-			_jwtTokenGeneratorMock,
+			_tokenGeneratorMock,
 			httpRequestMock,
 			messagingServiceMock,
 			linkGeneratorMock,
@@ -150,7 +150,7 @@ public class UserServiceTests
 		UserLoginInfo info = new(ExternalAuthRequest.Provider, GooglePayload.Subject, ExternalAuthRequest.Provider);
 		_userRepositoryMock.FindByLoginAsync(info.LoginProvider, info.ProviderKey).Returns(User);
 		_userRepositoryMock.FindByEmailAsync(GooglePayload.Email).Returns(User);
-		_jwtTokenGeneratorMock.GenerateToken(User.Id, User.FullName).Returns(ExpectedUserResponse.Token);
+		_tokenGeneratorMock.GenerateTokens(User.Id, User.FullName).Returns(Constants.UserData.Tokens);
 
 		UserResponse userResponse = await _sut.ExternalLoginAsync(ExternalAuthRequest);
 
@@ -165,8 +165,8 @@ public class UserServiceTests
 		_userRepositoryMock.FindByLoginAsync(info.LoginProvider, info.ProviderKey).ReturnsNull();
 		_userRepositoryMock.FindByEmailAsync(GooglePayload.Email).ReturnsNull();
 		_valueProviderMock.NewGuid().Returns(User.Id);
-		_jwtTokenGeneratorMock.GenerateToken(User.Id, User.FullName)
-			.Returns(ExpectedUserResponseWithoutPhoneNumber.Token);
+		_tokenGeneratorMock.GenerateTokens(User.Id, User.FullName)
+			.Returns(Constants.UserData.Tokens);
 		_userImageSubmissionServiceMock.ValidateUserImage(ExternalAuthPayload.Image).Returns(User.Image);
 
 		UserResponse userResponse = await _sut.ExternalLoginAsync(ExternalAuthRequest);
@@ -181,7 +181,7 @@ public class UserServiceTests
 		UserLoginInfo info = new(ExternalAuthRequest.Provider, GooglePayload.Subject, ExternalAuthRequest.Provider);
 		_userRepositoryMock.FindByLoginAsync(info.LoginProvider, info.ProviderKey).ReturnsNull();
 		_userRepositoryMock.FindByEmailAsync(GooglePayload.Email).Returns(User);
-		_jwtTokenGeneratorMock.GenerateToken(User.Id, User.FullName).Returns(ExpectedUserResponse.Token);
+		_tokenGeneratorMock.GenerateTokens(User.Id, User.FullName).Returns(Constants.UserData.Tokens);
 
 		UserResponse userResponse = await _sut.ExternalLoginAsync(ExternalAuthRequest);
 
@@ -248,8 +248,8 @@ public class UserServiceTests
 			.Returns(expectedIdentityResult);
 		_userRepositoryMock.SetLockoutEnabledAsync(Arg.Any<User>(), false)
 			.Returns(expectedIdentityResult);
-		_jwtTokenGeneratorMock.GenerateToken(User.Id, Constants.UserData.FullName)
-			.Returns(Constants.UserData.JwtToken);
+		_tokenGeneratorMock.GenerateTokens(User.Id, Constants.UserData.FullName)
+			.Returns(Constants.UserData.Tokens);
 
 		// Act
 		UserResponse userResponse = await _sut.RegisterAsync(CreateUserRequest);
@@ -293,7 +293,7 @@ public class UserServiceTests
 		FakeSignInResult fakeSignInResult = new FakeSignInResult(succeeded: true, isLockedOut: false);
 		_userRepositoryMock.CheckCredentials(Arg.Any<User>(), LoginUserRequest.Password)
 			.Returns(fakeSignInResult);
-		_jwtTokenGeneratorMock.GenerateToken(User.Id, User.FullName).Returns(Constants.UserData.JwtToken);
+		_tokenGeneratorMock.GenerateTokens(User.Id, User.FullName).Returns(Constants.UserData.Tokens);
 
 		UserResponse userResponse = await _sut.LoginAsync(LoginUserRequest);
 

@@ -28,7 +28,7 @@ public static class UserMappings
 		};
 	}
 
-	public static UserResponse ToUserResponse(this User user, string jwtToken)
+	public static UserResponse ToUserResponse(this User user, TokensResponse tokens)
 	{
 		return new UserResponse()
 		{
@@ -37,7 +37,8 @@ public static class UserMappings
 			Email = user.Email!,
 			Image = user.Image,
 			PhoneNumber = user.PhoneNumber!,
-			Token = jwtToken
+			AccessToken = tokens.AccessToken,
+			RefreshToken = tokens.RefreshToken
 		};
 	}
 }

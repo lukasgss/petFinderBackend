@@ -17,4 +17,6 @@ public interface IUserRepository : IGenericRepository<User>
 	Task<IdentityResult> ConfirmEmailAsync(User user, string token);
 	Task<User?> GetUserByIdAsync(Guid userId);
 	Task<User?> GetUserByEmailAsync(string email);
+	Task<bool> IsLockedOutAsync(User user);
+	Task<bool> IsEmailConfirmedAsync(User user);
 }

@@ -21,7 +21,7 @@ namespace Application.Services.Entities;
 public class UserService : IUserService
 {
 	private readonly IUserRepository _userRepository;
-	private readonly IJwtTokenGenerator _jwtTokenGenerator;
+	private readonly ITokenGenerator _tokenGenerator;
 	private readonly IHttpContextAccessor _httpRequest;
 	private readonly IMessagingService _messagingService;
 	private readonly LinkGenerator _linkGenerator;
@@ -35,7 +35,7 @@ public class UserService : IUserService
 
 	public UserService(
 		IUserRepository userRepository,
-		IJwtTokenGenerator jwtTokenGenerator,
+		ITokenGenerator tokenGenerator,
 		IHttpContextAccessor httpRequest,
 		IMessagingService messagingService,
 		LinkGenerator linkGenerator,
@@ -45,7 +45,7 @@ public class UserService : IUserService
 		IValueProvider valueProvider)
 	{
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-		_jwtTokenGenerator = jwtTokenGenerator ?? throw new ArgumentNullException(nameof(jwtTokenGenerator));
+		_tokenGenerator = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
 		_httpRequest = httpRequest ?? throw new ArgumentNullException(nameof(httpRequest));
 		_messagingService = messagingService ?? throw new ArgumentNullException(nameof(messagingService));
 		_linkGenerator = linkGenerator ?? throw new ArgumentNullException(nameof(linkGenerator));
@@ -102,9 +102,9 @@ public class UserService : IUserService
 
 		await GenerateAccountConfirmationMessage(userToCreate);
 
-		string jwtToken = _jwtTokenGenerator.GenerateToken(userToCreate.Id, userToCreate.FullName);
+		TokensResponse tokens = _tokenGenerator.GenerateTokens(userToCreate.Id, userToCreate.FullName);
 
-		return userToCreate.ToUserResponse(jwtToken);
+		return userToCreate.ToUserResponse(tokens);
 	}
 
 	public async Task<UserDataResponse> EditAsync(EditUserRequest editUserRequest, Guid userId, Guid routeId)
@@ -163,9 +163,9 @@ public class UserService : IUserService
 			throw new UnauthorizedException("Credenciais inválidas.");
 		}
 
-		string jwtToken = _jwtTokenGenerator.GenerateToken(userToLogin.Id, userToLogin.FullName);
+		TokensResponse tokens = _tokenGenerator.GenerateTokens(userToLogin.Id, userToLogin.FullName);
 
-		return userToLogin.ToUserResponse(jwtToken);
+		return userToLogin.ToUserResponse(tokens);
 	}
 
 
@@ -194,6 +194,28 @@ public class UserService : IUserService
 		{
 			throw new BadRequestException("Não foi possível ativar o email com os dados informados.");
 		}
+	}
+
+	public async Task<TokensResponse> RefreshToken(Guid userId)
+	{
+		User? user = await _userRepository.GetUserByIdAsync(userId);
+		if (user is null)
+		{
+			throw new NotFoundException("Não foi possível encontrar um usuário com esse id.");
+		}
+
+		if (await _userRepository.IsLockedOutAsync(user))
+		{
+			throw new LockedException("Essa conta está bloqueada.");
+		}
+
+		// TODO: Add user e-mail confirmation
+		// if (!await _userRepository.IsEmailConfirmedAsync(user))
+		// {
+		// 	throw new UnauthorizedException("É necessário confirmar o e-mail antes de realizar login.");
+		// }
+
+		return _tokenGenerator.GenerateTokens(userId, user.FullName);
 	}
 
 	private async Task<User> RegisterUserFromExternalAuthProviderAsync(ExternalAuthPayload payload, UserLoginInfo info)
@@ -246,9 +268,9 @@ public class UserService : IUserService
 
 		User user = await RegisterUserFromExternalAuthProviderAsync(externalAuthPayload, info);
 
-		string token = _jwtTokenGenerator.GenerateToken(user.Id, user.FullName);
+		TokensResponse tokens = _tokenGenerator.GenerateTokens(user.Id, user.FullName);
 
-		return user.ToUserResponse(token);
+		return user.ToUserResponse(tokens);
 	}
 
 	private async Task<UserResponse> FacebookLoginAsync(ExternalAuthRequest externalAuth)
@@ -269,9 +291,9 @@ public class UserService : IUserService
 
 		User user = await RegisterUserFromExternalAuthProviderAsync(externalAuthPayload, info);
 
-		string token = _jwtTokenGenerator.GenerateToken(user.Id, user.FullName);
+		TokensResponse tokens = _tokenGenerator.GenerateTokens(user.Id, user.FullName);
 
-		return user.ToUserResponse(token);
+		return user.ToUserResponse(tokens);
 	}
 
 	private async Task GenerateAccountConfirmationMessage(User userToCreate)

@@ -88,7 +88,8 @@ public static class UserGenerator
 			PhoneNumber = null,
 			Image = Constants.UserData.ImageUrl,
 			Email = Constants.UserData.Email,
-			Token = Constants.UserData.JwtToken
+			AccessToken = Constants.UserData.Tokens.AccessToken,
+			RefreshToken = Constants.UserData.Tokens.RefreshToken
 		};
 	}
 }

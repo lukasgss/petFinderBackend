@@ -5,6 +5,7 @@ using Application.Services.General.Messages;
 using Infrastructure.ExternalServices.Configs;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 namespace Infrastructure.ExternalServices.RabbitMQ;
 
@@ -46,7 +47,11 @@ public class MessagePublisherClient : IMessagePublisherClient
 				routingKey: routingKey,
 				body: body);
 		}
-		catch
+		catch (BrokerUnreachableException)
+		{
+			Console.WriteLine("Não foi possível conectar ao serviço de mensageria.");
+		}
+		catch (Exception)
 		{
 			Console.WriteLine("Não foi possível inserir à fila.");
 		}

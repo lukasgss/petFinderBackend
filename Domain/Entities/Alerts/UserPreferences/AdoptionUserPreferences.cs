@@ -25,10 +25,15 @@ public class AdoptionUserPreferences
 
 	public int? BreedId { get; set; }
 
+	[ForeignKey("AgeId")]
+	public virtual Age? Age { get; set; }
+
+	public int? AgeId { get; set; }
+
 	[Required, ForeignKey("UserId")]
 	public virtual required User User { get; set; } = null!;
 
-	public required Guid UserId { get; set; }
+	public Guid UserId { get; set; }
 
 	public virtual required ICollection<Color> Colors { get; set; } = null!;
 }

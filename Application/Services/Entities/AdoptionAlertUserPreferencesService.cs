@@ -17,7 +17,6 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 	private readonly IUserPreferencesValidations _userPreferencesValidations;
 	private readonly IValueProvider _valueProvider;
 
-
 	public AdoptionAlertUserPreferencesService(
 		IAdoptionUserPreferencesRepository adoptionUserPreferencesRepository,
 		IUserPreferencesValidations userPreferencesValidations,
@@ -57,6 +56,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(createUserPreferences.SpeciesId);
 		Breed? breed =
 			await _userPreferencesValidations.ValidateAndAssignBreedAsync(createUserPreferences.BreedId, species?.Id);
+		Age? age = await _userPreferencesValidations.ValidateAndAssignAgeAsync(createUserPreferences.AgeId);
 		List<Color> colors =
 			await _userPreferencesValidations.ValidateAndAssignColorsAsync(createUserPreferences.ColorIds);
 		User user = await _userPreferencesValidations.AssignUserAsync(userId);
@@ -75,12 +75,10 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 		{
 			Id = _valueProvider.NewGuid(),
 			User = user,
-			UserId = user.Id,
 			Colors = colors,
+			Age = age,
 			Breed = breed,
-			BreedId = breed?.Id,
 			Species = species,
-			SpeciesId = species?.Id,
 			Gender = createUserPreferences.Gender,
 			Location = location,
 			RadiusDistanceInKm = createUserPreferences.RadiusDistanceInKm
@@ -106,6 +104,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(editUserPreferences.SpeciesId);
 		Breed? breed =
 			await _userPreferencesValidations.ValidateAndAssignBreedAsync(editUserPreferences.BreedId, species?.Id);
+		Age? age = await _userPreferencesValidations.ValidateAndAssignAgeAsync(editUserPreferences.AgeId);
 		List<Color> colors =
 			await _userPreferencesValidations.ValidateAndAssignColorsAsync(editUserPreferences.ColorIds);
 		User user = await _userPreferencesValidations.AssignUserAsync(userId);
@@ -121,13 +120,11 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 		}
 
 		dbUserPreferences.User = user;
-		dbUserPreferences.UserId = user.Id;
 		dbUserPreferences.Colors = colors;
 		dbUserPreferences.Breed = breed;
-		dbUserPreferences.BreedId = breed?.Id;
 		dbUserPreferences.Species = species;
-		dbUserPreferences.SpeciesId = species?.Id;
 		dbUserPreferences.Gender = editUserPreferences.Gender;
+		dbUserPreferences.Age = age;
 		dbUserPreferences.Location = location;
 		dbUserPreferences.RadiusDistanceInKm = editUserPreferences.RadiusDistanceInKm;
 

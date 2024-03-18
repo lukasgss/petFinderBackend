@@ -16,6 +16,7 @@ public class UserPreferencesResponse
 	public double? RadiusDistanceInKm { get; set; }
 
 	public string? Gender { get; set; }
+	public string? Age { get; set; }
 
 	public SpeciesResponse? Species { get; set; }
 

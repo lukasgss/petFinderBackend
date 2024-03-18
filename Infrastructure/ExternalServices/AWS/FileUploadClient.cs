@@ -77,7 +77,7 @@ public class FileUploadClient : IFileUploadClient
 				return new AwsS3ImageResponse()
 				{
 					Success = true,
-					PublicUrl = _imagesData.DefaultUserProfilePicture
+					PublicUrl = FormatPublicUrlString(_imagesData.DefaultUserProfilePicture)
 				};
 			}
 

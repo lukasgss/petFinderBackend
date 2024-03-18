@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240318012613_AddGendersTable")]
-    partial class AddGendersTable
+    [Migration("20240318020837_AddAgesEntity")]
+    partial class AddAgesEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -138,7 +138,7 @@ namespace Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Bebê"
+                            Name = "Filhote"
                         },
                         new
                         {

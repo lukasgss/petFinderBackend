@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Application.Common.Exceptions;
+using Application.Common.Interfaces.Entities.Ages;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
@@ -30,6 +31,7 @@ public class FoundAnimalAlertServiceTests
 	private readonly IValueProvider _valueProviderMock;
 	private readonly IFoundAlertImageSubmissionService _imageSubmissionServiceMock;
 	private readonly IAlertsMessagingService _alertsMessagingServiceMock;
+	private readonly IAgeRepository _ageRepositoryMock;
 	private readonly IFoundAnimalAlertService _sut;
 
 	private static readonly FoundAnimalAlert FoundAnimalAlert = FoundAnimalAlertGenerator.GenerateFoundAnimalAlert();
@@ -50,6 +52,7 @@ public class FoundAnimalAlertServiceTests
 	private static readonly Species Species = SpeciesGenerator.GenerateSpecies();
 	private static readonly List<Color> Colors = ColorGenerator.GenerateListOfColors();
 	private static readonly Breed Breed = BreedGenerator.GenerateBreed();
+	private static readonly Age Age = AgeGenerator.GenerateAge();
 
 	private const int Page = 1;
 	private const int PageSize = 25;
@@ -63,6 +66,7 @@ public class FoundAnimalAlertServiceTests
 		_colorRepositoryMock = Substitute.For<IColorRepository>();
 		_imageSubmissionServiceMock = Substitute.For<IFoundAlertImageSubmissionService>();
 		_alertsMessagingServiceMock = Substitute.For<IAlertsMessagingService>();
+		_ageRepositoryMock = Substitute.For<IAgeRepository>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
 
 		_sut = new FoundAnimalAlertService(
@@ -73,6 +77,7 @@ public class FoundAnimalAlertServiceTests
 			_colorRepositoryMock,
 			_imageSubmissionServiceMock,
 			_alertsMessagingServiceMock,
+			_ageRepositoryMock,
 			_valueProviderMock);
 	}
 
@@ -169,11 +174,26 @@ public class FoundAnimalAlertServiceTests
 	}
 
 	[Fact]
+	public async Task Create_Alert_With_Non_Existent_Age_Throws_NotFoundException()
+	{
+		_speciesRepositoryMock.GetSpeciesByIdAsync(FoundAnimalAlert.SpeciesId).Returns(Species);
+		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreateFoundAnimalAlertRequest.ColorIds).Returns(Colors);
+		_breedRepositoryMock.GetBreedByIdAsync((int)CreateFoundAnimalAlertRequest.BreedId!).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(CreateFoundAnimalAlertRequest.AgeId).ReturnsNull();
+
+		async Task Result() => await _sut.CreateAsync(CreateFoundAnimalAlertRequest, User.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Idade com o id especificado não existe.", exception.Message);
+	}
+
+	[Fact]
 	public async Task Create_Alert_Returns_Created_Alert()
 	{
 		_speciesRepositoryMock.GetSpeciesByIdAsync(FoundAnimalAlert.SpeciesId).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreateFoundAnimalAlertRequest.ColorIds).Returns(Colors);
 		_breedRepositoryMock.GetBreedByIdAsync((int)CreateFoundAnimalAlertRequest.BreedId!).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(CreateFoundAnimalAlertRequest.AgeId).Returns(Age);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);
 		_valueProviderMock.NewGuid().Returns(FoundAnimalAlert.Id);
 		_imageSubmissionServiceMock
@@ -181,7 +201,7 @@ public class FoundAnimalAlertServiceTests
 			.Returns(Constants.FoundAnimalAlertData.ImageUrls);
 		_valueProviderMock.UtcNow().Returns(FoundAnimalAlert.RegistrationDate);
 
-		var createdAlertResponse = await _sut.CreateAsync(CreateFoundAnimalAlertRequest, User.Id);
+		FoundAnimalAlertResponse createdAlertResponse = await _sut.CreateAsync(CreateFoundAnimalAlertRequest, User.Id);
 
 		Assert.Equivalent(FoundAnimalAlertResponse, createdAlertResponse);
 	}
@@ -266,12 +286,29 @@ public class FoundAnimalAlertServiceTests
 	}
 
 	[Fact]
+	public async Task Edit_Alert_With_Non_Existent_Age_Throws_NotFoundException()
+	{
+		_foundAnimalAlertRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.Id).Returns(FoundAnimalAlert);
+		_speciesRepositoryMock.GetSpeciesByIdAsync(EditFoundAnimalAlertRequest.SpeciesId).Returns(Species);
+		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditFoundAnimalAlertRequest.ColorIds).Returns(Colors);
+		_breedRepositoryMock.GetBreedByIdAsync((int)EditFoundAnimalAlertRequest.BreedId!).ReturnsNull();
+		_ageRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.AgeId).ReturnsNull();
+
+		async Task Result() =>
+			await _sut.EditAsync(EditFoundAnimalAlertRequest, User.Id, EditFoundAnimalAlertRequest.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Raça com o id especificado não existe.", exception.Message);
+	}
+
+	[Fact]
 	public async Task Edit_Alert_Returns_Edited_Alert()
 	{
 		_foundAnimalAlertRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.Id).Returns(FoundAnimalAlert);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(EditFoundAnimalAlertRequest.SpeciesId).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditFoundAnimalAlertRequest.ColorIds).Returns(Colors);
 		_breedRepositoryMock.GetBreedByIdAsync((int)EditFoundAnimalAlertRequest.BreedId!).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(EditFoundAnimalAlertRequest.AgeId).Returns(Age);
 		_imageSubmissionServiceMock.UpdateImagesAsync(EditFoundAnimalAlertRequest.Id,
 				EditFoundAnimalAlertRequest.Images, EditFoundAnimalAlertRequest.Images.Count)
 			.Returns(Constants.FoundAnimalAlertData.ImageUrls);

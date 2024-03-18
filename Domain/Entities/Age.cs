@@ -11,5 +11,6 @@ public class Age
 	public required string Name { get; set; }
 
 	public virtual ICollection<Pet>? Pet { get; set; }
-	public virtual ICollection<AdoptionUserPreferences>? AdoptionUserPreferences { get; set; }
+	public virtual AdoptionUserPreferences AdoptionUserPreferences { get; set; } = null!;
+	public virtual FoundAnimalUserPreferences FoundAnimalUserPreferences { get; set; } = null!;
 }

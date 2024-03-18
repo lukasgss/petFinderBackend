@@ -25,6 +25,9 @@ public class EditFoundAnimalAlertRequest
 	[Required(ErrorMessage = "Campo de espécie é obrigatório.")]
 	public int SpeciesId { get; set; }
 
+	[Required(ErrorMessage = "Campo de idade é obrigatório.")]
+	public int AgeId { get; set; }
+
 	public Gender? Gender { get; set; }
 
 	public int? BreedId { get; set; }

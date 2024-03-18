@@ -7,17 +7,18 @@ namespace Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 
 public class FoundAnimalAlertResponse
 {
-	public Guid Id { get; set; }
-	public string? Name { get; set; }
-	public string? Description { get; set; }
-	public double FoundLocationLatitude { get; set; }
-	public double FoundLocationLongitude { get; set; }
-	public DateTime RegistrationDate { get; set; }
-	public DateOnly? RecoveryDate { get; set; }
-	public List<string> Images { get; set; } = null!;
-	public SpeciesResponse Species { get; set; } = null!;
-	public BreedResponse? Breed { get; set; } = null!;
-	public UserDataResponse Owner { get; set; } = null!;
-	public string? Gender { get; set; }
-	public IEnumerable<ColorResponse> Colors { get; set; } = null!;
+	public Guid Id { get; init; }
+	public string? Name { get; init; }
+	public string? Description { get; init; }
+	public double FoundLocationLatitude { get; init; }
+	public double FoundLocationLongitude { get; init; }
+	public DateTime RegistrationDate { get; init; }
+	public DateOnly? RecoveryDate { get; init; }
+	public List<string> Images { get; init; } = null!;
+	public required string Age { get; init; }
+	public SpeciesResponse Species { get; init; } = null!;
+	public BreedResponse? Breed { get; init; }
+	public UserDataResponse Owner { get; init; } = null!;
+	public string? Gender { get; init; }
+	public IEnumerable<ColorResponse> Colors { get; init; } = null!;
 }

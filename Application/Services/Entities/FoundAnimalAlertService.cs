@@ -2,6 +2,7 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Extensions.Mapping.Alerts;
+using Application.Common.Interfaces.Entities.Ages;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
@@ -30,6 +31,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 	private readonly IColorRepository _colorRepository;
 	private readonly IFoundAlertImageSubmissionService _imageSubmissionService;
 	private readonly IAlertsMessagingService _alertsMessagingService;
+	private readonly IAgeRepository _ageRepository;
 	private readonly IValueProvider _valueProvider;
 
 	public FoundAnimalAlertService(
@@ -40,6 +42,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		IColorRepository colorRepository,
 		IFoundAlertImageSubmissionService imageSubmissionService,
 		IAlertsMessagingService alertsMessagingService,
+		IAgeRepository ageRepository,
 		IValueProvider valueProvider)
 	{
 		_foundAnimalAlertRepository = foundAnimalAlertRepository ??
@@ -52,6 +55,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 		_alertsMessagingService =
 			alertsMessagingService ?? throw new ArgumentNullException(nameof(alertsMessagingService));
+		_ageRepository = ageRepository ?? throw new ArgumentNullException(nameof(ageRepository));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
 	}
 
@@ -92,21 +96,27 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 
 		List<Color> colors = await ValidateAndAssignColorsAsync(createAlertRequest.ColorIds);
 		Breed? breed = await ValidateAndQueryBreed(createAlertRequest.BreedId);
+		Age? age = await _ageRepository.GetByIdAsync(createAlertRequest.AgeId);
+		if (age is null)
+		{
+			throw new NotFoundException("Idade com o id especificado não existe.");
+		}
+
 		User? userCreating = await _userRepository.GetUserByIdAsync(userId);
-		Guid foundAlertId = _valueProvider.NewGuid();
 
 		Point location = CoordinatesCalculator.CreatePointBasedOnCoordinates(createAlertRequest.FoundLocationLatitude,
 			createAlertRequest.FoundLocationLongitude);
 
 		FoundAnimalAlert alertToBeCreated = new()
 		{
-			Id = foundAlertId,
+			Id = _valueProvider.NewGuid(),
 			Name = createAlertRequest.Name,
 			Description = createAlertRequest.Description,
 			Location = location,
 			RegistrationDate = _valueProvider.UtcNow(),
 			RecoveryDate = null,
 			Gender = createAlertRequest.Gender,
+			Age = age,
 			Colors = colors,
 			Species = species,
 			Breed = breed,
@@ -153,6 +163,11 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 
 		List<Color> colors = await ValidateAndAssignColorsAsync(editAlertRequest.ColorIds);
 		Breed? breed = await ValidateAndQueryBreed(editAlertRequest.BreedId);
+		Age? age = await _ageRepository.GetByIdAsync(editAlertRequest.AgeId);
+		if (age is null)
+		{
+			throw new NotFoundException("Idade especificada não existe.");
+		}
 
 		var uploadedImageUrls = await UpdateAlertImages(alertToBeEdited, editAlertRequest.Images);
 
@@ -166,6 +181,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		alertToBeEdited.Species = species;
 		alertToBeEdited.Breed = breed;
 		alertToBeEdited.Gender = editAlertRequest.Gender;
+		alertToBeEdited.Age = age;
 		alertToBeEdited.Colors = colors;
 
 		await _foundAnimalAlertRepository.CommitAsync();

@@ -31,6 +31,12 @@ public class EditFoundAnimalAlertValidator : AbstractValidator<EditFoundAnimalAl
 			.NotEmpty()
 			.WithMessage("Campo de imagens é obrigatório.");
 
+		RuleFor(alert => alert.AgeId)
+			.NotNull()
+			.WithMessage("Campo de idade é obrigatório.")
+			.GreaterThan(0)
+			.WithMessage("Campo recebe apenas valores positivos.");
+
 		RuleFor(alert => alert.SpeciesId)
 			.NotNull()
 			.WithMessage("Campo de espécie é obrigatório")

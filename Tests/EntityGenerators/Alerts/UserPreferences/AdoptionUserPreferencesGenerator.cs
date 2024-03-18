@@ -15,7 +15,7 @@ public static class AdoptionUserPreferencesGenerator
 			User = Constants.AdoptionAlertUserPreferencesData.User,
 			UserId = Constants.AdoptionAlertUserPreferencesData.User.Id,
 			Colors = Constants.AdoptionAlertUserPreferencesData.Colors,
-			Age = AgeGenerator.GenerateAge(),
+			Age = Constants.AdoptionAlertUserPreferencesData.Age,
 			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
 				Constants.AdoptionAlertUserPreferencesData.Latitude!.Value,
 				Constants.AdoptionAlertUserPreferencesData.Longitude!.Value),

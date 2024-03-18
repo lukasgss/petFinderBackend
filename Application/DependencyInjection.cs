@@ -65,12 +65,11 @@ public static class DependencyInjection
 		services.AddScoped<IUserPreferencesValidations, UserPreferencesValidations>();
 		services.AddScoped<IAdoptionAlertUserPreferencesService, AdoptionAlertUserPreferencesService>();
 		services.AddScoped<IAdoptionFavoritesService, AdoptionFavoritesService>();
-		services.AddScoped<IAgeService, AgeService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 
 		services.AddSingleton<IValueProvider, ValueProvider>();
-
+		services.AddSingleton<IAgeService, AgeService>();
 		services.AddSingleton<ITokenGenerator, TokenGenerator>();
 
 		services.Configure<MessagingSettings>(configuration.GetSection("MessagingSettings"));

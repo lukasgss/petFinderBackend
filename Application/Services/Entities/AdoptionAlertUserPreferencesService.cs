@@ -56,7 +56,6 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(createUserPreferences.SpeciesId);
 		Breed? breed =
 			await _userPreferencesValidations.ValidateAndAssignBreedAsync(createUserPreferences.BreedId, species?.Id);
-		Age? age = await _userPreferencesValidations.ValidateAndAssignAgeAsync(createUserPreferences.AgeId);
 		List<Color> colors =
 			await _userPreferencesValidations.ValidateAndAssignColorsAsync(createUserPreferences.ColorIds);
 		User user = await _userPreferencesValidations.AssignUserAsync(userId);
@@ -76,7 +75,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			Id = _valueProvider.NewGuid(),
 			User = user,
 			Colors = colors,
-			Age = age,
+			Age = createUserPreferences.Age,
 			Breed = breed,
 			Species = species,
 			Gender = createUserPreferences.Gender,
@@ -104,7 +103,6 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(editUserPreferences.SpeciesId);
 		Breed? breed =
 			await _userPreferencesValidations.ValidateAndAssignBreedAsync(editUserPreferences.BreedId, species?.Id);
-		Age? age = await _userPreferencesValidations.ValidateAndAssignAgeAsync(editUserPreferences.AgeId);
 		List<Color> colors =
 			await _userPreferencesValidations.ValidateAndAssignColorsAsync(editUserPreferences.ColorIds);
 		User user = await _userPreferencesValidations.AssignUserAsync(userId);
@@ -124,7 +122,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 		dbUserPreferences.Breed = breed;
 		dbUserPreferences.Species = species;
 		dbUserPreferences.Gender = editUserPreferences.Gender;
-		dbUserPreferences.Age = age;
+		dbUserPreferences.Age = editUserPreferences.Age;
 		dbUserPreferences.Location = location;
 		dbUserPreferences.RadiusDistanceInKm = editUserPreferences.RadiusDistanceInKm;
 

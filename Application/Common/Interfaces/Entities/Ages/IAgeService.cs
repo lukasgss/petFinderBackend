@@ -4,5 +4,5 @@ namespace Application.Common.Interfaces.Entities.Ages;
 
 public interface IAgeService
 {
-	Task<List<DropdownDataResponse<int>>> GetAgesAsync();
+	List<DropdownDataResponse<int>> GetAges();
 }

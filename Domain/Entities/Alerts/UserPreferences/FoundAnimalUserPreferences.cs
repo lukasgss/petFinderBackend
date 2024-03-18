@@ -14,6 +14,7 @@ public class FoundAnimalUserPreferences
 	public double? RadiusDistanceInKm { get; set; }
 
 	public Gender? Gender { get; set; }
+	public Age? Age { get; set; }
 
 	[ForeignKey("SpeciesId")]
 	public virtual Species? Species { get; set; }
@@ -29,11 +30,6 @@ public class FoundAnimalUserPreferences
 	public virtual required User User { get; set; } = null!;
 
 	public required Guid UserId { get; set; }
-
-	[ForeignKey("AgeId")]
-	public virtual Age? Age { get; set; }
-
-	public int? AgeId { get; set; }
 
 	public virtual required ICollection<Color> Colors { get; set; } = null!;
 }

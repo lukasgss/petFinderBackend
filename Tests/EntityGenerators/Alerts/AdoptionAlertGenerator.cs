@@ -158,7 +158,7 @@ public static class AdoptionAlertGenerator
 			SpeciesId = 1,
 			BreedId = 1,
 			ColorId = 1,
-			GenderId = Gender.Male
+			GenderId = Gender.Macho
 		};
 	}
 }

@@ -16,8 +16,8 @@ public class AgeController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<ActionResult<List<DropdownDataResponse<int>>>> ListAges()
+	public ActionResult<List<DropdownDataResponse<int>>> ListAges()
 	{
-		return await _ageService.GetAgesAsync();
+		return _ageService.GetAges();
 	}
 }

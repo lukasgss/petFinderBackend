@@ -1,4 +1,4 @@
-using Domain.Entities;
+using Domain.Enums;
 
 namespace Tests.EntityGenerators;
 
@@ -6,10 +6,6 @@ public static class AgeGenerator
 {
 	public static Age GenerateAge()
 	{
-		return new Age()
-		{
-			Id = 1,
-			Name = "Senior"
-		};
+		return Age.Jovem;
 	}
 }

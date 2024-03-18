@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
 using Domain.Entities.Alerts;
+using Domain.Enums;
 using Domain.ValueObjects;
 
 namespace Application.Common.Extensions.Mapping.Alerts;
@@ -17,12 +18,12 @@ public static class FoundAnimalAlertMappings
 			FoundLocationLongitude = foundAnimalAlert.Location.X,
 			RegistrationDate = foundAnimalAlert.RegistrationDate,
 			RecoveryDate = foundAnimalAlert.RecoveryDate,
-			Age = foundAnimalAlert.Age.Name,
+			Age = Enum.GetName(typeof(Age), foundAnimalAlert.Age)!,
 			Images = foundAnimalAlert.Images.ToFoundAlertImagesResponse(),
 			Species = foundAnimalAlert.Species.ToSpeciesResponse(),
 			Breed = foundAnimalAlert.Breed?.ToBreedResponse(),
 			Owner = foundAnimalAlert.User.ToUserDataResponse(),
-			Gender = foundAnimalAlert.Gender.ToString(),
+			Gender = foundAnimalAlert.Gender is null ? null : Enum.GetName(typeof(Gender), foundAnimalAlert.Gender),
 			Colors = foundAnimalAlert.Colors.ToListOfColorResponse()
 		};
 	}

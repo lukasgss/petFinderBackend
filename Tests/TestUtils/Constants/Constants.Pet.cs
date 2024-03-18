@@ -15,9 +15,9 @@ public static partial class Constants
 		public static readonly Guid Id = Guid.NewGuid();
 		public const string Name = "Pet Name";
 		public const string? Observations = "Observations";
-		public static readonly Gender Gender = Gender.Male;
+		public static readonly Gender Gender = Gender.Macho;
 		public static readonly Size Size = Size.Médio;
-		public static readonly Age Age = AgeGenerator.GenerateAge();
+		public static readonly Age Age = Age.Jovem;
 		public static readonly List<PetImage> PetImages = new(0);
 		public static readonly List<string> ImageUrls = new() { ImageUrl };
 		public const string ImageUrl = "ImageUrl";

@@ -34,6 +34,7 @@ public class FoundAnimalUserPreferencesServiceTests
 		UserPreferencesGenerator.GenerateCreateFoundAnimalUserPreferences();
 
 	private static readonly User User = UserGenerator.GenerateUser();
+	private static readonly Age Age = AgeGenerator.GenerateAge();
 
 	public FoundAnimalUserPreferencesServiceTests()
 	{
@@ -85,6 +86,7 @@ public class FoundAnimalUserPreferencesServiceTests
 		_foundAnimalUserPreferencesRepositoryMock.GetUserPreferences(User.Id).ReturnsNull();
 		_userPreferencesValidationsMock.ValidateAndAssignSpeciesAsync((int)CreateAlertsUserPreferences.SpeciesId!)
 			.Returns(UserPreferences.Species);
+		_userPreferencesValidationsMock.ValidateAndAssignAgeAsync(CreateAlertsUserPreferences.AgeId).Returns(Age);
 		_userPreferencesValidationsMock
 			.ValidateAndAssignBreedAsync((int)CreateAlertsUserPreferences.BreedId!, UserPreferences.SpeciesId)
 			.Returns(UserPreferences.Breed);

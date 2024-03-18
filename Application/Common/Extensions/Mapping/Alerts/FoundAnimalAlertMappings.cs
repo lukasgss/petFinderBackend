@@ -17,6 +17,7 @@ public static class FoundAnimalAlertMappings
 			FoundLocationLongitude = foundAnimalAlert.Location.X,
 			RegistrationDate = foundAnimalAlert.RegistrationDate,
 			RecoveryDate = foundAnimalAlert.RecoveryDate,
+			Age = foundAnimalAlert.Age.Name,
 			Images = foundAnimalAlert.Images.ToFoundAlertImagesResponse(),
 			Species = foundAnimalAlert.Species.ToSpeciesResponse(),
 			Breed = foundAnimalAlert.Breed?.ToBreedResponse(),

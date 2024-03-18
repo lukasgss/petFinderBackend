@@ -19,6 +19,7 @@ public class AlertsMessagingService : IAlertsMessagingService
 		{
 			foundAlert.Id,
 			foundAlert.Gender,
+			AgeId = foundAlert.Age.Id,
 			FoundLocationLatitude = foundAlert.Location.Y,
 			FoundLocationLongitude = foundAlert.Location.X,
 			SpeciesId = foundAlert.Species.Id,

@@ -27,6 +27,7 @@ public class FoundAnimalAlertRepository : GenericRepository<FoundAnimalAlert>, I
 			.Include(alert => alert.Species)
 			.Include(alert => alert.Colors)
 			.Include(alert => alert.Images)
+			.Include(alert => alert.Age)
 			.Include(alert => alert.User)
 			.FirstOrDefaultAsync(alert => alert.Id == alertId);
 	}
@@ -39,6 +40,7 @@ public class FoundAnimalAlertRepository : GenericRepository<FoundAnimalAlert>, I
 			.Include(alert => alert.Breed)
 			.Include(alert => alert.Colors)
 			.Include(alert => alert.Images)
+			.Include(alert => alert.Age)
 			.Include(alert => alert.User)
 			.AsNoTracking()
 			.AsQueryable();

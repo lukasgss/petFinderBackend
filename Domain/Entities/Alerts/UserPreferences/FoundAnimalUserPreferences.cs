@@ -30,5 +30,10 @@ public class FoundAnimalUserPreferences
 
 	public required Guid UserId { get; set; }
 
+	[ForeignKey("AgeId")]
+	public virtual Age? Age { get; set; }
+
+	public int? AgeId { get; set; }
+
 	public virtual required ICollection<Color> Colors { get; set; } = null!;
 }

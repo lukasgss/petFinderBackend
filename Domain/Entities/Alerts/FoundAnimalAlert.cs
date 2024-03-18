@@ -35,6 +35,11 @@ public class FoundAnimalAlert
 
 	public int? BreedId { get; set; }
 
+	[Required, ForeignKey("AgeId")]
+	public virtual required Age Age { get; set; } = null!;
+
+	public int AgeId { get; set; }
+
 	[Required, ForeignKey("UserId")]
 	public virtual User User { get; set; } = null!;
 

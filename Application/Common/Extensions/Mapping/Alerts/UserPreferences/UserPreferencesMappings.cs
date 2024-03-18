@@ -14,6 +14,7 @@ public static class UserPreferencesMappings
 			User = userPreferences.User.ToUserDataResponse(),
 			Colors = userPreferences.Colors.ToListOfColorResponse(),
 			Species = userPreferences.Species?.ToSpeciesResponse(),
+			Age = userPreferences.Age?.Name,
 			Breed = userPreferences.Breed?.ToBreedResponse(),
 			Gender = userPreferences.Gender?.ToString(),
 			FoundLocationLatitude = userPreferences.Location?.Y,

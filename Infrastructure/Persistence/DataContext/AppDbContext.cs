@@ -20,6 +20,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	public DbSet<Breed> Breeds { get; set; } = null!;
 	public DbSet<Color> Colors { get; set; } = null!;
 	public DbSet<Species> Species { get; set; } = null!;
+	public DbSet<Age> Ages { get; set; } = null!;
 	public DbSet<MissingAlert> MissingAlerts { get; set; } = null!;
 	public DbSet<AdoptionAlert> AdoptionAlerts { get; set; } = null!;
 	public DbSet<MissingAlertComment> MissingAlertComments { get; set; } = null!;
@@ -43,5 +44,6 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 		builder.Entity<Breed>().HasData(SeedBreeds.Seed());
 		builder.Entity<Color>().HasData(SeedColors.Seed());
 		builder.Entity<Species>().HasData(SeedSpecies.Seed());
+		builder.Entity<Age>().HasData(SeedAges.Seed());
 	}
 }

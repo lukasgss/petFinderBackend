@@ -10,7 +10,7 @@ public class PetResponseNoOwner
 	public string Name { get; init; } = null!;
 	public string? Observations { get; init; }
 	public string Gender { get; init; } = null!;
-	public int? AgeInMonths { get; init; }
+	public string? Age { get; init; }
 	public List<string> Images { get; init; } = null!;
 	public IEnumerable<ColorResponse> Colors { get; init; } = null!;
 	public BreedResponse Breed { get; init; } = null!;

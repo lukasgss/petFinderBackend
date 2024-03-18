@@ -11,7 +11,7 @@ public class PetResponse
 	public string Name { get; set; } = null!;
 	public string? Observations { get; set; }
 	public string Gender { get; set; } = null!;
-	public int? AgeInMonths { get; set; }
+	public string? Age { get; set; }
 	public List<string> Images { get; set; } = null!;
 	public OwnerResponse? Owner { get; set; }
 	public IEnumerable<ColorResponse> Colors { get; set; } = null!;

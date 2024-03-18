@@ -31,18 +31,25 @@ public class MessagePublisherClient : IMessagePublisherClient
 
 	public void PublishMessage<T>(T message, MessageType messageType) where T : class
 	{
-		IConnection connection = _messagingConnectionEstablisher.EstablishConnection();
-		using IModel channel = connection.CreateModel();
+		try
+		{
+			IConnection connection = _messagingConnectionEstablisher.EstablishConnection();
+			using IModel channel = connection.CreateModel();
 
-		SetupRouting(channel);
-		string routingKey = _routingKeyMap[messageType];
+			SetupRouting(channel);
+			string routingKey = _routingKeyMap[messageType];
 
-		string json = JsonSerializer.Serialize(message);
-		byte[] body = Encoding.UTF8.GetBytes(json);
+			string json = JsonSerializer.Serialize(message);
+			byte[] body = Encoding.UTF8.GetBytes(json);
 
-		channel.BasicPublish(exchange: _rabbitMqData.AlertsExchangeName,
-			routingKey: routingKey,
-			body: body);
+			channel.BasicPublish(exchange: _rabbitMqData.AlertsExchangeName,
+				routingKey: routingKey,
+				body: body);
+		}
+		catch
+		{
+			Console.WriteLine("Não foi possível inserir à fila.");
+		}
 	}
 
 	private void SetupRouting(IModel channel)

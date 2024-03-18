@@ -34,6 +34,7 @@ public class AdoptionAlertUserPreferencesServiceTests
 		UserPreferencesGenerator.GenerateCreateFoundAnimalUserPreferences();
 
 	private static readonly User User = UserGenerator.GenerateUser();
+	private static readonly Age Age = AgeGenerator.GenerateAge();
 
 	public AdoptionAlertUserPreferencesServiceTests()
 	{
@@ -86,6 +87,7 @@ public class AdoptionAlertUserPreferencesServiceTests
 		_userPreferencesValidationsMock
 			.ValidateAndAssignBreedAsync((int)CreateAlertsUserPreferences.BreedId!, UserPreferences.SpeciesId)
 			.Returns(UserPreferences.Breed);
+		_userPreferencesValidationsMock.ValidateAndAssignAgeAsync(CreateAlertsUserPreferences.AgeId).Returns(Age);
 		_userPreferencesValidationsMock.ValidateAndAssignColorsAsync(CreateAlertsUserPreferences.ColorIds)
 			.Returns(UserPreferences.Colors.ToList());
 		_userPreferencesValidationsMock.AssignUserAsync(User.Id).Returns(User);

@@ -13,6 +13,7 @@ public static class UserPreferencesGenerator
 			SpeciesId = Constants.FoundAnimalUserPreferencesData.SpeciesId,
 			FoundLocationLatitude = Constants.FoundAnimalUserPreferencesData.FoundLocationLatitude,
 			FoundLocationLongitude = Constants.FoundAnimalUserPreferencesData.FoundLocationLongitude,
+			AgeId = AgeGenerator.GenerateAge().Id,
 			RadiusDistanceInKm = Constants.FoundAnimalUserPreferencesData.RadiusDistanceInKm,
 			Gender = Constants.FoundAnimalUserPreferencesData.Gender,
 			BreedId = Constants.FoundAnimalUserPreferencesData.BreedId

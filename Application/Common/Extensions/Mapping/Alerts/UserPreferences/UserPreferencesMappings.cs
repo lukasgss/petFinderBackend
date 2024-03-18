@@ -30,6 +30,7 @@ public static class UserPreferencesMappings
 			Id = userPreferences.Id,
 			User = userPreferences.User.ToUserDataResponse(),
 			Colors = userPreferences.Colors.ToListOfColorResponse(),
+			Age = userPreferences.Age?.Name,
 			Species = userPreferences.Species?.ToSpeciesResponse(),
 			Breed = userPreferences.Breed?.ToBreedResponse(),
 			Gender = userPreferences.Gender?.ToString(),

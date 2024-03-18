@@ -35,10 +35,11 @@ public class AlertsMessagingService : IAlertsMessagingService
 		{
 			adoptionAlert.Id,
 			adoptionAlert.Pet.Gender,
+			AgeId = adoptionAlert.Pet.Age?.Id,
 			FoundLocationLatitude = adoptionAlert.Location.Y,
 			FoundLocationLongitude = adoptionAlert.Location.X,
 			SpeciesId = adoptionAlert.Pet.Species.Id,
-			BreedId = adoptionAlert.Pet.Breed?.Id,
+			BreedId = adoptionAlert.Pet.Breed.Id,
 			ColorIds = adoptionAlert.Pet.Colors.Select(color => color.Id)
 		};
 

@@ -1,4 +1,5 @@
 using Application.Common.Exceptions;
+using Application.Common.Interfaces.Entities.Ages;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
@@ -14,17 +15,20 @@ public class UserPreferencesValidations : IUserPreferencesValidations
 	private readonly IBreedRepository _breedRepository;
 	private readonly ISpeciesRepository _speciesRepository;
 	private readonly IColorRepository _colorRepository;
+	private readonly IAgeRepository _ageRepository;
 
 	public UserPreferencesValidations(
 		IUserRepository userRepository,
 		IBreedRepository breedRepository,
 		ISpeciesRepository speciesRepository,
-		IColorRepository colorRepository)
+		IColorRepository colorRepository,
+		IAgeRepository ageRepository)
 	{
-		_userRepository = userRepository;
-		_breedRepository = breedRepository;
-		_speciesRepository = speciesRepository;
-		_colorRepository = colorRepository;
+		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+		_breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
+		_speciesRepository = speciesRepository ?? throw new ArgumentNullException(nameof(speciesRepository));
+		_colorRepository = colorRepository ?? throw new ArgumentNullException(nameof(colorRepository));
+		_ageRepository = ageRepository ?? throw new ArgumentNullException(nameof(ageRepository));
 	}
 
 	public async Task<User> AssignUserAsync(Guid userId)
@@ -67,6 +71,22 @@ public class UserPreferencesValidations : IUserPreferencesValidations
 		}
 
 		return species;
+	}
+
+	public async Task<Age?> ValidateAndAssignAgeAsync(int? ageId)
+	{
+		if (ageId is null)
+		{
+			return null;
+		}
+
+		Age? age = await _ageRepository.GetByIdAsync(ageId.Value);
+		if (age is null)
+		{
+			throw new NotFoundException("Idade especificada não existe.");
+		}
+
+		return age;
 	}
 
 	public async Task<List<Color>> ValidateAndAssignColorsAsync(List<int> colorIds)

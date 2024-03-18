@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Domain.Entities.Alerts.UserPreferences;
 
 namespace Domain.Entities;
 
@@ -10,4 +11,5 @@ public class Age
 	public required string Name { get; set; }
 
 	public virtual ICollection<Pet>? Pet { get; set; }
+	public virtual ICollection<AdoptionUserPreferences>? AdoptionUserPreferences { get; set; }
 }

@@ -22,6 +22,7 @@ public class AdoptionUserPreferencesRepository : GenericRepository<AdoptionUserP
 			.Include(preferences => preferences.User)
 			.Include(preferences => preferences.Colors)
 			.Include(preferences => preferences.Species)
+			.Include(preferences => preferences.Age)
 			.SingleOrDefaultAsync(preferences => preferences.User.Id == userId);
 	}
 }

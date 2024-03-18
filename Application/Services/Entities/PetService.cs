@@ -82,6 +82,7 @@ public class PetService : IPetService
 			Name = createPetRequest.Name,
 			Observations = createPetRequest.Observations,
 			Gender = createPetRequest.Gender,
+			Size = createPetRequest.Size,
 			Age = age,
 			Owner = petOwner,
 			Breed = breed,
@@ -133,6 +134,7 @@ public class PetService : IPetService
 		dbPet.Observations = editPetRequest.Observations;
 		dbPet.Gender = editPetRequest.Gender;
 		dbPet.Images = uploadedImages;
+		dbPet.Size = editPetRequest.Size;
 		dbPet.Age = age;
 		dbPet.Owner = petOwner;
 		dbPet.Breed = breed;

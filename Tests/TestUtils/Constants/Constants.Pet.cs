@@ -16,6 +16,7 @@ public static partial class Constants
 		public const string Name = "Pet Name";
 		public const string? Observations = "Observations";
 		public static readonly Gender Gender = Gender.Male;
+		public static readonly Size Size = Size.Médio;
 		public static readonly Age Age = AgeGenerator.GenerateAge();
 		public static readonly List<PetImage> PetImages = new(0);
 		public static readonly List<string> ImageUrls = new() { ImageUrl };

@@ -18,6 +18,9 @@ public class Pet
 	[Required, EnumDataType(typeof(Gender))]
 	public Gender Gender { get; set; }
 
+	[Required, EnumDataType(typeof(Size))]
+	public virtual required Size Size { get; set; }
+
 	[Required, ForeignKey("UserId")]
 	public virtual User Owner { get; set; } = null!;
 

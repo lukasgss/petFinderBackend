@@ -7,14 +7,15 @@ namespace Application.Common.Interfaces.Entities.Pets.DTOs;
 
 public class PetResponse
 {
-	public Guid Id { get; set; }
-	public string Name { get; set; } = null!;
-	public string? Observations { get; set; }
-	public string Gender { get; set; } = null!;
-	public string? Age { get; set; }
-	public List<string> Images { get; set; } = null!;
-	public OwnerResponse? Owner { get; set; }
-	public IEnumerable<ColorResponse> Colors { get; set; } = null!;
-	public BreedResponse Breed { get; set; } = null!;
-	public List<VaccineResponse> Vaccines { get; set; } = null!;
+	public Guid Id { get; init; }
+	public string Name { get; init; } = null!;
+	public string? Observations { get; init; }
+	public string Gender { get; init; } = null!;
+	public string? Age { get; init; }
+	public List<string> Images { get; init; } = null!;
+	public OwnerResponse? Owner { get; init; }
+	public required string Size { get; init; }
+	public IEnumerable<ColorResponse> Colors { get; init; } = null!;
+	public BreedResponse Breed { get; init; } = null!;
+	public List<VaccineResponse> Vaccines { get; init; } = null!;
 }

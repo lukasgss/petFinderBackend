@@ -1,26 +1,27 @@
 using Application.Common.Interfaces.Entities.Ages;
 using Application.Common.Interfaces.FrontendDropdownData;
+using Domain.Enums;
 
 namespace Application.Services.Entities;
 
 public class AgeService : IAgeService
 {
-	private readonly IAgeRepository _ageRepository;
+	private readonly List<DropdownDataResponse<int>> _ages = new();
 
-	public AgeService(IAgeRepository ageRepository)
+	public AgeService()
 	{
-		_ageRepository = ageRepository ?? throw new ArgumentNullException(nameof(ageRepository));
+		foreach (Age age in Enum.GetValues<Age>())
+		{
+			_ages.Add(new DropdownDataResponse<int>()
+			{
+				Text = Enum.GetName(typeof(Age), age)!,
+				Value = (int)age
+			});
+		}
 	}
 
-	public async Task<List<DropdownDataResponse<int>>> GetAgesAsync()
+	public List<DropdownDataResponse<int>> GetAges()
 	{
-		var ages = await _ageRepository.GetAll();
-
-		return ages.Select(age => new DropdownDataResponse<int>()
-			{
-				Text = age.Name,
-				Value = age.Id
-			})
-			.ToList();
+		return _ages;
 	}
 }

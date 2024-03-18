@@ -23,7 +23,7 @@ public class CreateFoundAnimalAlertRequest
 	public int SpeciesId { get; set; }
 
 	[Required(ErrorMessage = "Campo de idade é obrigatório.")]
-	public int AgeId { get; set; }
+	public Age Age { get; set; }
 
 	public Gender? Gender { get; set; }
 

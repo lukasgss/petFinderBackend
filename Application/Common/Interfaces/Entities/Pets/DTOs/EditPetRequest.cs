@@ -17,7 +17,8 @@ public class EditPetRequest
 	[Required(ErrorMessage = "Campo de gênero é obrigatório.")]
 	public Gender Gender { get; set; }
 
-	public int? AgeId { get; set; }
+	[Required(ErrorMessage = "Campo de idade é obrigatório.")]
+	public required Age Age { get; set; }
 
 	[Required(ErrorMessage = "Campo de imagens é obrigatório.")]
 	public List<IFormFile> Images { get; set; } = null!;

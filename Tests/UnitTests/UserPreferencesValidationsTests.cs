@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Application.Common.Exceptions;
-using Application.Common.Interfaces.Entities.Ages;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
@@ -21,7 +20,6 @@ public class UserPreferencesValidationsTests
 	private readonly ISpeciesRepository _speciesRepositoryMock;
 	private readonly IColorRepository _colorRepositoryMock;
 	private readonly IUserPreferencesValidations _sut;
-	private readonly IAgeRepository _ageRepositoryMock;
 
 	private static readonly User User = UserGenerator.GenerateUser();
 	private static readonly Breed Breed = BreedGenerator.GenerateBreed();
@@ -35,13 +33,11 @@ public class UserPreferencesValidationsTests
 		_breedRepositoryMock = Substitute.For<IBreedRepository>();
 		_speciesRepositoryMock = Substitute.For<ISpeciesRepository>();
 		_colorRepositoryMock = Substitute.For<IColorRepository>();
-		_ageRepositoryMock = Substitute.For<IAgeRepository>();
 		_sut = new UserPreferencesValidations(
 			_userRepositoryMock,
 			_breedRepositoryMock,
 			_speciesRepositoryMock,
-			_colorRepositoryMock,
-			_ageRepositoryMock);
+			_colorRepositoryMock);
 	}
 
 	[Fact]
@@ -169,37 +165,6 @@ public class UserPreferencesValidationsTests
 
 		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
 		Assert.Equal("Alguma das cores especificadas não existe.", exception.Message);
-	}
-
-	[Fact]
-	public async Task Validate_And_Assign_Null_Age_Returns_Null()
-	{
-		Age? age = await _sut.ValidateAndAssignAgeAsync(null);
-
-		Assert.Null(age);
-	}
-
-	[Fact]
-	public async Task Validate_And_Assign_Non_Existent_Age_Throws_NotFoundException()
-	{
-		const int nonExistentAgeId = 99;
-		_ageRepositoryMock.GetByIdAsync(nonExistentAgeId).ReturnsNull();
-
-		async Task Result() => await _sut.ValidateAndAssignAgeAsync(nonExistentAgeId);
-
-		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-		Assert.Equal("Idade especificada não existe.", exception.Message);
-	}
-
-	[Fact]
-	public async Task Validate_And_Assign_Age_Returns_Age()
-	{
-		Age expectedAge = new() { Id = 1, Name = "Filhote" };
-		_ageRepositoryMock.GetByIdAsync(expectedAge.Id).Returns(expectedAge);
-
-		Age? returnedAge = await _sut.ValidateAndAssignAgeAsync(expectedAge.Id);
-
-		Assert.Equivalent(expectedAge, returnedAge);
 	}
 
 	[Fact]

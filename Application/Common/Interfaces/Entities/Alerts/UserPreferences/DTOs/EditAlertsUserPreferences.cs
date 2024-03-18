@@ -8,7 +8,7 @@ public class EditAlertsUserPreferences
 	public double? FoundLocationLongitude { get; set; }
 	public double? RadiusDistanceInKm { get; set; }
 	public Gender? Gender { get; set; }
-	public int? AgeId { get; set; }
+	public Age? Age { get; set; }
 	public int? SpeciesId { get; set; }
 	public int? BreedId { get; set; }
 	public required List<int> ColorIds { get; set; }

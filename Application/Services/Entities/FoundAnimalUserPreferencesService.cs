@@ -56,7 +56,6 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 
 		Species? species =
 			await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(createUserPreferences.SpeciesId);
-		Age? age = await _userPreferencesValidations.ValidateAndAssignAgeAsync(createUserPreferences.AgeId);
 		Breed? breed =
 			await _userPreferencesValidations.ValidateAndAssignBreedAsync(createUserPreferences.BreedId, species?.Id);
 		List<Color> colors =
@@ -81,7 +80,7 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 			Colors = colors,
 			Breed = breed,
 			Species = species,
-			Age = age,
+			Age = createUserPreferences.Age,
 			Gender = createUserPreferences.Gender,
 			Location = location,
 			RadiusDistanceInKm = createUserPreferences.RadiusDistanceInKm
@@ -105,7 +104,6 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 
 		Species? species =
 			await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(editUserPreferences.SpeciesId);
-		Age? age = await _userPreferencesValidations.ValidateAndAssignAgeAsync(editUserPreferences.AgeId);
 		Breed? breed =
 			await _userPreferencesValidations.ValidateAndAssignBreedAsync(editUserPreferences.BreedId, species?.Id);
 		List<Color> colors =
@@ -127,7 +125,7 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 		dbUserPreferences.Colors = colors;
 		dbUserPreferences.Breed = breed;
 		dbUserPreferences.Species = species;
-		dbUserPreferences.Age = age;
+		dbUserPreferences.Age = editUserPreferences.Age;
 		dbUserPreferences.Gender = editUserPreferences.Gender;
 		dbUserPreferences.Location = location;
 		dbUserPreferences.RadiusDistanceInKm = editUserPreferences.RadiusDistanceInKm;

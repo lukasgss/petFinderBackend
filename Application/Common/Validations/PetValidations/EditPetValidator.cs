@@ -34,6 +34,12 @@ public class EditPetValidator : AbstractValidator<EditPetRequest>
 			.Must(size => Enum.IsDefined(typeof(Size), size))
 			.WithMessage("Valor inválido como porte.");
 
+		RuleFor(pet => pet.Age)
+			.NotNull()
+			.WithMessage("Campo de idade é obrigatório.")
+			.Must(age => Enum.IsDefined(typeof(Age), age))
+			.WithMessage("Valor inválido como idade.");
+
 		RuleFor(pet => pet.BreedId)
 			.NotNull()
 			.WithMessage("Campo de raça é obrigatório.");

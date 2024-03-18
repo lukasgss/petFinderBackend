@@ -21,6 +21,9 @@ public class FoundAnimalAlert
 	public required Point Location { get; set; } = null!;
 
 	[Required]
+	public required Age Age { get; set; }
+
+	[Required]
 	public DateTime RegistrationDate { get; set; }
 
 	public DateOnly? RecoveryDate { get; set; }
@@ -34,11 +37,6 @@ public class FoundAnimalAlert
 	public virtual Breed? Breed { get; set; }
 
 	public int? BreedId { get; set; }
-
-	[Required, ForeignKey("AgeId")]
-	public virtual required Age Age { get; set; } = null!;
-
-	public int AgeId { get; set; }
 
 	[Required, ForeignKey("UserId")]
 	public virtual User User { get; set; } = null!;

@@ -2,7 +2,7 @@ namespace Domain.Enums;
 
 public enum Size
 {
-	Pequeno,
+	Pequeno = 1,
 	Médio,
 	Grande,
 	Gigante

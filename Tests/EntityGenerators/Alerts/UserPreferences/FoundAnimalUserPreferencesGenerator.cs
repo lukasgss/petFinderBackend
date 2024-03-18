@@ -14,7 +14,7 @@ public static class FoundAnimalUserPreferencesGenerator
 			User = Constants.FoundAnimalUserPreferencesData.User,
 			UserId = Constants.FoundAnimalUserPreferencesData.User.Id,
 			Colors = Constants.FoundAnimalUserPreferencesData.Colors,
-			Age = AgeGenerator.GenerateAge(),
+			Age = Constants.FoundAnimalUserPreferencesData.Age,
 			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
 				Constants.FoundAnimalUserPreferencesData.FoundLocationLatitude!.Value,
 				Constants.FoundAnimalUserPreferencesData.FoundLocationLongitude!.Value),

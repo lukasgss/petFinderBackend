@@ -27,7 +27,7 @@ public static class FoundAnimalAlertGenerator
 			SpeciesId = Constants.FoundAnimalAlertData.SpeciesId,
 			Breed = Constants.FoundAnimalAlertData.Breed,
 			BreedId = Constants.FoundAnimalAlertData.BreedId,
-			Age = AgeGenerator.GenerateAge(),
+			Age = Constants.FoundAnimalAlertData.Age,
 			User = Constants.FoundAnimalAlertData.User,
 			UserId = Constants.FoundAnimalAlertData.UserId,
 			Gender = Constants.FoundAnimalAlertData.Gender,
@@ -66,7 +66,7 @@ public static class FoundAnimalAlertGenerator
 			FoundLocationLatitude = Constants.FoundAnimalAlertData.FoundLocationLatitude,
 			FoundLocationLongitude = Constants.FoundAnimalAlertData.FoundLocationLongitude,
 			Images = Constants.FoundAnimalAlertData.ImageFiles,
-			AgeId = AgeGenerator.GenerateAge().Id,
+			Age = Constants.FoundAnimalAlertData.Age,
 			SpeciesId = Constants.FoundAnimalAlertData.SpeciesId,
 			Gender = Constants.FoundAnimalAlertData.Gender,
 			BreedId = Constants.FoundAnimalAlertData.BreedId,
@@ -84,7 +84,7 @@ public static class FoundAnimalAlertGenerator
 			FoundLocationLatitude = Constants.FoundAnimalAlertData.FoundLocationLatitude,
 			FoundLocationLongitude = Constants.FoundAnimalAlertData.FoundLocationLongitude,
 			Images = Constants.FoundAnimalAlertData.ImageFiles,
-			AgeId = AgeGenerator.GenerateAge().Id,
+			Age = Constants.FoundAnimalAlertData.Age,
 			SpeciesId = Constants.FoundAnimalAlertData.SpeciesId,
 			Gender = Constants.FoundAnimalAlertData.Gender,
 			BreedId = Constants.FoundAnimalAlertData.BreedId,
@@ -104,11 +104,11 @@ public static class FoundAnimalAlertGenerator
 			RegistrationDate = Constants.FoundAnimalAlertData.RegistrationDate,
 			RecoveryDate = Constants.FoundAnimalAlertData.RecoveryDate,
 			Images = Constants.FoundAnimalAlertData.ImageUrls,
-			Age = AgeGenerator.GenerateAge().Name,
+			Age = Enum.GetName(typeof(Age), Constants.FoundAnimalAlertData.Age)!,
 			Species = Constants.FoundAnimalAlertData.Species.ToSpeciesResponse(),
 			Breed = Constants.FoundAnimalAlertData.Breed.ToBreedResponse(),
 			Owner = Constants.FoundAnimalAlertData.User.ToUserDataResponse(),
-			Gender = Constants.FoundAnimalAlertData.Gender.ToString(),
+			Gender = Enum.GetName(typeof(Gender), Constants.FoundAnimalAlertData.Gender)!,
 			Colors = Constants.FoundAnimalAlertData.Colors.ToListOfColorResponse()
 		};
 	}
@@ -124,7 +124,7 @@ public static class FoundAnimalAlertGenerator
 			SpeciesId = 1,
 			BreedId = 1,
 			ColorId = 1,
-			GenderId = Gender.Male
+			GenderId = Gender.Macho
 		};
 	}
 }

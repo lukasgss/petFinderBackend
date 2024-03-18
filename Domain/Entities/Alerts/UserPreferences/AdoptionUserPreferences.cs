@@ -15,6 +15,8 @@ public class AdoptionUserPreferences
 
 	public Gender? Gender { get; set; }
 
+	public Age? Age { get; set; }
+
 	[ForeignKey("SpeciesId")]
 	public virtual Species? Species { get; set; }
 
@@ -24,11 +26,6 @@ public class AdoptionUserPreferences
 	public virtual Breed? Breed { get; set; }
 
 	public int? BreedId { get; set; }
-
-	[ForeignKey("AgeId")]
-	public virtual Age? Age { get; set; }
-
-	public int? AgeId { get; set; }
 
 	[Required, ForeignKey("UserId")]
 	public virtual required User User { get; set; } = null!;

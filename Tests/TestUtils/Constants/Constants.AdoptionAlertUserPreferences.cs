@@ -13,9 +13,10 @@ public static partial class Constants
 		public static readonly double? Latitude = 35;
 		public static readonly double? Longitude = 22;
 		public static readonly double? RadiusDistanceInKm = 5;
-		public static readonly Gender? Gender = Domain.Enums.Gender.Female;
+		public static readonly Gender? Gender = Domain.Enums.Gender.Fêmea;
 		public static readonly Species? Species = SpeciesGenerator.GenerateSpecies();
 		public static readonly int SpeciesId = Species.Id;
+		public static readonly Age Age = Age.Jovem;
 		public static readonly Breed? Breed = BreedGenerator.GenerateBreed();
 		public static readonly int? BreedId = Breed.Id;
 		public static readonly User User = UserGenerator.GenerateUser();

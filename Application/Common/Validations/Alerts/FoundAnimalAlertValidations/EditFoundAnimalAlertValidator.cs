@@ -1,4 +1,5 @@
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts.DTOs;
+using Domain.Enums;
 using FluentValidation;
 
 namespace Application.Common.Validations.Alerts.FoundAnimalAlertValidations;
@@ -31,11 +32,11 @@ public class EditFoundAnimalAlertValidator : AbstractValidator<EditFoundAnimalAl
 			.NotEmpty()
 			.WithMessage("Campo de imagens é obrigatório.");
 
-		RuleFor(alert => alert.AgeId)
+		RuleFor(pet => pet.Age)
 			.NotNull()
 			.WithMessage("Campo de idade é obrigatório.")
-			.GreaterThan(0)
-			.WithMessage("Campo recebe apenas valores positivos.");
+			.Must(age => Enum.IsDefined(typeof(Age), age))
+			.WithMessage("Valor inválido como idade.");
 
 		RuleFor(alert => alert.SpeciesId)
 			.NotNull()

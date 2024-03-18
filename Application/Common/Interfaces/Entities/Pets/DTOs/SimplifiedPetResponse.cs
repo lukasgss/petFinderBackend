@@ -7,5 +7,6 @@ public class SimplifiedPetResponse
 	public string? Observations { get; init; }
 	public required string Gender { get; init; }
 	public string? Age { get; init; }
+	public required string Size { get; init; }
 	public required List<string> Images { get; init; }
 }

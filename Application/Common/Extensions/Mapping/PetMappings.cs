@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.ValueObjects;
 
 namespace Application.Common.Extensions.Mapping;
@@ -14,8 +15,9 @@ public static class PetMappings
 			Name = pet.Name,
 			Observations = pet.Observations,
 			Age = pet.Age?.Name,
+			Size = Enum.GetName(typeof(Size), pet.Size)!,
 			Images = pet.Images.ToPetImagesResponse(),
-			Gender = pet.Gender.ToString(),
+			Gender = Enum.GetName(typeof(Gender), pet.Gender)!,
 			Owner = pet.Owner.ToOwnerResponse(),
 			Breed = pet.Breed.ToBreedResponse(),
 			Colors = pet.Colors.ToListOfColorResponse(),
@@ -31,8 +33,9 @@ public static class PetMappings
 			Name = pet.Name,
 			Observations = pet.Observations,
 			Age = pet.Age?.Name,
+			Size = Enum.GetName(typeof(Size), pet.Size)!,
 			Images = pet.Images.ToPetImagesResponse(),
-			Gender = pet.Gender.ToString(),
+			Gender = Enum.GetName(typeof(Gender), pet.Gender)!,
 			Breed = pet.Breed.ToBreedResponse(),
 			Colors = pet.Colors.ToListOfColorResponse(),
 			Vaccines = pet.Vaccines.ToVaccineResponseList()
@@ -47,8 +50,9 @@ public static class PetMappings
 			Name = pet.Name,
 			Observations = pet.Observations,
 			Age = pet.Age?.Name,
+			Size = Enum.GetName(typeof(Size), pet.Size)!,
 			Images = pet.Images.ToPetImagesResponse(),
-			Gender = pet.Gender.ToString(),
+			Gender = Enum.GetName(typeof(Gender), pet.Gender)!,
 		};
 	}
 

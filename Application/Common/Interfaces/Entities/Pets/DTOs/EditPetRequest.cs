@@ -28,6 +28,9 @@ public class EditPetRequest
 	[Required(ErrorMessage = "Campo de espécie é obrigatório.")]
 	public int SpeciesId { get; set; }
 
+	[Required(ErrorMessage = "Campo de tamanho é obrigatório.")]
+	public required Size Size { get; set; }
+
 	[Required(ErrorMessage = "Campo de cores é obrigatório.")]
 	public List<int> ColorIds { get; set; } = null!;
 }

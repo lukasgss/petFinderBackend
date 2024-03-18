@@ -8,7 +8,7 @@ public static class SeedAges
 	{
 		return new()
 		{
-			new Age() { Id = 1, Name = "Bebê" },
+			new Age() { Id = 1, Name = "Filhote" },
 			new Age() { Id = 2, Name = "Jovem" },
 			new Age() { Id = 3, Name = "Adulto" },
 			new Age() { Id = 4, Name = "Sênior" },

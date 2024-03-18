@@ -135,7 +135,7 @@ namespace Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Bebê"
+                            Name = "Filhote"
                         },
                         new
                         {
@@ -536,7 +536,7 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("AgeId")
+                    b.Property<int?>("AgeInMonths")
                         .HasColumnType("integer");
 
                     b.Property<int>("BreedId")

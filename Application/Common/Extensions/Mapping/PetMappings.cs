@@ -1,7 +1,6 @@
 using Application.Common.Interfaces.Entities.Pets.DTOs;
 using Domain.Entities;
 using Domain.ValueObjects;
-using Color = Domain.Entities.Color;
 
 namespace Application.Common.Extensions.Mapping;
 
@@ -14,7 +13,7 @@ public static class PetMappings
 			Id = pet.Id,
 			Name = pet.Name,
 			Observations = pet.Observations,
-			AgeInMonths = pet.AgeInMonths,
+			Age = pet.Age?.Name,
 			Images = pet.Images.ToPetImagesResponse(),
 			Gender = pet.Gender.ToString(),
 			Owner = pet.Owner.ToOwnerResponse(),
@@ -31,7 +30,7 @@ public static class PetMappings
 			Id = pet.Id,
 			Name = pet.Name,
 			Observations = pet.Observations,
-			AgeInMonths = pet.AgeInMonths,
+			Age = pet.Age?.Name,
 			Images = pet.Images.ToPetImagesResponse(),
 			Gender = pet.Gender.ToString(),
 			Breed = pet.Breed.ToBreedResponse(),
@@ -47,7 +46,7 @@ public static class PetMappings
 			Id = pet.Id,
 			Name = pet.Name,
 			Observations = pet.Observations,
-			AgeInMonths = pet.AgeInMonths,
+			Age = pet.Age?.Name,
 			Images = pet.Images.ToPetImagesResponse(),
 			Gender = pet.Gender.ToString(),
 		};

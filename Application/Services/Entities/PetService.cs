@@ -1,5 +1,6 @@
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
+using Application.Common.Interfaces.Entities.Ages;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
@@ -21,6 +22,7 @@ public class PetService : IPetService
 	private readonly IPetRepository _petRepository;
 	private readonly IBreedRepository _breedRepository;
 	private readonly ISpeciesRepository _speciesRepository;
+	private readonly IAgeRepository _ageRepository;
 	private readonly IColorRepository _colorRepository;
 	private readonly IUserRepository _userRepository;
 	private readonly IVaccineRepository _vaccineRepository;
@@ -31,6 +33,7 @@ public class PetService : IPetService
 		IPetRepository petRepository,
 		IBreedRepository breedRepository,
 		ISpeciesRepository speciesRepository,
+		IAgeRepository ageRepository,
 		IColorRepository colorRepository,
 		IUserRepository userRepository,
 		IVaccineRepository vaccineRepository,
@@ -40,6 +43,7 @@ public class PetService : IPetService
 		_petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
 		_breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
 		_speciesRepository = speciesRepository ?? throw new ArgumentNullException(nameof(speciesRepository));
+		_ageRepository = ageRepository ?? throw new ArgumentNullException(nameof(ageRepository));
 		_colorRepository = colorRepository ?? throw new ArgumentNullException(nameof(colorRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 		_vaccineRepository = vaccineRepository ?? throw new ArgumentNullException(nameof(vaccineRepository));
@@ -58,6 +62,7 @@ public class PetService : IPetService
 	public async Task<PetResponse> CreatePetAsync(CreatePetRequest createPetRequest, Guid userId)
 	{
 		Breed breed = await ValidateAndAssignBreedAsync(createPetRequest.BreedId);
+		Age? age = await ValidateAndAssignAgeAsync(createPetRequest.AgeId);
 		Species species = await ValidateAndAssignSpeciesAsync(createPetRequest.SpeciesId);
 		List<Color> colors = await ValidateAndAssignColorsAsync(createPetRequest.ColorIds);
 		List<Vaccine> vaccines =
@@ -77,7 +82,7 @@ public class PetService : IPetService
 			Name = createPetRequest.Name,
 			Observations = createPetRequest.Observations,
 			Gender = createPetRequest.Gender,
-			AgeInMonths = createPetRequest.AgeInMonths,
+			Age = age,
 			Owner = petOwner,
 			Breed = breed,
 			Species = species,
@@ -107,6 +112,7 @@ public class PetService : IPetService
 		Pet dbPet = await ValidateAndAssignPetAsync(editPetRequest.Id);
 
 		Breed breed = await ValidateAndAssignBreedAsync(editPetRequest.BreedId);
+		Age? age = await ValidateAndAssignAgeAsync(editPetRequest.AgeId);
 		Species species = await ValidateAndAssignSpeciesAsync(editPetRequest.SpeciesId);
 		List<Color> colors = await ValidateAndAssignColorsAsync(editPetRequest.ColorIds);
 		User petOwner = await ValidateAndAssignUserAsync(userId);
@@ -127,7 +133,7 @@ public class PetService : IPetService
 		dbPet.Observations = editPetRequest.Observations;
 		dbPet.Gender = editPetRequest.Gender;
 		dbPet.Images = uploadedImages;
-		dbPet.AgeInMonths = editPetRequest.AgeInMonths;
+		dbPet.Age = age;
 		dbPet.Owner = petOwner;
 		dbPet.Breed = breed;
 		dbPet.Colors = colors;
@@ -220,6 +226,22 @@ public class PetService : IPetService
 		}
 
 		return breed;
+	}
+
+	private async Task<Age?> ValidateAndAssignAgeAsync(int? ageId)
+	{
+		if (ageId is null)
+		{
+			return null;
+		}
+
+		Age? age = await _ageRepository.GetByIdAsync(ageId.Value);
+		if (age is null)
+		{
+			throw new NotFoundException("Idade especificada não existe.");
+		}
+
+		return age;
 	}
 
 	private async Task<Species> ValidateAndAssignSpeciesAsync(int speciesId)

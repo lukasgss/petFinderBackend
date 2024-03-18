@@ -2,6 +2,7 @@ using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.AdoptionFavoriteAlerts;
+using Application.Common.Interfaces.Entities.Ages;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
@@ -64,6 +65,7 @@ public static class DependencyInjection
 		services.AddScoped<IUserPreferencesValidations, UserPreferencesValidations>();
 		services.AddScoped<IAdoptionAlertUserPreferencesService, AdoptionAlertUserPreferencesService>();
 		services.AddScoped<IAdoptionFavoritesService, AdoptionFavoritesService>();
+		services.AddScoped<IAgeService, AgeService>();
 
 		services.AddValidatorsFromAssemblyContaining<IAssemblyMarker>();
 

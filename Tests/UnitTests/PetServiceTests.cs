@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
+using Application.Common.Interfaces.Entities.Ages;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Colors;
@@ -25,6 +26,7 @@ public class PetServiceTests
 	private readonly IPetRepository _petRepositoryMock;
 	private readonly IBreedRepository _breedRepositoryMock;
 	private readonly ISpeciesRepository _speciesRepositoryMock;
+	private readonly IAgeRepository _ageRepositoryMock;
 	private readonly IColorRepository _colorRepositoryMock;
 	private readonly IUserRepository _userRepositoryMock;
 	private readonly IVaccineRepository _vaccineRepositoryMock;
@@ -40,6 +42,7 @@ public class PetServiceTests
 	private static readonly List<Color> Colors = ColorGenerator.GenerateListOfColors();
 	private static readonly CreatePetRequest CreatePetRequest = PetGenerator.GenerateCreatePetRequest();
 	private static readonly EditPetRequest EditPetRequest = PetGenerator.GenerateEditPetRequest();
+	private static readonly Age Age = AgeGenerator.GenerateAge();
 
 	private static readonly PetVaccinationRequest PetVaccinationRequest =
 		VaccinationGenerator.GeneratePetVaccinationRequest();
@@ -51,6 +54,7 @@ public class PetServiceTests
 		_petRepositoryMock = Substitute.For<IPetRepository>();
 		_breedRepositoryMock = Substitute.For<IBreedRepository>();
 		_speciesRepositoryMock = Substitute.For<ISpeciesRepository>();
+		_ageRepositoryMock = Substitute.For<IAgeRepository>();
 		_colorRepositoryMock = Substitute.For<IColorRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
 		_vaccineRepositoryMock = Substitute.For<IVaccineRepository>();
@@ -61,6 +65,7 @@ public class PetServiceTests
 			_petRepositoryMock,
 			_breedRepositoryMock,
 			_speciesRepositoryMock,
+			_ageRepositoryMock,
 			_colorRepositoryMock,
 			_userRepositoryMock,
 			_vaccineRepositoryMock,
@@ -101,9 +106,23 @@ public class PetServiceTests
 	}
 
 	[Fact]
+	public async Task Create_Pet_With_Non_Existent_Age_Throws_NotFoundException()
+	{
+		_breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
+		_speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).ReturnsNull();
+		_ageRepositoryMock.GetByIdAsync(CreatePetRequest.AgeId!.Value).ReturnsNull();
+
+		async Task Result() => await _sut.CreatePetAsync(CreatePetRequest, Guid.NewGuid());
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Idade especificada não existe.", exception.Message);
+	}
+
+	[Fact]
 	public async Task Create_Pet_With_Non_Existent_Species_Throws_NotFoundException()
 	{
 		_breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(CreatePetRequest.AgeId!.Value).Returns(Age);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).ReturnsNull();
 
 		async Task Result() => await _sut.CreatePetAsync(CreatePetRequest, Guid.NewGuid());
@@ -116,6 +135,7 @@ public class PetServiceTests
 	public async Task Create_Pet_With_Non_Existent_Colors_Throws_NotFoundException()
 	{
 		_breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(CreatePetRequest.AgeId!.Value).Returns(Age);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).Returns(Species);
 		List<Color> emptyColorList = new();
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreatePetRequest.ColorIds).Returns(emptyColorList);
@@ -130,6 +150,7 @@ public class PetServiceTests
 	public async Task Create_Pet_With_Pet_Images_Transaction_Error_Throws_InternalServerErrorException()
 	{
 		_breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(CreatePetRequest.AgeId!.Value).Returns(Age);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreatePetRequest.ColorIds).Returns(Colors);
 		_vaccineRepositoryMock.GetMultipleByIdAsync(CreatePetRequest.VaccineIds!).Returns(Vaccines);
@@ -148,6 +169,7 @@ public class PetServiceTests
 	public async Task Create_Pet_While_Authenticated_Returns_Pet_Response_With_Logged_In_User_As_Owner()
 	{
 		_breedRepositoryMock.GetBreedByIdAsync(CreatePetRequest.BreedId).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(CreatePetRequest.AgeId!.Value).Returns(Age);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(CreatePetRequest.SpeciesId).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(CreatePetRequest.ColorIds).Returns(Colors);
 		_vaccineRepositoryMock.GetMultipleByIdAsync(CreatePetRequest.VaccineIds!).Returns(Vaccines);
@@ -195,10 +217,24 @@ public class PetServiceTests
 	}
 
 	[Fact]
+	public async Task Edit_Pet_With_Non_Existent_Age_Throws_NotFoundException()
+	{
+		_petRepositoryMock.GetPetByIdAsync(EditPetRequest.Id).Returns(Pet);
+		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(EditPetRequest.AgeId!.Value).ReturnsNull();
+
+		async Task Result() => await _sut.EditPetAsync(EditPetRequest, Constants.UserData.Id, EditPetRequest.Id);
+
+		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
+		Assert.Equal("Idade especificada não existe.", exception.Message);
+	}
+
+	[Fact]
 	public async Task Edit_Pet_With_Non_Existent_Species_Throws_NotFoundException()
 	{
 		_petRepositoryMock.GetPetByIdAsync(EditPetRequest.Id).Returns(Pet);
 		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(EditPetRequest.AgeId!.Value).Returns(Age);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(EditPetRequest.SpeciesId).ReturnsNull();
 
 		async Task Result() => await _sut.EditPetAsync(EditPetRequest, Constants.UserData.Id, EditPetRequest.Id);
@@ -212,6 +248,7 @@ public class PetServiceTests
 	{
 		_petRepositoryMock.GetPetByIdAsync(EditPetRequest.Id).Returns(Pet);
 		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(EditPetRequest.AgeId!.Value).Returns(Age);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(Species.Id).Returns(Species);
 		List<Color> emptyColorsList = new();
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditPetRequest.ColorIds).Returns(emptyColorsList);
@@ -227,6 +264,7 @@ public class PetServiceTests
 	{
 		_petRepositoryMock.GetPetByIdAsync(EditPetRequest.Id).Returns(Pet);
 		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(CreatePetRequest.AgeId!.Value).Returns(Age);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(Species.Id).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditPetRequest.ColorIds).Returns(Colors);
 		_userRepositoryMock.GetUserByIdAsync(Constants.UserData.Id).Returns(User);
@@ -245,6 +283,7 @@ public class PetServiceTests
 	{
 		_petRepositoryMock.GetPetByIdAsync(EditPetRequest.Id).Returns(Pet);
 		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
+		_ageRepositoryMock.GetByIdAsync(CreatePetRequest.AgeId!.Value).Returns(Age);
 		_speciesRepositoryMock.GetSpeciesByIdAsync(Species.Id).Returns(Species);
 		_colorRepositoryMock.GetMultipleColorsByIdsAsync(EditPetRequest.ColorIds).Returns(Colors);
 		_userRepositoryMock.GetUserByIdAsync(User.Id).Returns(User);

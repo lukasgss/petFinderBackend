@@ -1,5 +1,6 @@
 using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Entities.AdoptionFavoriteAlerts;
+using Application.Common.Interfaces.Entities.Ages;
 using Application.Common.Interfaces.Entities.Alerts.AdoptionAlerts;
 using Application.Common.Interfaces.Entities.Alerts.Comments;
 using Application.Common.Interfaces.Entities.Alerts.FoundAnimalAlerts;
@@ -55,6 +56,7 @@ public static class DependencyInjection
 		services.AddScoped<IAdoptionUserPreferencesRepository, AdoptionUserPreferencesRepository>();
 		services.AddScoped<IExternalAuthHandler, ExternalAuthHandler>();
 		services.AddScoped<IAdoptionFavoritesRepository, AdoptionFavoritesRepository>();
+		services.AddScoped<IAgeRepository, AgeRepository>();
 
 		services.AddScoped<IFileUploadClient, FileUploadClient>();
 		services.Configure<AwsData>(configuration.GetSection("AWS"));

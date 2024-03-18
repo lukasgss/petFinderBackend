@@ -25,10 +25,6 @@ builder.Services.AddApplication(builder.Configuration)
 
 var app = builder.Build();
 
-await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
-await using AppDbContext db = scope.ServiceProvider.GetService<AppDbContext>()!;
-await db.Database.MigrateAsync();
-
 app.UseMiddleware<ErrorHandlerMiddleware>();
 
 // Configure the HTTP request pipeline.

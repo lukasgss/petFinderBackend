@@ -25,6 +25,7 @@ public class PetRepository : GenericRepository<Pet>, IPetRepository
 			.Include(pet => pet.Vaccines)
 			.Include(pet => pet.Species)
 			.Include(pet => pet.Images)
+			.Include(pet => pet.Age)
 			.FirstOrDefaultAsync(pet => pet.Id == petId);
 	}
 

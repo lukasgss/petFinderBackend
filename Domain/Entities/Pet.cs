@@ -18,8 +18,6 @@ public class Pet
 	[Required, EnumDataType(typeof(Gender))]
 	public Gender Gender { get; set; }
 
-	public int? AgeInMonths { get; set; }
-
 	[Required, ForeignKey("UserId")]
 	public virtual User Owner { get; set; } = null!;
 
@@ -34,6 +32,11 @@ public class Pet
 	public virtual Species Species { get; set; } = null!;
 
 	public int SpeciesId { get; set; }
+
+	[ForeignKey("AgeId")]
+	public virtual Age? Age { get; set; }
+
+	public int? AgeId { get; set; }
 
 	public virtual ICollection<Color> Colors { get; set; } = null!;
 	public virtual ICollection<Vaccine> Vaccines { get; set; } = null!;

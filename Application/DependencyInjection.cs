@@ -13,6 +13,7 @@ using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
 using Application.Common.Interfaces.Entities.Genders;
 using Application.Common.Interfaces.Entities.Pets;
+using Application.Common.Interfaces.Entities.Sizes;
 using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Entities.Vaccines;
@@ -72,6 +73,7 @@ public static class DependencyInjection
 		services.AddSingleton<IValueProvider, ValueProvider>();
 		services.AddSingleton<IAgeService, AgeService>();
 		services.AddSingleton<IGenderService, GenderService>();
+		services.AddSingleton<ISizeService, SizeService>();
 		services.AddSingleton<ITokenGenerator, TokenGenerator>();
 
 		services.Configure<MessagingSettings>(configuration.GetSection("MessagingSettings"));

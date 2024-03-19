@@ -18,10 +18,10 @@ public class FoundAnimalUserPreferencesRepository : GenericRepository<FoundAnima
 	public async Task<FoundAnimalUserPreferences?> GetUserPreferences(Guid userId)
 	{
 		return await _dbContext.FoundAnimalUserPreferences
-			.Include(preferences => preferences.Breed)
+			.Include(preferences => preferences.Breeds)
 			.Include(preferences => preferences.User)
 			.Include(preferences => preferences.Colors)
 			.Include(preferences => preferences.Species)
-			.SingleOrDefaultAsync(preferences => preferences.User.Id == userId);
+			.SingleOrDefaultAsync(preferences => preferences.UserId == userId);
 	}
 }

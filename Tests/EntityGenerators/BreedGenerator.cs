@@ -6,24 +6,24 @@ namespace Tests.EntityGenerators;
 
 public static class BreedGenerator
 {
-    public static Breed GenerateBreed()
-    {
-        Species species = SpeciesGenerator.GenerateSpecies();
-        
-        return new Breed()
-        {
-            Id = Constants.BreedData.SpeciesId,
-            Name = Constants.BreedData.Name,
-            Species = Constants.BreedData.Species,
-            SpeciesId = Constants.BreedData.SpeciesId
-        };
-    }
+	public static Breed GenerateBreed()
+	{
+		Species species = SpeciesGenerator.GenerateSpecies();
 
-    public static List<Breed> GenerateListOfBreeds()
-    {
-        return new List<Breed>()
-        {
-            GenerateBreed()
-        };
-    }
+		return new Breed()
+		{
+			Id = Constants.BreedData.SpeciesId,
+			Name = Constants.BreedData.Name,
+			Species = species,
+			SpeciesId = species.Id
+		};
+	}
+
+	public static List<Breed> GenerateListOfBreeds()
+	{
+		return new List<Breed>()
+		{
+			GenerateBreed()
+		};
+	}
 }

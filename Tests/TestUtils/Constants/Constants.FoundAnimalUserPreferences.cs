@@ -13,20 +13,21 @@ public static partial class Constants
 		public static readonly double? FoundLocationLatitude = 35;
 		public static readonly double? FoundLocationLongitude = 22;
 		public static readonly double? RadiusDistanceInKm = 5;
-		public static readonly Gender? Gender = Domain.Enums.Gender.Fêmea;
-		public static readonly Age Age = Age.Jovem;
-		public static readonly Species? Species = SpeciesGenerator.GenerateSpecies();
-		public static readonly int SpeciesId = Species.Id;
-		public static readonly Breed? Breed = BreedGenerator.GenerateBreed();
-		public static readonly int? BreedId = Breed.Id;
+		public static readonly List<Size>? Sizes = new(1) { Size.Médio };
+		public static readonly List<Gender>? Genders = new(1) { Gender.Macho };
+		public static readonly List<Age> Ages = new(1) { Age.Jovem };
+		public static readonly List<Breed>? Breeds = BreedGenerator.GenerateListOfBreeds();
+		public static readonly List<int>? BreedIds = new(1) { 1 };
 		public static readonly User User = UserGenerator.GenerateUser();
-		public static readonly Guid UserId = User.Id;
 
-		public static List<Color> Colors = new()
+		public static readonly List<Species>? Species = SpeciesGenerator.GenerateListOfSpecies();
+		public static readonly List<int>? SpeciesIds = new() { 1 };
+
+		public static readonly List<Color> Colors = new()
 		{
 			ColorGenerator.GenerateColor()
 		};
 
-		public static List<int> ColorIds = new() { 1 };
+		public static readonly List<int> ColorIds = new() { 1 };
 	}
 }

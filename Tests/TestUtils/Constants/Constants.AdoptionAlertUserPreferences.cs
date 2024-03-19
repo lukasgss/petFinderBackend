@@ -13,14 +13,11 @@ public static partial class Constants
 		public static readonly double? Latitude = 35;
 		public static readonly double? Longitude = 22;
 		public static readonly double? RadiusDistanceInKm = 5;
-		public static readonly Gender? Gender = Domain.Enums.Gender.Fêmea;
-		public static readonly Species? Species = SpeciesGenerator.GenerateSpecies();
-		public static readonly int SpeciesId = Species.Id;
-		public static readonly Age Age = Age.Jovem;
-		public static readonly Breed? Breed = BreedGenerator.GenerateBreed();
-		public static readonly int? BreedId = Breed.Id;
+		public static readonly List<Gender>? Gender = new(1) { Domain.Enums.Gender.Macho };
+		public static readonly List<Species>? Species = SpeciesGenerator.GenerateListOfSpecies();
+		public static readonly List<Age> Ages = new(1) { Age.Jovem };
+		public static readonly List<Breed>? Breed = BreedGenerator.GenerateListOfBreeds();
 		public static readonly User User = UserGenerator.GenerateUser();
-		public static readonly Guid UserId = User.Id;
 
 		public static List<Color> Colors = new()
 		{

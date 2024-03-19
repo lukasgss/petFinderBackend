@@ -81,13 +81,13 @@ public class AdoptionAlertUserPreferencesServiceTests
 	public async Task Create_User_Preferences_Returns_Created_Preferences()
 	{
 		_adoptionUserPreferencesRepositoryMock.GetUserPreferences(User.Id).ReturnsNull();
-		_userPreferencesValidationsMock.ValidateAndAssignSpeciesAsync((int)CreateAlertsUserPreferences.SpeciesId!)
-			.Returns(UserPreferences.Species);
+		_userPreferencesValidationsMock.ValidateAndAssignSpeciesAsync(CreateAlertsUserPreferences.SpeciesIds!)
+			.Returns(UserPreferences.Species!);
 		_userPreferencesValidationsMock
-			.ValidateAndAssignBreedAsync((int)CreateAlertsUserPreferences.BreedId!, UserPreferences.SpeciesId)
-			.Returns(UserPreferences.Breed);
+			.ValidateAndAssignBreedAsync(CreateAlertsUserPreferences.BreedIds!, UserPreferences.Species!)
+			.Returns(UserPreferences.Breeds!);
 		_userPreferencesValidationsMock.ValidateAndAssignColorsAsync(CreateAlertsUserPreferences.ColorIds)
-			.Returns(UserPreferences.Colors.ToList());
+			.Returns(UserPreferences.Colors!.ToList());
 		_userPreferencesValidationsMock.AssignUserAsync(User.Id).Returns(User);
 		_valueProviderMock.NewGuid().Returns(UserPreferences.Id);
 

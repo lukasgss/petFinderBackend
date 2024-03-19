@@ -7,22 +7,15 @@ namespace Application.Common.Interfaces.Entities.Alerts.UserPreferences.DTOs;
 
 public class UserPreferencesResponse
 {
-	public required Guid Id { get; set; }
-
-	public double? FoundLocationLatitude { get; set; }
-
-	public double? FoundLocationLongitude { get; set; }
-
-	public double? RadiusDistanceInKm { get; set; }
-
-	public string? Gender { get; set; }
-	public string? Age { get; set; }
-
-	public SpeciesResponse? Species { get; set; }
-
-	public virtual BreedResponse? Breed { get; set; }
-
-	public virtual required UserDataResponse User { get; set; } = null!;
-
-	public required IEnumerable<ColorResponse> Colors { get; set; } = null!;
+	public required Guid Id { get; init; }
+	public double? FoundLocationLatitude { get; init; }
+	public double? FoundLocationLongitude { get; init; }
+	public double? RadiusDistanceInKm { get; init; }
+	public required List<string> Genders { get; init; }
+	public required List<string> Ages { get; init; }
+	public required List<string> Sizes { get; init; }
+	public required List<SpeciesResponse> Species { get; init; }
+	public required List<BreedResponse> Breeds { get; init; }
+	public required List<ColorResponse> Colors { get; init; }
+	public required UserDataResponse User { get; init; }
 }

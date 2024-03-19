@@ -4,13 +4,12 @@ using Api.Extensions;
 using Application;
 using Application.Middlewares;
 using Infrastructure;
-using Infrastructure.Persistence.DataContext;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Host.ConfigureLogging();
 
+// Add services to the container.
 builder.Services.AddControllers(options => { options.Filters.Add<CustomModelValidationAttribute>(); })
 	.ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = true; })
 	.AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter()); });

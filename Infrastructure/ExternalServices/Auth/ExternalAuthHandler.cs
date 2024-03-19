@@ -4,6 +4,7 @@ using Application.Common.Interfaces.Authorization.Facebook;
 using Application.Common.Interfaces.Authorization.Google;
 using Application.Common.Interfaces.Entities.Users.DTOs;
 using Google.Apis.Auth;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.ExternalServices.Auth;
@@ -11,16 +12,16 @@ namespace Infrastructure.ExternalServices.Auth;
 public class ExternalAuthHandler : IExternalAuthHandler
 {
 	private readonly GoogleAuthConfig _googleAuthConfig;
-	private readonly FacebookAuthConfig _facebookAuthConfig;
 	private readonly IHttpClientFactory _httpClientFactory;
+	private readonly ILogger<ExternalAuthHandler> _logger;
 
 	public ExternalAuthHandler(IOptions<GoogleAuthConfig> googleAuthConfig,
-		IOptions<FacebookAuthConfig> facebookAuthConfig,
-		IHttpClientFactory httpClientFactory)
+		IHttpClientFactory httpClientFactory,
+		ILogger<ExternalAuthHandler> logger)
 	{
 		_googleAuthConfig = googleAuthConfig.Value ?? throw new ArgumentNullException(nameof(googleAuthConfig));
-		_facebookAuthConfig = facebookAuthConfig.Value ?? throw new ArgumentNullException(nameof(facebookAuthConfig));
 		_httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<GooglePayload?> ValidateGoogleToken(ExternalAuthRequest externalAuth)
@@ -74,7 +75,7 @@ public class ExternalAuthHandler : IExternalAuthHandler
 		catch (Exception ex)
 		{
 			ClearHttpClientHeaders();
-			Console.WriteLine(ex.Message);
+			_logger.LogError("{Exception}", ex);
 			return null;
 		}
 	}

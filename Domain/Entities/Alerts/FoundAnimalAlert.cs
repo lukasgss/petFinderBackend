@@ -24,6 +24,9 @@ public class FoundAnimalAlert
 	public required Age Age { get; set; }
 
 	[Required]
+	public required Size Size { get; set; }
+
+	[Required]
 	public DateTime RegistrationDate { get; set; }
 
 	public DateOnly? RecoveryDate { get; set; }

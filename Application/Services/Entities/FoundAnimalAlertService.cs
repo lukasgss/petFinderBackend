@@ -104,6 +104,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 			Name = createAlertRequest.Name,
 			Description = createAlertRequest.Description,
 			Location = location,
+			Size = createAlertRequest.Size,
 			RegistrationDate = _valueProvider.UtcNow(),
 			RecoveryDate = null,
 			Gender = createAlertRequest.Gender,
@@ -164,6 +165,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		alertToBeEdited.Description = editAlertRequest.Description;
 		alertToBeEdited.Location = location;
 		alertToBeEdited.Images = uploadedImageUrls;
+		alertToBeEdited.Size = editAlertRequest.Size;
 		alertToBeEdited.Species = species;
 		alertToBeEdited.Breed = breed;
 		alertToBeEdited.Gender = editAlertRequest.Gender;

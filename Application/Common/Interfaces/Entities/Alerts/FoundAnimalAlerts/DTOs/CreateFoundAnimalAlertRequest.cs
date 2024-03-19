@@ -25,6 +25,9 @@ public class CreateFoundAnimalAlertRequest
 	[Required(ErrorMessage = "Campo de idade é obrigatório.")]
 	public Age Age { get; set; }
 
+	[Required(ErrorMessage = "Campo de porte é obrigatório.")]
+	public required Size Size { get; set; }
+
 	public Gender? Gender { get; set; }
 
 	public int? BreedId { get; set; }

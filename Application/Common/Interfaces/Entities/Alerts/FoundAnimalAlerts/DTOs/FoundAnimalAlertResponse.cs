@@ -20,5 +20,6 @@ public class FoundAnimalAlertResponse
 	public BreedResponse? Breed { get; init; }
 	public UserDataResponse Owner { get; init; } = null!;
 	public string? Gender { get; init; }
+	public required string Size { get; set; }
 	public IEnumerable<ColorResponse> Colors { get; init; } = null!;
 }

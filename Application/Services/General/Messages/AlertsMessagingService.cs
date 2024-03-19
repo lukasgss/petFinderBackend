@@ -19,7 +19,8 @@ public class AlertsMessagingService : IAlertsMessagingService
 		{
 			foundAlert.Id,
 			foundAlert.Gender,
-			AgeId = foundAlert.Age,
+			foundAlert.Age,
+			foundAlert.Size,
 			FoundLocationLatitude = foundAlert.Location.Y,
 			FoundLocationLongitude = foundAlert.Location.X,
 			SpeciesId = foundAlert.Species.Id,
@@ -36,7 +37,8 @@ public class AlertsMessagingService : IAlertsMessagingService
 		{
 			adoptionAlert.Id,
 			adoptionAlert.Pet.Gender,
-			AgeId = adoptionAlert.Pet.Age,
+			adoptionAlert.Pet.Age,
+			adoptionAlert.Pet.Size,
 			FoundLocationLatitude = adoptionAlert.Location.Y,
 			FoundLocationLongitude = adoptionAlert.Location.X,
 			SpeciesId = adoptionAlert.Pet.Species.Id,

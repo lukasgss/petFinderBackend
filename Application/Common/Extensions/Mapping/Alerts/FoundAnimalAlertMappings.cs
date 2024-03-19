@@ -19,6 +19,7 @@ public static class FoundAnimalAlertMappings
 			RegistrationDate = foundAnimalAlert.RegistrationDate,
 			RecoveryDate = foundAnimalAlert.RecoveryDate,
 			Age = Enum.GetName(typeof(Age), foundAnimalAlert.Age)!,
+			Size = Enum.GetName(typeof(Size), foundAnimalAlert.Size)!,
 			Images = foundAnimalAlert.Images.ToFoundAlertImagesResponse(),
 			Species = foundAnimalAlert.Species.ToSpeciesResponse(),
 			Breed = foundAnimalAlert.Breed?.ToBreedResponse(),

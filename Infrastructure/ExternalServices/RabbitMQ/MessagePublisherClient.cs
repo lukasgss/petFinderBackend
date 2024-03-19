@@ -3,6 +3,7 @@ using System.Text.Json;
 using Application.Common.Interfaces.ExternalServices.MessagePublisher;
 using Application.Services.General.Messages;
 using Infrastructure.ExternalServices.Configs;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -13,14 +14,18 @@ public class MessagePublisherClient : IMessagePublisherClient
 {
 	private readonly IMessagingConnectionEstablisher _messagingConnectionEstablisher;
 	private readonly RabbitMqData _rabbitMqData;
+	private readonly ILogger<MessagePublisherClient> _logger;
 
 	private readonly Dictionary<MessageType, string> _routingKeyMap;
 
-	public MessagePublisherClient(IMessagingConnectionEstablisher messagingConnectionEstablisher,
-		IOptions<RabbitMqData> rabbitMqData)
+	public MessagePublisherClient(
+		IMessagingConnectionEstablisher messagingConnectionEstablisher,
+		IOptions<RabbitMqData> rabbitMqData,
+		ILogger<MessagePublisherClient> logger)
 	{
 		_messagingConnectionEstablisher = messagingConnectionEstablisher ??
 		                                  throw new ArgumentNullException(nameof(messagingConnectionEstablisher));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_rabbitMqData = rabbitMqData.Value ?? throw new ArgumentNullException(nameof(rabbitMqData));
 
 		_routingKeyMap = new Dictionary<MessageType, string>()
@@ -47,13 +52,13 @@ public class MessagePublisherClient : IMessagePublisherClient
 				routingKey: routingKey,
 				body: body);
 		}
-		catch (BrokerUnreachableException)
+		catch (BrokerUnreachableException ex)
 		{
-			Console.WriteLine("Não foi possível conectar ao serviço de mensageria.");
+			_logger.LogError("Não foi possível conectar ao serviço de mensageria. {Exception}", ex);
 		}
-		catch (Exception)
+		catch (Exception ex)
 		{
-			Console.WriteLine("Não foi possível inserir à fila.");
+			_logger.LogError("Não foi possível inserir à fila. {Exception}", ex);
 		}
 	}
 

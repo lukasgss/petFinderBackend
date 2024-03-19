@@ -33,6 +33,7 @@ public static partial class Constants
 		public static readonly Breed Breed = BreedGenerator.GenerateBreed();
 		public static readonly int BreedId = Breed.Id;
 		public static readonly Age Age = Age.Jovem;
+		public static readonly Size Size = Size.Grande;
 		public static readonly User User = UserGenerator.GenerateUser();
 		public static readonly Guid UserId = User.Id;
 		public const Gender Gender = Domain.Enums.Gender.Fêmea;

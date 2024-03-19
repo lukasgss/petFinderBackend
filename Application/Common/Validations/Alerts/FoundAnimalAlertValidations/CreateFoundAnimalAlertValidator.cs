@@ -34,6 +34,12 @@ public class CreateFoundAnimalAlertValidator : AbstractValidator<CreateFoundAnim
 			.Must(age => Enum.IsDefined(typeof(Age), age))
 			.WithMessage("Valor inválido como idade.");
 
+		RuleFor(pet => pet.Size)
+			.NotNull()
+			.WithMessage("Campo de porte é obrigatório.")
+			.Must(size => Enum.IsDefined(typeof(Size), size))
+			.WithMessage("Valor inválido como porte.");
+
 		RuleFor(alert => alert.SpeciesId)
 			.NotNull()
 			.WithMessage("Campo de espécie é obrigatório")

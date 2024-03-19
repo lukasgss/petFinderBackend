@@ -4,12 +4,13 @@ namespace Application.Common.Interfaces.Entities.Alerts.UserPreferences.DTOs;
 
 public class CreateAlertsUserPreferences
 {
-	public double? FoundLocationLatitude { get; set; }
-	public double? FoundLocationLongitude { get; set; }
-	public double? RadiusDistanceInKm { get; set; }
-	public Gender? Gender { get; set; }
-	public Age? Age { get; set; }
-	public int? SpeciesId { get; set; }
-	public int? BreedId { get; set; }
-	public required List<int> ColorIds { get; set; }
+	public double? FoundLocationLatitude { get; init; }
+	public double? FoundLocationLongitude { get; init; }
+	public double? RadiusDistanceInKm { get; init; }
+	public List<Gender>? Genders { get; init; }
+	public List<Age>? Ages { get; init; }
+	public List<Size>? Sizes { get; init; }
+	public List<int>? SpeciesIds { get; init; }
+	public List<int>? BreedIds { get; init; }
+	public List<int>? ColorIds { get; init; }
 }

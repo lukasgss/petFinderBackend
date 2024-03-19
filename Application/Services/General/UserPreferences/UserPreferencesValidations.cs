@@ -32,46 +32,41 @@ public class UserPreferencesValidations : IUserPreferencesValidations
 		return (await _userRepository.GetUserByIdAsync(userId))!;
 	}
 
-	public async Task<Breed?> ValidateAndAssignBreedAsync(int? breedId, int? speciesId)
+	public async Task<List<Breed>> ValidateAndAssignBreedAsync(List<int>? breedIds, List<Species> species)
 	{
-		if (breedId is null)
+		if (breedIds is null || !breedIds.Any())
 		{
-			return null;
+			return new List<Breed>(0);
 		}
 
-		Breed? breed = await _breedRepository.GetBreedByIdAsync((int)breedId);
-		if (breed is null)
+		var breeds = await _breedRepository.GetMultipleBreedsByIdAsync(breedIds);
+		if (breeds.Count != breedIds.Count || !breeds.Any())
 		{
-			throw new NotFoundException("Raça especificada não existe.");
+			throw new NotFoundException("Alguma das raças especificadas não existe.");
 		}
 
-		if (breed.Species.Id != speciesId && speciesId is not null)
-		{
-			throw new BadRequestException("Raça não pertence a espécie especificada.");
-		}
-
-		return breed;
+		return breeds;
 	}
 
-	public async Task<Species?> ValidateAndAssignSpeciesAsync(int? speciesId)
+	public async Task<List<Species>> ValidateAndAssignSpeciesAsync(List<int>? speciesIds)
 	{
-		if (speciesId is null)
+		if (speciesIds is null)
 		{
-			return null;
+			return new List<Species>(0);
 		}
 
-		Species? species = await _speciesRepository.GetSpeciesByIdAsync((int)speciesId);
-		if (species is null)
+		var species = await _speciesRepository.GetMultipleSpeciesByIdAsync(speciesIds);
+		if (species.Count != speciesIds.Count || species.Count == 0)
 		{
-			throw new NotFoundException("Espécie especificada não existe.");
+			throw new NotFoundException("Alguma das espécies especificadas não existe.");
 		}
 
 		return species;
 	}
 
-	public async Task<List<Color>> ValidateAndAssignColorsAsync(List<int> colorIds)
+	public async Task<List<Color>> ValidateAndAssignColorsAsync(List<int>? colorIds)
 	{
-		if (!colorIds.Any())
+		if (colorIds is null || !colorIds.Any())
 		{
 			return new List<Color>(0);
 		}

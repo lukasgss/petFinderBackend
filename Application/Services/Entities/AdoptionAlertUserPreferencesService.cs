@@ -42,32 +42,28 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 		return userPreferences.ToAdoptionUserPreferencesResponse();
 	}
 
-	public async Task<UserPreferencesResponse> CreatePreferences(CreateAlertsUserPreferences createUserPreferences,
-		Guid userId)
+	public async Task<UserPreferencesResponse> CreatePreferences(
+		CreateAlertsUserPreferences createPreferences, Guid userId)
 	{
-		AdoptionUserPreferences? dbUserPreferences =
-			await _adoptionUserPreferencesRepository.GetUserPreferences(userId);
-		if (dbUserPreferences is not null)
+		AdoptionUserPreferences? dbPreferences = await _adoptionUserPreferencesRepository.GetUserPreferences(userId);
+		if (dbPreferences is not null)
 		{
 			throw new BadRequestException("Usuário já possui preferências cadastradas para esse tipo de alerta.");
 		}
 
-		Species? species =
-			await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(createUserPreferences.SpeciesId);
-		Breed? breed =
-			await _userPreferencesValidations.ValidateAndAssignBreedAsync(createUserPreferences.BreedId, species?.Id);
-		List<Color> colors =
-			await _userPreferencesValidations.ValidateAndAssignColorsAsync(createUserPreferences.ColorIds);
+		var species = await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(createPreferences.SpeciesIds);
+		var breed = await _userPreferencesValidations.ValidateAndAssignBreedAsync(createPreferences.BreedIds, species);
+		var colors = await _userPreferencesValidations.ValidateAndAssignColorsAsync(createPreferences.ColorIds);
 		User user = await _userPreferencesValidations.AssignUserAsync(userId);
 
 		Point? location = null;
-		if (createUserPreferences.FoundLocationLatitude is not null &&
-		    createUserPreferences.FoundLocationLongitude is not null &&
-		    createUserPreferences.RadiusDistanceInKm is not null)
+		if (createPreferences.FoundLocationLatitude is not null &&
+		    createPreferences.FoundLocationLongitude is not null &&
+		    createPreferences.RadiusDistanceInKm is not null)
 		{
 			location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
-				createUserPreferences.FoundLocationLatitude.Value,
-				createUserPreferences.FoundLocationLongitude!.Value);
+				createPreferences.FoundLocationLatitude.Value,
+				createPreferences.FoundLocationLongitude!.Value);
 		}
 
 		AdoptionUserPreferences adoptionUserPreferences = new()
@@ -75,12 +71,13 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			Id = _valueProvider.NewGuid(),
 			User = user,
 			Colors = colors,
-			Age = createUserPreferences.Age,
-			Breed = breed,
+			Ages = createPreferences.Ages,
+			Breeds = breed,
 			Species = species,
-			Gender = createUserPreferences.Gender,
+			Sizes = createPreferences.Sizes,
+			Genders = createPreferences.Genders,
 			Location = location,
-			RadiusDistanceInKm = createUserPreferences.RadiusDistanceInKm
+			RadiusDistanceInKm = createPreferences.RadiusDistanceInKm
 		};
 
 		_adoptionUserPreferencesRepository.Add(adoptionUserPreferences);
@@ -90,7 +87,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 	}
 
 	public async Task<UserPreferencesResponse> EditPreferences(
-		EditAlertsUserPreferences editUserPreferences, Guid userId)
+		EditAlertsUserPreferences editPreferences, Guid userId)
 	{
 		AdoptionUserPreferences? dbUserPreferences =
 			await _adoptionUserPreferencesRepository.GetUserPreferences(userId);
@@ -99,32 +96,30 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			throw new BadRequestException("Usuário não possui preferências cadastradas para esse tipo de alerta.");
 		}
 
-		Species? species =
-			await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(editUserPreferences.SpeciesId);
-		Breed? breed =
-			await _userPreferencesValidations.ValidateAndAssignBreedAsync(editUserPreferences.BreedId, species?.Id);
-		List<Color> colors =
-			await _userPreferencesValidations.ValidateAndAssignColorsAsync(editUserPreferences.ColorIds);
+		var species = await _userPreferencesValidations.ValidateAndAssignSpeciesAsync(editPreferences.SpeciesIds);
+		var breeds = await _userPreferencesValidations.ValidateAndAssignBreedAsync(editPreferences.BreedIds, species);
+		var colors = await _userPreferencesValidations.ValidateAndAssignColorsAsync(editPreferences.ColorIds);
 		User user = await _userPreferencesValidations.AssignUserAsync(userId);
 
 		Point? location = null;
-		if (editUserPreferences.FoundLocationLatitude is not null &&
-		    editUserPreferences.FoundLocationLongitude is not null &&
-		    editUserPreferences.RadiusDistanceInKm is not null)
+		if (editPreferences.FoundLocationLatitude is not null &&
+		    editPreferences.FoundLocationLongitude is not null &&
+		    editPreferences.RadiusDistanceInKm is not null)
 		{
 			location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
-				editUserPreferences.FoundLocationLatitude.Value,
-				editUserPreferences.FoundLocationLongitude!.Value);
+				editPreferences.FoundLocationLatitude.Value,
+				editPreferences.FoundLocationLongitude!.Value);
 		}
 
 		dbUserPreferences.User = user;
 		dbUserPreferences.Colors = colors;
-		dbUserPreferences.Breed = breed;
+		dbUserPreferences.Breeds = breeds;
 		dbUserPreferences.Species = species;
-		dbUserPreferences.Gender = editUserPreferences.Gender;
-		dbUserPreferences.Age = editUserPreferences.Age;
+		dbUserPreferences.Sizes = editPreferences.Sizes;
+		dbUserPreferences.Genders = editPreferences.Genders;
+		dbUserPreferences.Ages = editPreferences.Ages;
 		dbUserPreferences.Location = location;
-		dbUserPreferences.RadiusDistanceInKm = editUserPreferences.RadiusDistanceInKm;
+		dbUserPreferences.RadiusDistanceInKm = editPreferences.RadiusDistanceInKm;
 
 		await _adoptionUserPreferencesRepository.CommitAsync();
 

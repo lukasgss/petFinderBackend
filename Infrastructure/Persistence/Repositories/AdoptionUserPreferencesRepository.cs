@@ -18,7 +18,7 @@ public class AdoptionUserPreferencesRepository : GenericRepository<AdoptionUserP
 	public async Task<AdoptionUserPreferences?> GetUserPreferences(Guid userId)
 	{
 		return await _dbContext.AdoptionUserPreferences
-			.Include(preferences => preferences.Breed)
+			.Include(preferences => preferences.Breeds)
 			.Include(preferences => preferences.User)
 			.Include(preferences => preferences.Colors)
 			.Include(preferences => preferences.Species)

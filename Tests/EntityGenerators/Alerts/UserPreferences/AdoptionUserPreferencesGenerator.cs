@@ -15,16 +15,14 @@ public static class AdoptionUserPreferencesGenerator
 			User = Constants.AdoptionAlertUserPreferencesData.User,
 			UserId = Constants.AdoptionAlertUserPreferencesData.User.Id,
 			Colors = Constants.AdoptionAlertUserPreferencesData.Colors,
-			Age = Constants.AdoptionAlertUserPreferencesData.Age,
+			Ages = Constants.AdoptionAlertUserPreferencesData.Ages,
 			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
 				Constants.AdoptionAlertUserPreferencesData.Latitude!.Value,
 				Constants.AdoptionAlertUserPreferencesData.Longitude!.Value),
 			RadiusDistanceInKm = Constants.AdoptionAlertUserPreferencesData.RadiusDistanceInKm,
 			Species = Constants.AdoptionAlertUserPreferencesData.Species,
-			SpeciesId = Constants.AdoptionAlertUserPreferencesData.SpeciesId,
-			Breed = Constants.AdoptionAlertUserPreferencesData.Breed,
-			BreedId = Constants.AdoptionAlertUserPreferencesData.BreedId,
-			Gender = Constants.AdoptionAlertUserPreferencesData.Gender,
+			Breeds = Constants.AdoptionAlertUserPreferencesData.Breed,
+			Genders = Constants.AdoptionAlertUserPreferencesData.Gender,
 		};
 	}
 }

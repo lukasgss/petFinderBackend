@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Entities.Alerts.UserPreferences;
 
 namespace Domain.Entities;
 
@@ -16,4 +17,6 @@ public class Breed
 	public int SpeciesId { get; set; }
 
 	public virtual ICollection<Pet> Pets { get; set; } = null!;
+	public virtual ICollection<FoundAnimalUserPreferences>? FoundAnimalUserPreferences { get; set; }
+	public virtual ICollection<AdoptionUserPreferences>? AdoptionUserPreferences { get; set; }
 }

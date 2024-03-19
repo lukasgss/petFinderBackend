@@ -9,14 +9,15 @@ public static class UserPreferencesGenerator
 	{
 		return new CreateAlertsUserPreferences()
 		{
+			BreedIds = Constants.FoundAnimalUserPreferencesData.BreedIds,
+			SpeciesIds = Constants.FoundAnimalUserPreferencesData.SpeciesIds,
 			ColorIds = Constants.FoundAnimalUserPreferencesData.ColorIds,
-			SpeciesId = Constants.FoundAnimalUserPreferencesData.SpeciesId,
 			FoundLocationLatitude = Constants.FoundAnimalUserPreferencesData.FoundLocationLatitude,
 			FoundLocationLongitude = Constants.FoundAnimalUserPreferencesData.FoundLocationLongitude,
-			Age = Constants.FoundAnimalUserPreferencesData.Age,
+			Sizes = Constants.FoundAnimalUserPreferencesData.Sizes,
+			Ages = Constants.FoundAnimalUserPreferencesData.Ages,
 			RadiusDistanceInKm = Constants.FoundAnimalUserPreferencesData.RadiusDistanceInKm,
-			Gender = Constants.FoundAnimalUserPreferencesData.Gender,
-			BreedId = Constants.FoundAnimalUserPreferencesData.BreedId
+			Genders = Constants.FoundAnimalUserPreferencesData.Genders,
 		};
 	}
 }

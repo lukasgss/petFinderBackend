@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces.Entities.AnimalSpecies;
 using Application.Common.Interfaces.Entities.Breeds;
@@ -8,7 +9,6 @@ using Application.Common.Interfaces.General.UserPreferences;
 using Application.Services.General.UserPreferences;
 using Domain.Entities;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
 
 namespace Tests.UnitTests;
@@ -22,10 +22,12 @@ public class UserPreferencesValidationsTests
 	private readonly IUserPreferencesValidations _sut;
 
 	private static readonly User User = UserGenerator.GenerateUser();
-	private static readonly Breed Breed = BreedGenerator.GenerateBreed();
-	private static readonly Species Species = SpeciesGenerator.GenerateSpecies();
+	private static readonly List<Breed> Breeds = BreedGenerator.GenerateListOfBreeds();
+	private static readonly List<Species> SpeciesList = SpeciesGenerator.GenerateListOfSpecies();
 	private static readonly List<Color> Colors = ColorGenerator.GenerateListOfColors();
 	private static readonly List<int> ColorIds = new() { 1 };
+	private static readonly List<int>? BreedIds = Breeds.Select(breed => breed.Id).ToList();
+	private static readonly List<int> SpeciesIds = SpeciesList.Select(species => species.Id).ToList();
 
 	public UserPreferencesValidationsTests()
 	{
@@ -51,83 +53,69 @@ public class UserPreferencesValidationsTests
 	}
 
 	[Fact]
-	public async Task Validate_And_Assign_Breed_Returns_Null_If_Breed_Id_Is_Null()
+	public async Task Validate_And_Assign_Breed_Returns_Empty_If_Breed_Ids_Are_Null()
 	{
-		Breed? returnedBreed = await _sut.ValidateAndAssignBreedAsync(breedId: null, Species.Id);
+		List<Breed> emptyList = new(0);
 
-		Assert.Null(returnedBreed);
+		List<Breed> returnedBreed = await _sut.ValidateAndAssignBreedAsync(breedIds: null, SpeciesList);
+
+		Assert.Equivalent(emptyList, returnedBreed);
 	}
 
 	[Fact]
-	public async Task Validate_And_Assign_Breed_Throws_NotFoundException_If_Breed_Is_NonExistent()
+	public async Task Validate_And_Assign_Breed_Throws_NotFoundException_If_Any_Breed_Is_NonExistent()
 	{
-		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).ReturnsNull();
+		List<Breed> emptyBreedList = new(0);
 
-		async Task Result() => await _sut.ValidateAndAssignBreedAsync(Breed.Id, Species.Id);
+		_breedRepositoryMock.GetMultipleBreedsByIdAsync(BreedIds!).Returns(emptyBreedList);
+
+		async Task Result() => await _sut.ValidateAndAssignBreedAsync(BreedIds, SpeciesList);
 
 		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-		Assert.Equal("Raça especificada não existe.", exception.Message);
+		Assert.Equal("Alguma das raças especificadas não existe.", exception.Message);
 	}
 
 	[Fact]
-	public async Task Validate_And_Assign_Breed_Throws_BadRequestException_If_Breed_Does_Not_Belong_To_Species()
+	public async Task Validate_And_Assign_Breed_Returns_Breeds()
 	{
-		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
-		const int differentSpeciesId = 99;
+		_breedRepositoryMock.GetMultipleBreedsByIdAsync(BreedIds!).Returns(Breeds);
 
-		async Task Result() => await _sut.ValidateAndAssignBreedAsync(Breed.Id, differentSpeciesId);
+		var returnedBreeds = await _sut.ValidateAndAssignBreedAsync(BreedIds, SpeciesList);
 
-		var exception = await Assert.ThrowsAsync<BadRequestException>(Result);
-		Assert.Equal("Raça não pertence a espécie especificada.", exception.Message);
+		Assert.Equivalent(Breeds, returnedBreeds);
 	}
 
 	[Fact]
-	public async Task Validate_And_Assign_Breed_Returns_Breed_If_Species_Is_Null()
+	public async Task Validate_And_Assign_Species_Returns_Empty_List_If_Species_Id_Is_Null()
 	{
-		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
+		List<Species> emptyList = new(0);
 
-		Breed? returnedBreed = await _sut.ValidateAndAssignBreedAsync(Breed.Id, null);
+		var returnedSpecies = await _sut.ValidateAndAssignSpeciesAsync(null);
 
-		Assert.Equivalent(Breed, returnedBreed);
-	}
-
-	[Fact]
-	public async Task Validate_And_Assign_Breed_Returns_Breed_If_Breed_Is_From_Species()
-	{
-		_breedRepositoryMock.GetBreedByIdAsync(Breed.Id).Returns(Breed);
-
-		Breed? returnedBreed = await _sut.ValidateAndAssignBreedAsync(Breed.Id, Species.Id);
-
-		Assert.Equivalent(Breed, returnedBreed);
-	}
-
-	[Fact]
-	public async Task Validate_And_Assign_Species_Returns_Null_If_Species_Id_Is_Null()
-	{
-		Species? returnedSpecies = await _sut.ValidateAndAssignSpeciesAsync(null);
-
-		Assert.Null(returnedSpecies);
+		Assert.Equivalent(emptyList, returnedSpecies);
 	}
 
 	[Fact]
 	public async Task Validate_And_Assign_Species_Throws_NotFoundException_If_Species_Does_Not_Exist()
 	{
-		_speciesRepositoryMock.GetSpeciesByIdAsync(Species.Id).ReturnsNull();
+		List<Species> differentList = new List<Species>(0);
 
-		async Task Result() => await _sut.ValidateAndAssignSpeciesAsync(Species.Id);
+		_speciesRepositoryMock.GetMultipleSpeciesByIdAsync(SpeciesIds).Returns(differentList);
+
+		async Task Result() => await _sut.ValidateAndAssignSpeciesAsync(SpeciesIds);
 
 		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-		Assert.Equal("Espécie especificada não existe.", exception.Message);
+		Assert.Equal("Alguma das espécies especificadas não existe.", exception.Message);
 	}
 
 	[Fact]
 	public async Task Validate_And_Assign_Species_Returns_Species()
 	{
-		_speciesRepositoryMock.GetSpeciesByIdAsync(Species.Id).Returns(Species);
+		_speciesRepositoryMock.GetMultipleSpeciesByIdAsync(SpeciesIds).Returns(SpeciesList);
 
-		Species? returnedSpecies = await _sut.ValidateAndAssignSpeciesAsync(Species.Id);
+		var returnedSpecies = await _sut.ValidateAndAssignSpeciesAsync(SpeciesIds);
 
-		Assert.Equivalent(Species, returnedSpecies);
+		Assert.Equivalent(SpeciesList, returnedSpecies);
 	}
 
 	[Fact]

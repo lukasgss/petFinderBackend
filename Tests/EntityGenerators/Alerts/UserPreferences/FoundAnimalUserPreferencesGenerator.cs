@@ -14,16 +14,14 @@ public static class FoundAnimalUserPreferencesGenerator
 			User = Constants.FoundAnimalUserPreferencesData.User,
 			UserId = Constants.FoundAnimalUserPreferencesData.User.Id,
 			Colors = Constants.FoundAnimalUserPreferencesData.Colors,
-			Age = Constants.FoundAnimalUserPreferencesData.Age,
+			Ages = Constants.FoundAnimalUserPreferencesData.Ages,
 			Location = CoordinatesCalculator.CreatePointBasedOnCoordinates(
 				Constants.FoundAnimalUserPreferencesData.FoundLocationLatitude!.Value,
 				Constants.FoundAnimalUserPreferencesData.FoundLocationLongitude!.Value),
 			RadiusDistanceInKm = Constants.FoundAnimalUserPreferencesData.RadiusDistanceInKm,
 			Species = Constants.FoundAnimalUserPreferencesData.Species,
-			SpeciesId = Constants.FoundAnimalUserPreferencesData.SpeciesId,
-			Breed = Constants.FoundAnimalUserPreferencesData.Breed,
-			BreedId = Constants.FoundAnimalUserPreferencesData.BreedId,
-			Gender = Constants.FoundAnimalUserPreferencesData.Gender,
+			Breeds = Constants.FoundAnimalUserPreferencesData.Breeds,
+			Genders = Constants.FoundAnimalUserPreferencesData.Genders,
 		};
 	}
 }

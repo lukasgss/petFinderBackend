@@ -7,6 +7,7 @@ using Application.Common.Interfaces.General.UserPreferences;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
 using Domain.Entities.Alerts.UserPreferences;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 
 namespace Application.Services.Entities;
@@ -16,17 +17,20 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 	private readonly IAdoptionUserPreferencesRepository _adoptionUserPreferencesRepository;
 	private readonly IUserPreferencesValidations _userPreferencesValidations;
 	private readonly IValueProvider _valueProvider;
+	private readonly ILogger<AdoptionAlertUserPreferencesService> _logger;
 
 	public AdoptionAlertUserPreferencesService(
 		IAdoptionUserPreferencesRepository adoptionUserPreferencesRepository,
 		IUserPreferencesValidations userPreferencesValidations,
-		IValueProvider valueProvider)
+		IValueProvider valueProvider,
+		ILogger<AdoptionAlertUserPreferencesService> logger)
 	{
 		_adoptionUserPreferencesRepository = adoptionUserPreferencesRepository ??
 		                                     throw new ArgumentNullException(nameof(adoptionUserPreferencesRepository));
 		_userPreferencesValidations = userPreferencesValidations ??
 		                              throw new ArgumentNullException(nameof(userPreferencesValidations));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<UserPreferencesResponse> GetUserPreferences(Guid currentUserId)
@@ -35,6 +39,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			await _adoptionUserPreferencesRepository.GetUserPreferences(currentUserId);
 		if (userPreferences is null)
 		{
+			_logger.LogInformation("Ainda não foram definidas preferências pro usuário {UserId}", currentUserId);
 			throw new NotFoundException(
 				"Ainda não foram definidas preferências desse tipo de alerta para este usuário.");
 		}
@@ -48,6 +53,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 		AdoptionUserPreferences? dbPreferences = await _adoptionUserPreferencesRepository.GetUserPreferences(userId);
 		if (dbPreferences is not null)
 		{
+			_logger.LogInformation("Usuário {UserId} já possui preferências de adoção cadastradas", userId);
 			throw new BadRequestException("Usuário já possui preferências cadastradas para esse tipo de alerta.");
 		}
 
@@ -93,6 +99,7 @@ public class AdoptionAlertUserPreferencesService : IAdoptionAlertUserPreferences
 			await _adoptionUserPreferencesRepository.GetUserPreferences(userId);
 		if (dbUserPreferences is null)
 		{
+			_logger.LogInformation("Usuário {UserId} não possui preferências de adoção cadastradas", userId);
 			throw new BadRequestException("Usuário não possui preferências cadastradas para esse tipo de alerta.");
 		}
 

@@ -13,6 +13,7 @@ using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
 using Domain.Entities;
 using Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -56,6 +57,7 @@ public class PetServiceTests
 		_vaccineRepositoryMock = Substitute.For<IVaccineRepository>();
 		_imageSubmissionServiceMock = Substitute.For<IPetImageSubmissionService>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
+		var loggerMock = Substitute.For<ILogger<PetService>>();
 
 		_sut = new PetService(
 			_petRepositoryMock,
@@ -65,7 +67,8 @@ public class PetServiceTests
 			_userRepositoryMock,
 			_vaccineRepositoryMock,
 			_imageSubmissionServiceMock,
-			_valueProviderMock);
+			_valueProviderMock,
+			loggerMock);
 	}
 
 	[Fact]

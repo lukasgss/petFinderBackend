@@ -10,6 +10,7 @@ using Application.Common.Interfaces.General.Images;
 using Application.Services.General.Images;
 using Domain.Entities;
 using Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Tests.EntityGenerators;
 
@@ -35,8 +36,9 @@ public class PetImageSubmissionServiceTests
 		IImageProcessingService imageProcessingServiceMock = Substitute.For<IImageProcessingService>();
 		_fileUploadClientMock = Substitute.For<IFileUploadClient>();
 		_idConverterServiceMock = Substitute.For<IIdConverterService>();
+		var loggerMock = Substitute.For<ILogger<PetImageSubmissionService>>();
 		_sut = new PetImageSubmissionService(imageProcessingServiceMock, _fileUploadClientMock,
-			_idConverterServiceMock);
+			_idConverterServiceMock, loggerMock);
 	}
 
 	[Fact]

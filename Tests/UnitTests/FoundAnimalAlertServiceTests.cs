@@ -12,6 +12,7 @@ using Application.Services.Entities;
 using Application.Services.General.Messages;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -64,6 +65,7 @@ public class FoundAnimalAlertServiceTests
 		_imageSubmissionServiceMock = Substitute.For<IFoundAlertImageSubmissionService>();
 		_alertsMessagingServiceMock = Substitute.For<IAlertsMessagingService>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
+		var loggerMock = Substitute.For<ILogger<FoundAnimalAlertService>>();
 
 		_sut = new FoundAnimalAlertService(
 			_foundAnimalAlertRepositoryMock,
@@ -73,7 +75,8 @@ public class FoundAnimalAlertServiceTests
 			_colorRepositoryMock,
 			_imageSubmissionServiceMock,
 			_alertsMessagingServiceMock,
-			_valueProviderMock);
+			_valueProviderMock,
+			loggerMock);
 	}
 
 	[Fact]

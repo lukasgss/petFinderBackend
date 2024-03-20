@@ -14,6 +14,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace Application.Services.Entities;
@@ -29,6 +30,7 @@ public class UserService : IUserService
 	private readonly IUserImageSubmissionService _userImageSubmissionService;
 	private readonly IExternalAuthHandler _externalAuthHandler;
 	private readonly IValueProvider _valueProvider;
+	private readonly ILogger<UserService> _logger;
 
 	private const string GoogleProvider = "GOOGLE";
 	private const string FacebookProvider = "FACEBOOK";
@@ -42,7 +44,8 @@ public class UserService : IUserService
 		IIdConverterService idConverterService,
 		IUserImageSubmissionService userImageSubmissionService,
 		IExternalAuthHandler externalAuthHandler,
-		IValueProvider valueProvider)
+		IValueProvider valueProvider,
+		ILogger<UserService> logger)
 	{
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 		_tokenGenerator = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
@@ -54,6 +57,7 @@ public class UserService : IUserService
 			userImageSubmissionService ?? throw new ArgumentNullException(nameof(userImageSubmissionService));
 		_externalAuthHandler = externalAuthHandler ?? throw new ArgumentNullException(nameof(externalAuthHandler));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<UserDataResponse> GetUserByIdAsync(Guid userId)
@@ -62,6 +66,7 @@ public class UserService : IUserService
 
 		if (searchedUser is null)
 		{
+			_logger.LogInformation("Não foi possível obter usuário {UserId}", userId);
 			throw new NotFoundException("Não foi possível obter o usuário com o id especificado.");
 		}
 
@@ -111,17 +116,21 @@ public class UserService : IUserService
 	{
 		if (editUserRequest.Id != routeId)
 		{
+			_logger.LogInformation("Id {RouteId} não coincide com {UserId}", routeId, userId);
 			throw new BadRequestException("Id da rota não coincide com o id especificado.");
 		}
 
 		if (editUserRequest.Id != userId)
 		{
+			_logger.LogInformation("Usuário {UserId} não possui permissão para editar {OtherUserId}",
+				userId, editUserRequest.Id);
 			throw new ForbiddenException("Você não possui permissão para editar este usuário.");
 		}
 
 		User? user = await _userRepository.GetUserByIdAsync(editUserRequest.Id);
 		if (user is null)
 		{
+			_logger.LogInformation("Usuário {UserId} não existe", editUserRequest.Id);
 			throw new NotFoundException("Usuário com o id especificado não existe.");
 		}
 
@@ -171,12 +180,16 @@ public class UserService : IUserService
 
 	public async Task<UserResponse> ExternalLoginAsync(ExternalAuthRequest externalAuth)
 	{
-		return externalAuth.Provider.ToUpperInvariant() switch
+		switch (externalAuth.Provider.ToUpperInvariant())
 		{
-			GoogleProvider => await GoogleLoginAsync(externalAuth),
-			FacebookProvider => await FacebookLoginAsync(externalAuth),
-			_ => throw new BadRequestException("Unsupported external authentication provider.")
-		};
+			case GoogleProvider:
+				return await GoogleLoginAsync(externalAuth);
+			case FacebookProvider:
+				return await FacebookLoginAsync(externalAuth);
+			default:
+				_logger.LogInformation("Provedor {Provider} não suportado", externalAuth.Provider);
+				throw new BadRequestException("Provedor de autenticação externa não suportada.");
+		}
 	}
 
 	public async Task ConfirmEmailAsync(string hashedUserId, string token)
@@ -201,6 +214,7 @@ public class UserService : IUserService
 		User? user = await _userRepository.GetUserByIdAsync(userId);
 		if (user is null)
 		{
+			_logger.LogInformation("Usuário {UserId} não existe", userId);
 			throw new NotFoundException("Não foi possível encontrar um usuário com esse id.");
 		}
 

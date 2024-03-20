@@ -14,6 +14,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -69,6 +70,7 @@ public class UserServiceTests
 		_userImageSubmissionServiceMock = Substitute.For<IUserImageSubmissionService>();
 		_externalAuthHandlerMock = Substitute.For<IExternalAuthHandler>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
+		var loggerMock = Substitute.For<ILogger<UserService>>();
 
 		_sut = new UserService(
 			_userRepositoryMock,
@@ -79,7 +81,8 @@ public class UserServiceTests
 			_idConverterServiceMock,
 			_userImageSubmissionServiceMock,
 			_externalAuthHandlerMock,
-			_valueProviderMock);
+			_valueProviderMock,
+			loggerMock);
 	}
 
 	[Fact]

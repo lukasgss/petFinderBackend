@@ -6,6 +6,7 @@ using Application.Common.Interfaces.Entities.UserMessages.DTOs;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services.Entities;
 
@@ -17,16 +18,19 @@ public class UserMessageService : IUserMessageService
 	private readonly IUserMessageRepository _userMessageRepository;
 	private readonly IUserRepository _userRepository;
 	private readonly IValueProvider _valueProvider;
+	private readonly ILogger<UserMessageService> _logger;
 
 	public UserMessageService(
 		IUserMessageRepository userMessageRepository,
 		IUserRepository userRepository,
-		IValueProvider valueProvider)
+		IValueProvider valueProvider,
+		ILogger<UserMessageService> logger)
 	{
 		_userMessageRepository =
 			userMessageRepository ?? throw new ArgumentNullException(nameof(userMessageRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<UserMessageResponse> GetByIdAsync(long messageId, Guid userId)
@@ -34,6 +38,9 @@ public class UserMessageService : IUserMessageService
 		UserMessage? message = await _userMessageRepository.GetByIdAsync(messageId, userId);
 		if (message is null)
 		{
+			_logger.LogInformation(
+				"Mensagem {MessageId} não existe ou usuário {UserId} não possui permissão para acessá-la",
+				messageId, userId);
 			throw new NotFoundException(
 				"Mensagem com o id especificado não existe ou você não tem permissão para acessá-la.");
 		}
@@ -46,6 +53,9 @@ public class UserMessageService : IUserMessageService
 	{
 		if (currentUserId != senderId && currentUserId != receiverId)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para ler mensagens entre {ReceiverId} e {SenderId}",
+				currentUserId, receiverId, senderId);
 			throw new ForbiddenException("Você não possui permissão para ler mensagens de outros usuários.");
 		}
 
@@ -64,12 +74,14 @@ public class UserMessageService : IUserMessageService
 		User? receiver = await _userRepository.GetUserByIdAsync(messageRequest.ReceiverId);
 		if (receiver is null)
 		{
+			_logger.LogInformation("Destinatário {ReceiverId} não existe", messageRequest.ReceiverId);
 			throw new NotFoundException("Usuário destinatário não foi encontrado.");
 		}
 
 		User? sender = await _userRepository.GetUserByIdAsync(senderId);
 		if (sender is null)
 		{
+			_logger.LogInformation("Remetente {SenderId} não existe", senderId);
 			throw new NotFoundException("Usuário remetente não foi encontrado.");
 		}
 
@@ -94,12 +106,16 @@ public class UserMessageService : IUserMessageService
 	{
 		if (routeId != editUserMessageRequest.Id)
 		{
+			_logger.LogInformation("Id {RouteId} não coincide com {MessageId}", routeId, editUserMessageRequest.Id);
 			throw new BadRequestException("Id da rota não coincide com o id especificado.");
 		}
 
 		UserMessage? dbUserMessage = await _userMessageRepository.GetByIdAsync(messageId, userId);
 		if (dbUserMessage is null || dbUserMessage.Sender.Id != userId)
 		{
+			_logger.LogInformation(
+				"Mensagem {MessageId} não existe ou usuário {UserId} não possui permissão para editá-la",
+				messageId, userId);
 			throw new NotFoundException(
 				"Mensagem com o id especificado não existe ou você não tem permissão para editá-la.");
 		}
@@ -107,6 +123,8 @@ public class UserMessageService : IUserMessageService
 		if (_valueProvider.UtcNow().Subtract(dbUserMessage.TimeStampUtc).TotalMinutes >
 		    MaximumTimeToEditMessageInMinutes)
 		{
+			_logger.LogInformation("Não é possível editar mensagem {MessageId}, cadastrada em {MessageTimeStamp}",
+				messageId, dbUserMessage.TimeStampUtc);
 			throw new ForbiddenException("Não é possível editar a mensagem, o tempo limite foi expirado.");
 		}
 
@@ -122,6 +140,9 @@ public class UserMessageService : IUserMessageService
 		UserMessage? dbUserMessage = await _userMessageRepository.GetByIdAsync(messageId, userId);
 		if (dbUserMessage is null || dbUserMessage.Sender.Id != userId)
 		{
+			_logger.LogInformation(
+				"Mensagem {MessageId} não existe ou usuário {UserId} não tem permissão para excluí-la",
+				messageId, userId);
 			throw new NotFoundException(
 				"Mensagem com o id especificado não existe ou você não tem permissão para excluí-la.");
 		}
@@ -129,6 +150,8 @@ public class UserMessageService : IUserMessageService
 		if (_valueProvider.UtcNow().Subtract(dbUserMessage.TimeStampUtc).TotalMinutes >
 		    MaximumTimeToDeleteMessageInMinutes)
 		{
+			_logger.LogInformation("Não é possível excluir mensagem {MessageId}, cadastrada em {MessageTimeStamp}",
+				messageId, dbUserMessage.TimeStampUtc);
 			throw new ForbiddenException(
 				"Não é possível excluir a mensagem, o tempo limite foi excedido.");
 		}

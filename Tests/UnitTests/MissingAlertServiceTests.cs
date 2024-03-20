@@ -8,6 +8,7 @@ using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -49,12 +50,14 @@ public class MissingAlertServiceTests
 		_petRepositoryMock = Substitute.For<IPetRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
+		var loggerMock = Substitute.For<ILogger<MissingAlertService>>();
 
 		_sut = new MissingAlertService(
 			_missingAlertRepositoryMock,
 			_petRepositoryMock,
 			_userRepositoryMock,
-			_valueProviderMock);
+			_valueProviderMock,
+			loggerMock);
 	}
 
 	[Fact]

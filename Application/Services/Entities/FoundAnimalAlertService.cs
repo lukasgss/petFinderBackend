@@ -17,6 +17,7 @@ using Domain.Entities;
 using Domain.Entities.Alerts;
 using Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 
 namespace Application.Services.Entities;
@@ -31,6 +32,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 	private readonly IFoundAlertImageSubmissionService _imageSubmissionService;
 	private readonly IAlertsMessagingService _alertsMessagingService;
 	private readonly IValueProvider _valueProvider;
+	private readonly ILogger<FoundAnimalAlertService> _logger;
 
 	public FoundAnimalAlertService(
 		IFoundAnimalAlertRepository foundAnimalAlertRepository,
@@ -40,7 +42,8 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		IColorRepository colorRepository,
 		IFoundAlertImageSubmissionService imageSubmissionService,
 		IAlertsMessagingService alertsMessagingService,
-		IValueProvider valueProvider)
+		IValueProvider valueProvider,
+		ILogger<FoundAnimalAlertService> logger)
 	{
 		_foundAnimalAlertRepository = foundAnimalAlertRepository ??
 		                              throw new ArgumentNullException(nameof(foundAnimalAlertRepository));
@@ -53,6 +56,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		_alertsMessagingService =
 			alertsMessagingService ?? throw new ArgumentNullException(nameof(alertsMessagingService));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<FoundAnimalAlertResponse> GetByIdAsync(Guid alertId)
@@ -60,6 +64,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		FoundAnimalAlert? foundAnimalAlert = await _foundAnimalAlertRepository.GetByIdAsync(alertId);
 		if (foundAnimalAlert is null)
 		{
+			_logger.LogInformation("Alerta {FoundAlertId} não existe", alertId);
 			throw new NotFoundException("Alerta com o id especificado não existe.");
 		}
 
@@ -87,6 +92,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		Species? species = await _speciesRepository.GetSpeciesByIdAsync(createAlertRequest.SpeciesId);
 		if (species is null)
 		{
+			_logger.LogInformation("Espécie {SpeciesId} não existe", createAlertRequest.SpeciesId);
 			throw new NotFoundException("Espécie com o id especificado não existe.");
 		}
 
@@ -132,24 +138,30 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 	{
 		if (routeId != editAlertRequest.Id)
 		{
+			_logger.LogInformation("Id {RouteId} não coincide com {FoundAlertId}", routeId, editAlertRequest.Id);
 			throw new BadRequestException("Id da rota não coincide com o id especificado.");
 		}
 
 		FoundAnimalAlert? alertToBeEdited = await _foundAnimalAlertRepository.GetByIdAsync(editAlertRequest.Id);
 		if (alertToBeEdited is null)
 		{
+			_logger.LogInformation("Alerta {FoundAlertId} não existe", editAlertRequest.Id);
 			throw new NotFoundException("Alerta com o id especificado não existe.");
 		}
 
 		bool canUpdate = ValidatePermissionToChange(alertToBeEdited, userId);
 		if (!canUpdate)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para editar alerta de animal encontrado de {ActualOwnerId}",
+				userId, alertToBeEdited.User.Id);
 			throw new ForbiddenException("Não é possível editar alertas de outros usuários.");
 		}
 
 		Species? species = await _speciesRepository.GetSpeciesByIdAsync(editAlertRequest.SpeciesId);
 		if (species is null)
 		{
+			_logger.LogInformation("Espécie {SpeciesId} não existe", editAlertRequest.SpeciesId);
 			throw new NotFoundException("Espécie com o id especificado não existe.");
 		}
 
@@ -180,13 +192,21 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 	public async Task DeleteAsync(Guid alertId, Guid userId)
 	{
 		FoundAnimalAlert? alertToDelete = await _foundAnimalAlertRepository.GetByIdAsync(alertId);
+		if (alertToDelete is null)
+		{
+			_logger.LogInformation("Alerta {FoundAlertId} não existe", alertId);
+			throw new NotFoundException("Alerta com o id especificado não existe.");
+		}
+
 		bool canUpdate = ValidatePermissionToChange(alertToDelete, userId);
 		if (!canUpdate)
 		{
+			_logger.LogInformation("User {UserId} não possui permissão para excluir alerta {FoundAlertId}",
+				userId, alertId);
 			throw new ForbiddenException("Não é possível excluir alertas de outros usuários.");
 		}
 
-		_foundAnimalAlertRepository.Delete(alertToDelete!);
+		_foundAnimalAlertRepository.Delete(alertToDelete);
 		await _foundAnimalAlertRepository.CommitAsync();
 	}
 
@@ -195,11 +215,14 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		FoundAnimalAlert? alertToToggle = await _foundAnimalAlertRepository.GetByIdAsync(alertId);
 		if (alertToToggle is null)
 		{
+			_logger.LogInformation("Alerta {FoundAlertId} não existe", alertId);
 			throw new NotFoundException("Alerta com o id especificado não existe.");
 		}
 
 		if (alertToToggle.User.Id != userId)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para alterar status de {FoundAlertId}", userId, alertId);
 			throw new ForbiddenException("Não é possível alterar o status de alertas de outros usuários.");
 		}
 
@@ -210,13 +233,8 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		return alertToToggle.ToFoundAnimalAlertResponse();
 	}
 
-	private static bool ValidatePermissionToChange(FoundAnimalAlert? alertToBeEdited, Guid userId)
+	private static bool ValidatePermissionToChange(FoundAnimalAlert alertToBeEdited, Guid userId)
 	{
-		if (alertToBeEdited is null)
-		{
-			throw new NotFoundException("Alerta com o id especificado não existe.");
-		}
-
 		return userId == alertToBeEdited.User.Id;
 	}
 
@@ -230,6 +248,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		Breed? breed = await _breedRepository.GetBreedByIdAsync((int)breedId);
 		if (breed is null)
 		{
+			_logger.LogInformation("Raça {BreedId} não existe", breedId);
 			throw new NotFoundException("Raça com o id especificado não existe.");
 		}
 
@@ -241,6 +260,7 @@ public class FoundAnimalAlertService : IFoundAnimalAlertService
 		List<Color> colors = await _colorRepository.GetMultipleColorsByIdsAsync(colorIds);
 		if (colors.Count != colorIds.Count || colors.Count == 0)
 		{
+			_logger.LogInformation("Alguma das cores {@ColorIds} não existe", colors);
 			throw new NotFoundException("Alguma das cores especificadas não existe.");
 		}
 

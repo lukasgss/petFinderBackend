@@ -6,6 +6,7 @@ using Application.Common.Interfaces.Providers;
 using Application.Common.Pagination;
 using Application.Services.Entities;
 using Domain.Entities;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -42,8 +43,9 @@ public class UserMessageServiceTests
 		_userMessageRepositoryMock = Substitute.For<IUserMessageRepository>();
 		_userRepositoryMock = Substitute.For<IUserRepository>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
+		var loggerMock = Substitute.For<ILogger<UserMessageService>>();
 
-		_sut = new UserMessageService(_userMessageRepositoryMock, _userRepositoryMock, _valueProviderMock);
+		_sut = new UserMessageService(_userMessageRepositoryMock, _userRepositoryMock, _valueProviderMock, loggerMock);
 	}
 
 	[Fact]

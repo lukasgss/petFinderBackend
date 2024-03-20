@@ -8,6 +8,7 @@ using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
 using Domain.Entities;
 using Domain.Entities.Alerts.UserPreferences;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -40,10 +41,12 @@ public class FoundAnimalUserPreferencesServiceTests
 		_foundAnimalUserPreferencesRepositoryMock = Substitute.For<IFoundAnimalUserPreferencesRepository>();
 		_userPreferencesValidationsMock = Substitute.For<IUserPreferencesValidations>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
+		var loggerMock = Substitute.For<ILogger<FoundAnimalUserPreferencesService>>();
 		_sut = new FoundAnimalUserPreferencesService(
 			_foundAnimalUserPreferencesRepositoryMock,
 			_userPreferencesValidationsMock,
-			_valueProviderMock);
+			_valueProviderMock,
+			loggerMock);
 	}
 
 	[Fact]

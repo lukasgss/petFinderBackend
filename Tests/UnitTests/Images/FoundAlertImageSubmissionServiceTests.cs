@@ -9,6 +9,7 @@ using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.General.Images;
 using Application.Services.General.Images;
 using Domain.Entities.Alerts;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Tests.EntityGenerators;
 using Tests.EntityGenerators.Alerts;
@@ -36,8 +37,9 @@ public class FoundAlertImageSubmissionServiceTests
 		IImageProcessingService imageProcessingServiceMock = Substitute.For<IImageProcessingService>();
 		_fileUploadClientMock = Substitute.For<IFileUploadClient>();
 		IIdConverterService idConverterServiceMock = Substitute.For<IIdConverterService>();
+		var loggerMock = Substitute.For<ILogger<FoundAlertImageSubmissionService>>();
 		_sut = new FoundAlertImageSubmissionService(
-			imageProcessingServiceMock, _fileUploadClientMock, idConverterServiceMock);
+			imageProcessingServiceMock, _fileUploadClientMock, idConverterServiceMock, loggerMock);
 	}
 
 	[Fact]

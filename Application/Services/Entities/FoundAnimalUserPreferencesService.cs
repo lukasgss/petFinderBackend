@@ -7,6 +7,7 @@ using Application.Common.Interfaces.General.UserPreferences;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
 using Domain.Entities.Alerts.UserPreferences;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 
 namespace Application.Services.Entities;
@@ -16,12 +17,13 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 	private readonly IFoundAnimalUserPreferencesRepository _foundAnimalUserPreferencesRepository;
 	private readonly IUserPreferencesValidations _userPreferencesValidations;
 	private readonly IValueProvider _valueProvider;
-
+	private readonly ILogger<FoundAnimalUserPreferencesService> _logger;
 
 	public FoundAnimalUserPreferencesService(
 		IFoundAnimalUserPreferencesRepository foundAnimalUserPreferencesRepository,
 		IUserPreferencesValidations userPreferencesValidations,
-		IValueProvider valueProvider)
+		IValueProvider valueProvider,
+		ILogger<FoundAnimalUserPreferencesService> logger)
 	{
 		_foundAnimalUserPreferencesRepository = foundAnimalUserPreferencesRepository ??
 		                                        throw new ArgumentNullException(
@@ -29,6 +31,7 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 		_userPreferencesValidations = userPreferencesValidations ??
 		                              throw new ArgumentNullException(nameof(userPreferencesValidations));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<UserPreferencesResponse> GetUserPreferences(Guid currentUserId)
@@ -37,6 +40,7 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 			await _foundAnimalUserPreferencesRepository.GetUserPreferences(currentUserId);
 		if (userPreferences is null)
 		{
+			_logger.LogInformation("Ainda não foram definidas preferências pro usuário {UserId}", currentUserId);
 			throw new NotFoundException(
 				"Ainda não foram definidas preferências desse tipo de alerta para este usuário.");
 		}
@@ -51,6 +55,8 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 			await _foundAnimalUserPreferencesRepository.GetUserPreferences(userId);
 		if (dbUserPreferences is not null)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} já possui preferências de animais encontrados cadastradas", userId);
 			throw new BadRequestException("Usuário já possui preferências cadastradas para esse tipo de alerta.");
 		}
 
@@ -97,6 +103,7 @@ public class FoundAnimalUserPreferencesService : IFoundAnimalUserPreferencesServ
 			await _foundAnimalUserPreferencesRepository.GetUserPreferences(userId);
 		if (dbPreferences is null)
 		{
+			_logger.LogInformation("Ainda não foram definidas preferências pro usuário {UserId}", userId);
 			throw new BadRequestException("Usuário não possui preferências cadastradas para esse tipo de alerta.");
 		}
 

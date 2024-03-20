@@ -4,6 +4,7 @@ using Application.Common.Interfaces.ExternalServices;
 using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.General.Images;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services.General.Images;
 
@@ -12,16 +13,19 @@ public class FoundAlertImageSubmissionService : IFoundAlertImageSubmissionServic
 	private readonly IImageProcessingService _imageProcessingService;
 	private readonly IFileUploadClient _fileUploadClient;
 	private readonly IIdConverterService _idConverterService;
+	private readonly ILogger<FoundAlertImageSubmissionService> _logger;
 
 	public FoundAlertImageSubmissionService(
 		IImageProcessingService imageProcessingService,
 		IFileUploadClient fileUploadClient,
-		IIdConverterService idConverterService)
+		IIdConverterService idConverterService,
+		ILogger<FoundAlertImageSubmissionService> logger)
 	{
 		_imageProcessingService =
 			imageProcessingService ?? throw new ArgumentNullException(nameof(imageProcessingService));
 		_fileUploadClient = fileUploadClient ?? throw new ArgumentNullException(nameof(fileUploadClient));
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<IReadOnlyList<string>> UploadImagesAsync(Guid alertId, List<IFormFile> alertImages)
@@ -51,6 +55,7 @@ public class FoundAlertImageSubmissionService : IFoundAlertImageSubmissionServic
 			AwsS3ImageResponse response = await _fileUploadClient.DeleteFoundAlertImageAsync(hashedId);
 			if (!response.Success)
 			{
+				_logger.LogInformation("Não foi possível excluir a imagem {ImageId}", hashedId);
 				throw new InternalServerErrorException(
 					"Não foi possível excluir a imagem, tente novamente mais tarde.");
 			}
@@ -75,6 +80,7 @@ public class FoundAlertImageSubmissionService : IFoundAlertImageSubmissionServic
 
 			if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
 			{
+				_logger.LogInformation("Não foi possível inserir a imagem {ImageId}", hashedAlertId);
 				throw new InternalServerErrorException(
 					"Não foi possível fazer upload da imagem, tente novamente mais tarde.");
 			}

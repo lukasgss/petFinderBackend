@@ -8,6 +8,7 @@ using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.General.UserPreferences;
 using Application.Services.General.UserPreferences;
 using Domain.Entities;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Tests.EntityGenerators;
 
@@ -35,11 +36,13 @@ public class UserPreferencesValidationsTests
 		_breedRepositoryMock = Substitute.For<IBreedRepository>();
 		_speciesRepositoryMock = Substitute.For<ISpeciesRepository>();
 		_colorRepositoryMock = Substitute.For<IColorRepository>();
+		var loggerMock = Substitute.For<ILogger<UserPreferencesValidations>>();
 		_sut = new UserPreferencesValidations(
 			_userRepositoryMock,
 			_breedRepositoryMock,
 			_speciesRepositoryMock,
-			_colorRepositoryMock);
+			_colorRepositoryMock,
+			loggerMock);
 	}
 
 	[Fact]

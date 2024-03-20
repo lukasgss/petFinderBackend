@@ -8,6 +8,7 @@ using Application.Common.Interfaces.Providers;
 using Application.Services.Entities;
 using Domain.Entities;
 using Domain.Entities.Alerts.UserPreferences;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -40,8 +41,9 @@ public class AdoptionAlertUserPreferencesServiceTests
 		_adoptionUserPreferencesRepositoryMock = Substitute.For<IAdoptionUserPreferencesRepository>();
 		_userPreferencesValidationsMock = Substitute.For<IUserPreferencesValidations>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
+		var loggerMock = Substitute.For<ILogger<AdoptionAlertUserPreferencesService>>();
 		_sut = new AdoptionAlertUserPreferencesService(_adoptionUserPreferencesRepositoryMock,
-			_userPreferencesValidationsMock, _valueProviderMock);
+			_userPreferencesValidationsMock, _valueProviderMock, loggerMock);
 	}
 
 	[Fact]

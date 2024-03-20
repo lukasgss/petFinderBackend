@@ -10,6 +10,7 @@ using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 
 namespace Application.Services.Entities;
@@ -20,17 +21,20 @@ public class MissingAlertService : IMissingAlertService
 	private readonly IPetRepository _petRepository;
 	private readonly IUserRepository _userRepository;
 	private readonly IValueProvider _valueProvider;
+	private readonly ILogger<MissingAlertService> _logger;
 
 	public MissingAlertService(IMissingAlertRepository missingAlertRepository,
 		IPetRepository petRepository,
 		IUserRepository userRepository,
-		IValueProvider valueProvider)
+		IValueProvider valueProvider,
+		ILogger<MissingAlertService> logger)
 	{
 		_missingAlertRepository =
 			missingAlertRepository ?? throw new ArgumentNullException(nameof(missingAlertRepository));
 		_petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<MissingAlertResponse> GetByIdAsync(Guid missingAlertId)
@@ -88,6 +92,7 @@ public class MissingAlertService : IMissingAlertService
 	{
 		if (editAlertRequest.Id != routeId)
 		{
+			_logger.LogInformation("Id {RouteId} não coincide com {AdoptionRequestId}", routeId, editAlertRequest.Id);
 			throw new BadRequestException("Id da rota não coincide com o id especificado.");
 		}
 
@@ -118,6 +123,8 @@ public class MissingAlertService : IMissingAlertService
 
 		if (alertToDelete.User.Id != userId)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para excluir alerta {MissingAlertId}", userId, missingAlertId);
 			throw new ForbiddenException("Não é possível excluir alertas de outros usuários.");
 		}
 
@@ -131,6 +138,9 @@ public class MissingAlertService : IMissingAlertService
 
 		if (userId != missingAlert.User.Id)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para alterar status do alerta {MissingAlertId}",
+				userId, alertId);
 			throw new ForbiddenException("Não é possível marcar alertas de outros usuários como encontrado.");
 		}
 
@@ -148,18 +158,24 @@ public class MissingAlertService : IMissingAlertService
 		return missingAlert.ToMissingAlertResponse();
 	}
 
-	private static void CheckUserPermissionToCreate(Guid userId, Guid requestUserId)
+	private void CheckUserPermissionToCreate(Guid userId, Guid requestUserId)
 	{
 		if (userId != requestUserId)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para criar alerta para usuário {RequestUserId}",
+				userId, requestUserId);
 			throw new ForbiddenException("Não é possível criar alertas para outros usuários.");
 		}
 	}
 
-	private static void CheckUserPermissionToEdit(Guid? userId, Guid requestUserId)
+	private void CheckUserPermissionToEdit(Guid? userId, Guid requestUserId)
 	{
 		if (userId != requestUserId)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para editar alerta do usuário {ActualOwnerId}",
+				userId, requestUserId);
 			throw new ForbiddenException("Não é possível editar alertas de outros usuários.");
 		}
 	}
@@ -169,6 +185,7 @@ public class MissingAlertService : IMissingAlertService
 		MissingAlert? dbMissingAlert = await _missingAlertRepository.GetByIdAsync(missingAlertId);
 		if (dbMissingAlert is null)
 		{
+			_logger.LogInformation("Alerta {MissingAlertId} não existe", missingAlertId);
 			throw new NotFoundException("Alerta com o id especificado não existe.");
 		}
 
@@ -180,6 +197,7 @@ public class MissingAlertService : IMissingAlertService
 		User? user = await _userRepository.GetUserByIdAsync(userId);
 		if (user is null)
 		{
+			_logger.LogInformation("Usuário {UserId} não existe", userId);
 			throw new NotFoundException("Usuário com o id especificado não existe.");
 		}
 
@@ -191,6 +209,7 @@ public class MissingAlertService : IMissingAlertService
 		Pet? pet = await _petRepository.GetPetByIdAsync(petId);
 		if (pet is null)
 		{
+			_logger.LogInformation("Pet {PetId} não existe", petId);
 			throw new NotFoundException("Animal com o id especificado não existe.");
 		}
 

@@ -12,6 +12,7 @@ using Application.Common.Interfaces.Providers;
 using Domain.Entities;
 using Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Color = Domain.Entities.Color;
 
 namespace Application.Services.Entities;
@@ -26,6 +27,7 @@ public class PetService : IPetService
 	private readonly IVaccineRepository _vaccineRepository;
 	private readonly IPetImageSubmissionService _imageSubmissionService;
 	private readonly IValueProvider _valueProvider;
+	private readonly ILogger<PetService> _logger;
 
 	public PetService(
 		IPetRepository petRepository,
@@ -35,7 +37,8 @@ public class PetService : IPetService
 		IUserRepository userRepository,
 		IVaccineRepository vaccineRepository,
 		IPetImageSubmissionService imageSubmissionService,
-		IValueProvider valueProvider)
+		IValueProvider valueProvider,
+		ILogger<PetService> logger)
 	{
 		_petRepository = petRepository ?? throw new ArgumentNullException(nameof(petRepository));
 		_breedRepository = breedRepository ?? throw new ArgumentNullException(nameof(breedRepository));
@@ -46,6 +49,7 @@ public class PetService : IPetService
 		_imageSubmissionService =
 			imageSubmissionService ?? throw new ArgumentNullException(nameof(imageSubmissionService));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<PetResponse> GetPetBydIdAsync(Guid petId)
@@ -68,6 +72,7 @@ public class PetService : IPetService
 
 		if (createPetRequest.Images.Count >= 10)
 		{
+			_logger.LogInformation("Não é possível adicionar {ImageCount} imagens", createPetRequest.Images.Count);
 			throw new BadRequestException("Não é possível adicionar 10 ou mais imagens");
 		}
 
@@ -102,6 +107,7 @@ public class PetService : IPetService
 	{
 		if (editPetRequest.Id != routeId)
 		{
+			_logger.LogInformation("Id {RouteId} não coincide com {PetId}", routeId, editPetRequest.Id);
 			throw new BadRequestException("Id da rota não coincide com o id especificado.");
 		}
 
@@ -114,6 +120,8 @@ public class PetService : IPetService
 
 		if (dbPet.Owner.Id != userId)
 		{
+			_logger.LogInformation("Usuário {UserId} não possui permissão para editar dados do pet de {ActualOwnerId}",
+				userId, dbPet.Owner.Id);
 			throw new UnauthorizedException("Você não possui permissão para editar dados desse animal.");
 		}
 
@@ -145,6 +153,7 @@ public class PetService : IPetService
 		Pet petToDelete = await ValidateAndAssignPetAsync(petId);
 		if (petToDelete.Owner.Id != userId)
 		{
+			_logger.LogInformation("Usuário {UserId} não possui permissão para excluir pet {PetId}", userId, petId);
 			throw new UnauthorizedException("Você não possui permissão para excluir o animal.");
 		}
 
@@ -160,17 +169,22 @@ public class PetService : IPetService
 		Pet? vaccinatedPet = await _petRepository.GetPetByIdAsync(petId);
 		if (vaccinatedPet is null)
 		{
+			_logger.LogInformation("Pet {PetId} não existe", petId);
 			throw new NotFoundException("Animal com o id especificado não existe.");
 		}
 
 		if (vaccinatedPet.Owner.Id != userId)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para adicionar vacinas ao pet de {ActualOwnerId}",
+				userId, vaccinatedPet.Owner.Id);
 			throw new ForbiddenException("Você não possui permissão para adicionar vacinas ao animal.");
 		}
 
 		var appliedVaccines = await _vaccineRepository.GetMultipleByIdAsync(petVaccinationRequest.VaccinationIds);
 		if (appliedVaccines.Count != petVaccinationRequest.VaccinationIds.Count)
 		{
+			_logger.LogInformation("Alguma das vacinas {@VaccineIds} não existe", petVaccinationRequest.VaccinationIds);
 			throw new NotFoundException("Alguma vacina com o id especificado não existe.");
 		}
 
@@ -182,11 +196,13 @@ public class PetService : IPetService
 		return vaccinatedPet.ToPetResponse();
 	}
 
-	private static void ValidateIfVaccinesAreFromCorrectSpecies(List<Vaccine> vaccines, int speciesId)
+	private void ValidateIfVaccinesAreFromCorrectSpecies(List<Vaccine> vaccines, int speciesId)
 	{
 		bool isValid = vaccines.All(vaccine => vaccine.Species.Any(species => species.Id == speciesId));
 		if (!isValid)
 		{
+			_logger.LogInformation("Alguma das acinas {@VaccineIds} não podem ser adicionadas a espécie {SpeciesId}",
+				vaccines, speciesId);
 			throw new BadRequestException("Não é possível adicionar vacinas de outras espécies.");
 		}
 	}
@@ -196,6 +212,7 @@ public class PetService : IPetService
 		User? user = await _userRepository.GetUserByIdAsync(userId);
 		if (user is null)
 		{
+			_logger.LogInformation("Usuário {UserId} não existe", userId);
 			throw new NotFoundException("Usuário com o id especificado não existe.");
 		}
 
@@ -207,6 +224,7 @@ public class PetService : IPetService
 		Pet? pet = await _petRepository.GetPetByIdAsync(petId);
 		if (pet is null)
 		{
+			_logger.LogInformation("Pet {PetId} não existe", petId);
 			throw new NotFoundException("Animal com o id especificado não existe.");
 		}
 
@@ -218,6 +236,7 @@ public class PetService : IPetService
 		Breed? breed = await _breedRepository.GetBreedByIdAsync(breedId);
 		if (breed is null)
 		{
+			_logger.LogInformation("Raça {BreedId} não existe", breedId);
 			throw new NotFoundException("Raça especificada não existe.");
 		}
 
@@ -229,6 +248,7 @@ public class PetService : IPetService
 		Species? species = await _speciesRepository.GetSpeciesByIdAsync(speciesId);
 		if (species is null)
 		{
+			_logger.LogInformation("Espécie {SpeciesId} não existe", speciesId);
 			throw new NotFoundException("Espécie especificada não existe.");
 		}
 
@@ -240,6 +260,7 @@ public class PetService : IPetService
 		List<Color> colors = await _colorRepository.GetMultipleColorsByIdsAsync(colorIds);
 		if (colors.Count != colorIds.Count || colors.Count == 0)
 		{
+			_logger.LogInformation("Alguma das cores {@ColorIds} não existe", colorIds);
 			throw new NotFoundException("Alguma das cores especificadas não existe.");
 		}
 
@@ -256,6 +277,7 @@ public class PetService : IPetService
 		List<Vaccine> vaccines = await _vaccineRepository.GetMultipleByIdAsync(vaccineIds);
 		if (vaccines.Count != vaccineIds.Count || vaccines.Count == 0)
 		{
+			_logger.LogInformation("Alguma das vacinas {@VaccineIds} não existe", vaccineIds);
 			throw new NotFoundException("Alguma das vacinas especificadas não existe.");
 		}
 

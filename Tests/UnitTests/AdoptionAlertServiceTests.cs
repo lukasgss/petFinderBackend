@@ -8,6 +8,7 @@ using Application.Services.Entities;
 using Application.Services.General.Messages;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using Tests.EntityGenerators;
@@ -57,13 +58,15 @@ public class AdoptionAlertServiceTests
 		_userRepositoryMock = Substitute.For<IUserRepository>();
 		_alertsMessagingServiceMock = Substitute.For<IAlertsMessagingService>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
+		var loggerMock = Substitute.For<ILogger<AdoptionAlertService>>();
 
 		_sut = new AdoptionAlertService(
 			_adoptionAlertRepositoryMock,
 			_petRepositoryMock,
 			_userRepositoryMock,
 			_alertsMessagingServiceMock,
-			_valueProviderMock);
+			_valueProviderMock,
+			loggerMock);
 	}
 
 	[Fact]

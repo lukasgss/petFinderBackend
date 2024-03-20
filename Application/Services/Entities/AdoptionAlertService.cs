@@ -11,6 +11,7 @@ using Application.Common.Interfaces.Providers;
 using Application.Services.General.Messages;
 using Domain.Entities;
 using Domain.Entities.Alerts;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 
 namespace Application.Services.Entities;
@@ -22,13 +23,15 @@ public class AdoptionAlertService : IAdoptionAlertService
 	private readonly IUserRepository _userRepository;
 	private readonly IAlertsMessagingService _alertsMessagingService;
 	private readonly IValueProvider _valueProvider;
+	private readonly ILogger<AdoptionAlertService> _logger;
 
 	public AdoptionAlertService(
 		IAdoptionAlertRepository adoptionAlertRepository,
 		IPetRepository petRepository,
 		IUserRepository userRepository,
 		IAlertsMessagingService alertsMessagingService,
-		IValueProvider valueProvider)
+		IValueProvider valueProvider,
+		ILogger<AdoptionAlertService> logger)
 	{
 		_adoptionAlertRepository =
 			adoptionAlertRepository ?? throw new ArgumentNullException(nameof(adoptionAlertRepository));
@@ -37,6 +40,7 @@ public class AdoptionAlertService : IAdoptionAlertService
 		_alertsMessagingService =
 			alertsMessagingService ?? throw new ArgumentNullException(nameof(alertsMessagingService));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<AdoptionAlertResponse> GetByIdAsync(Guid alertId)
@@ -97,6 +101,7 @@ public class AdoptionAlertService : IAdoptionAlertService
 	{
 		if (routeId != editAlertRequest.Id)
 		{
+			_logger.LogInformation("Id {RouteId} não coincide com {AdoptionRequestId}", routeId, editAlertRequest.Id);
 			throw new BadRequestException("Id da rota não coincide com o id especificado.");
 		}
 
@@ -135,6 +140,9 @@ public class AdoptionAlertService : IAdoptionAlertService
 
 		if (userId != adoptionAlert.User.Id)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para alterar status de adoção em que o dono é {ActualAlertOwnerId}",
+				userId, adoptionAlert.User.Id);
 			throw new ForbiddenException("Não é possível alterar o status de alertas em que não é dono.");
 		}
 
@@ -152,18 +160,24 @@ public class AdoptionAlertService : IAdoptionAlertService
 		return adoptionAlert.ToAdoptionAlertResponse();
 	}
 
-	private static void ValidateIfUserIsOwnerOfAlert(Guid actualOwnerId, Guid userId)
+	private void ValidateIfUserIsOwnerOfAlert(Guid actualOwnerId, Guid userId)
 	{
 		if (actualOwnerId != userId)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para alterar adoção em que o dono é {ActualAlertOwnerId}",
+				userId, actualOwnerId);
 			throw new UnauthorizedException("Não é possível alterar alertas de adoção de outros usuários.");
 		}
 	}
 
-	private static void ValidateIfUserIsOwnerOfPet(Guid actualPetOwnerId, Guid userId)
+	private void ValidateIfUserIsOwnerOfPet(Guid actualPetOwnerId, Guid userId)
 	{
 		if (actualPetOwnerId != userId)
 		{
+			_logger.LogInformation(
+				"Usuário {UserId} não possui permissão para cadastrar ou editar adoção em que o dono é {ActualPetOwnerId}",
+				userId, actualPetOwnerId);
 			throw new UnauthorizedException(
 				"Não é possível cadastrar ou editar adoções para animais em que não é dono.");
 		}
@@ -174,6 +188,7 @@ public class AdoptionAlertService : IAdoptionAlertService
 		User? user = await _userRepository.GetUserByIdAsync(userId);
 		if (user is null)
 		{
+			_logger.LogInformation("Usuário {UserId} não existe", userId);
 			throw new NotFoundException("Usuário com o id especificado não existe.");
 		}
 
@@ -185,6 +200,7 @@ public class AdoptionAlertService : IAdoptionAlertService
 		Pet? pet = await _petRepository.GetPetByIdAsync(petId);
 		if (pet is null)
 		{
+			_logger.LogInformation("Pet {PetId} não existe", petId);
 			throw new NotFoundException("Animal com o id especificado não existe.");
 		}
 
@@ -196,6 +212,7 @@ public class AdoptionAlertService : IAdoptionAlertService
 		AdoptionAlert? adoptionAlert = await _adoptionAlertRepository.GetByIdAsync(alertId);
 		if (adoptionAlert is null)
 		{
+			_logger.LogInformation("Alerta de adoção {AlertId} não existe", alertId);
 			throw new NotFoundException("Alerta de adoção com o id especificado não existe.");
 		}
 

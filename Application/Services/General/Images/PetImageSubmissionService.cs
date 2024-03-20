@@ -5,6 +5,7 @@ using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.General.Images;
 using Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services.General.Images;
 
@@ -13,16 +14,19 @@ public class PetImageSubmissionService : IPetImageSubmissionService
 	private readonly IImageProcessingService _imageProcessingService;
 	private readonly IFileUploadClient _fileUploadClient;
 	private readonly IIdConverterService _idConverterService;
+	private readonly ILogger<PetImageSubmissionService> _logger;
 
 	public PetImageSubmissionService(
 		IImageProcessingService imageProcessingService,
 		IFileUploadClient fileUploadClient,
-		IIdConverterService idConverterService)
+		IIdConverterService idConverterService,
+		ILogger<PetImageSubmissionService> logger)
 	{
 		_imageProcessingService =
 			imageProcessingService ?? throw new ArgumentNullException(nameof(imageProcessingService));
 		_fileUploadClient = fileUploadClient ?? throw new ArgumentNullException(nameof(fileUploadClient));
 		_idConverterService = idConverterService ?? throw new ArgumentNullException(nameof(idConverterService));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task<List<string>> UploadPetImageAsync(Guid petId, List<IFormFile> petImages)
@@ -52,6 +56,7 @@ public class PetImageSubmissionService : IPetImageSubmissionService
 			AwsS3ImageResponse response = await _fileUploadClient.DeletePetImageAsync(hashedPetId);
 			if (!response.Success)
 			{
+				_logger.LogInformation("Não foi possível excluir a imagem {ImageId}", hashedPetId);
 				throw new InternalServerErrorException(
 					"Não foi possível excluir a imagem do animal, tente novamente mais tarde.");
 			}
@@ -76,6 +81,7 @@ public class PetImageSubmissionService : IPetImageSubmissionService
 
 			if (!uploadedImage.Success || uploadedImage.PublicUrl is null)
 			{
+				_logger.LogInformation("Não foi possível inserir a imagem {ImageId}", hashedPetId);
 				throw new InternalServerErrorException(
 					"Não foi possível fazer upload da imagem, tente novamente mais tarde.");
 			}
@@ -95,6 +101,7 @@ public class PetImageSubmissionService : IPetImageSubmissionService
 			AwsS3ImageResponse response = await _fileUploadClient.DeletePetImageAsync(hashedId);
 			if (!response.Success)
 			{
+				_logger.LogInformation("Não foi possível excluir a imagem {ImageId}", hashedId);
 				throw new InternalServerErrorException(
 					"Não foi possível excluir a imagem, tente novamente mais tarde.");
 			}

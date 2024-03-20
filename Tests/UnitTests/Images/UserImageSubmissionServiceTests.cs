@@ -7,6 +7,7 @@ using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.General.Images;
 using Application.Services.General.Images;
 using Domain.Entities;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tests.EntityGenerators;
@@ -28,21 +29,17 @@ public class UserImageSubmissionServiceTests
 	private static readonly AwsS3ImageResponse S3SuccessImageResponse =
 		AwsS3ImageGenerator.GenerateSuccessS3ImageResponse();
 
-	private static readonly IOptions<ImagesData> ImagesData = Options.Create(new ImagesData()
-	{
-		DefaultUserProfilePicture = User.Image
-	});
-
 	public UserImageSubmissionServiceTests()
 	{
 		IImageProcessingService imageProcessingServiceMock = Substitute.For<IImageProcessingService>();
 		_fileUploadClientMock = Substitute.For<IFileUploadClient>();
 		IIdConverterService idConverterServiceMock = Substitute.For<IIdConverterService>();
+		var loggerMock = Substitute.For<ILogger<UserImageSubmissionService>>();
 		_sut = new UserImageSubmissionService(
 			imageProcessingServiceMock,
 			_fileUploadClientMock,
 			idConverterServiceMock,
-			ImagesData);
+			loggerMock);
 	}
 
 	[Fact]

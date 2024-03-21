@@ -4,12 +4,12 @@ namespace Application.Common.Interfaces.Entities.UserMessages.DTOs;
 
 public class UserMessageResponse
 {
-    public long Id { get; set; }
-    public string Content { get; set; } = null!;
-    public DateTime TimeStampUtc { get; set; }
-    public bool HasBeenRead { get; set; }
-    public bool HasBeenEdited { get; set; }
-    public bool HasBeenDeleted { get; set; }
-    public UserDataResponse Sender { get; set; } = null!;
-    public UserDataResponse Receiver { get; set; } = null!;
+	public long Id { get; init; }
+	public string Content { get; init; } = null!;
+	public DateTime TimeStampUtc { get; init; }
+	public bool HasBeenRead { get; init; }
+	public bool HasBeenEdited { get; init; }
+	public bool HasBeenDeleted { get; init; }
+	public UserDataResponse Sender { get; init; } = null!;
+	public UserDataResponse Receiver { get; init; } = null!;
 }

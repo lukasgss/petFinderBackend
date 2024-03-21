@@ -5,14 +5,15 @@ namespace Application.Common.Interfaces.Entities.UserMessages;
 
 public interface IUserMessageService
 {
-    Task<UserMessageResponse> GetByIdAsync(long messageId, Guid userId);
+	Task<UserMessageResponse> GetByIdAsync(long messageId, Guid userId);
 
-    Task<PaginatedEntity<UserMessageResponse>> GetMessagesAsync(
-        Guid senderId, Guid receiverId, Guid currentUserId, int pageNumber, int pageSize);
+	Task<PaginatedEntity<UserMessageResponse>> GetMessagesAsync(
+		Guid senderId, Guid receiverId, Guid currentUserId, int pageNumber, int pageSize);
 
-    Task<UserMessageResponse> EditAsync(
-        long messageId, EditUserMessageRequest editUserMessageRequest, Guid userId, long routeId);
+	Task<UserMessageResponse> SendAsync(Guid? senderId, Guid? receiverId, string messageContent);
 
-    Task DeleteAsync(long messageId, Guid userId);
-    Task<UserMessageResponse> SendAsync(SendUserMessageRequest messageRequest, Guid senderId);
+	Task<UserMessageResponse> EditAsync(
+		long messageId, EditUserMessageRequest editRequest, Guid userId, long routeId);
+
+	Task DeleteAsync(long messageId, Guid userId);
 }

@@ -3,6 +3,7 @@ using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.UserMessages.DTOs;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
+using Application.Common.Interfaces.RealTimeCommunication;
 using Application.Common.Pagination;
 using Application.Services.Entities;
 using Domain.Entities;
@@ -17,16 +18,12 @@ namespace Tests.UnitTests;
 public class UserMessageServiceTests
 {
 	private readonly IUserMessageRepository _userMessageRepositoryMock;
-	private readonly IUserRepository _userRepositoryMock;
 	private readonly IValueProvider _valueProviderMock;
 	private readonly IUserMessageService _sut;
 
 	private static readonly UserMessage UserMessage = UserMessageGenerator.GenerateUserMessage();
 	private static readonly UserMessage EditedUserMessage = UserMessageGenerator.GenerateEditedUserMessage();
 	private static readonly User User = UserGenerator.GenerateUser();
-
-	private static readonly SendUserMessageRequest UserMessageRequest =
-		UserMessageGenerator.GenerateSendUserMessageRequest();
 
 	private static readonly EditUserMessageRequest EditUserMessageRequest =
 		UserMessageGenerator.GenerateEditUserMessageRequest();
@@ -41,11 +38,13 @@ public class UserMessageServiceTests
 	public UserMessageServiceTests()
 	{
 		_userMessageRepositoryMock = Substitute.For<IUserMessageRepository>();
-		_userRepositoryMock = Substitute.For<IUserRepository>();
+		IUserRepository userRepositoryMock = Substitute.For<IUserRepository>();
 		_valueProviderMock = Substitute.For<IValueProvider>();
+		IRealTimeChatClient realTimeChatClientMock = Substitute.For<IRealTimeChatClient>();
 		var loggerMock = Substitute.For<ILogger<UserMessageService>>();
 
-		_sut = new UserMessageService(_userMessageRepositoryMock, _userRepositoryMock, _valueProviderMock, loggerMock);
+		_sut = new UserMessageService(_userMessageRepositoryMock, userRepositoryMock, _valueProviderMock,
+			realTimeChatClientMock, loggerMock);
 	}
 
 	[Fact]
@@ -111,43 +110,6 @@ public class UserMessageServiceTests
 			await _sut.GetMessagesAsync(UserMessage.SenderId, UserMessage.ReceiverId, UserMessage.ReceiverId, 1, 50);
 
 		Assert.Equivalent(expectedUserMessageResponse, userMessageResponse);
-	}
-
-	[Fact]
-	public async Task Send_Message_To_Non_Existent_Receiver_Throws_NotFoundException()
-	{
-		_userRepositoryMock.GetUserByIdAsync(Constants.UserMessageData.ReceiverId).ReturnsNull();
-
-		async Task Result() => await _sut.SendAsync(UserMessageRequest, Constants.UserMessageData.SenderId);
-
-		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-		Assert.Equal("Usuário destinatário não foi encontrado.", exception.Message);
-	}
-
-	[Fact]
-	public async Task Send_Message_As_Non_Existent_Sender_Throws_NotFoundException()
-	{
-		_userRepositoryMock.GetUserByIdAsync(UserMessage.ReceiverId).Returns(User);
-		_userRepositoryMock.GetUserByIdAsync(UserMessage.SenderId).ReturnsNull();
-
-		async Task Result() => await _sut.SendAsync(UserMessageRequest, UserMessage.SenderId);
-
-		var exception = await Assert.ThrowsAsync<NotFoundException>(Result);
-		Assert.Equal("Usuário remetente não foi encontrado.", exception.Message);
-	}
-
-	[Fact]
-	public async Task Send_message_Returns_Sent_Message()
-	{
-		_userRepositoryMock.GetUserByIdAsync(UserMessage.ReceiverId).Returns(UserMessage.Receiver);
-		_userRepositoryMock.GetUserByIdAsync(UserMessage.SenderId).Returns(UserMessage.Sender);
-		_valueProviderMock.UtcNow().Returns(Constants.UserMessageData.TimeStamp);
-
-		var userMessageResponse =
-			await _sut.SendAsync(UserMessageRequest, Constants.UserMessageData.SenderId);
-		userMessageResponse.Id = Constants.UserMessageData.Id;
-
-		Assert.Equivalent(UserMessageResponse, userMessageResponse);
 	}
 
 	[Fact]

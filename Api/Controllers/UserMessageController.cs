@@ -42,28 +42,6 @@ public class UserMessageController : ControllerBase
 			senderId, receiverId, currentUserId, pageNumber, pageSize);
 	}
 
-	[HttpPost("send")]
-	public async Task<ActionResult<UserMessageResponse>> SendAsync(SendUserMessageRequest messageRequest)
-	{
-		SendUserMessageValidator requestValidator = new();
-		ValidationResult validationResult = requestValidator.Validate(messageRequest);
-		if (!validationResult.IsValid)
-		{
-			var errors = validationResult.Errors.Select(e =>
-				new ValidationError(e.PropertyName, e.ErrorMessage));
-			return BadRequest(errors);
-		}
-
-		Guid senderId = _userAuthorizationService.GetUserIdFromJwtToken(User);
-
-		UserMessageResponse message = await _userMessageService.SendAsync(messageRequest, senderId);
-
-		return new ObjectResult(message)
-		{
-			StatusCode = StatusCodes.Status201Created
-		};
-	}
-
 	[HttpPut("{messageId:long}")]
 	public async Task<ActionResult<UserMessageResponse>> EditAsync(
 		long messageId, EditUserMessageRequest userMessage)

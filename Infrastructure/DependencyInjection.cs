@@ -16,6 +16,7 @@ using Application.Common.Interfaces.Entities.Vaccines;
 using Application.Common.Interfaces.ExternalServices.AWS;
 using Application.Common.Interfaces.ExternalServices.MessagePublisher;
 using Application.Common.Interfaces.Messaging;
+using Application.Common.Interfaces.RealTimeCommunication;
 using Application.Services.General.MessageNotifications;
 using Infrastructure.DependencyInjections;
 using Infrastructure.ExternalServices.Auth;
@@ -25,6 +26,7 @@ using Infrastructure.ExternalServices.RabbitMQ;
 using Infrastructure.Messaging;
 using Infrastructure.Persistence.DataContext;
 using Infrastructure.Persistence.Repositories;
+using Infrastructure.RealTimeCommunication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,6 +57,7 @@ public static class DependencyInjection
 		services.AddScoped<IAdoptionUserPreferencesRepository, AdoptionUserPreferencesRepository>();
 		services.AddScoped<IExternalAuthHandler, ExternalAuthHandler>();
 		services.AddScoped<IAdoptionFavoritesRepository, AdoptionFavoritesRepository>();
+		services.AddScoped<IRealTimeChatClient, RealTimeChatClient>();
 
 		services.AddScoped<IFileUploadClient, FileUploadClient>();
 		services.Configure<AwsData>(configuration.GetSection("AWS"));

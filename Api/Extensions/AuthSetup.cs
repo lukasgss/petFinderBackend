@@ -1,12 +1,12 @@
 using System.Text;
 using Application.Common.Interfaces.Authentication;
-using Application.Common.Interfaces.Authorization;
 using Application.Common.Interfaces.Authorization.Facebook;
 using Application.Common.Interfaces.Authorization.Google;
 using Domain.Entities;
 using Infrastructure.Persistence.DataContext;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Extensions;
@@ -48,6 +48,23 @@ public static class AuthSetup
 					IssuerSigningKey = new SymmetricSecurityKey(
 						Encoding.UTF8.GetBytes(secret)
 					)
+				};
+
+				options.Events = new JwtBearerEvents
+				{
+					OnMessageReceived = context =>
+					{
+						StringValues accessToken = context.Request.Query["access_token"];
+
+						PathString path = context.HttpContext.Request.Path;
+						if (!string.IsNullOrEmpty(accessToken) &&
+						    (path.StartsWithSegments("/api/chat-hub")))
+						{
+							context.Token = accessToken;
+						}
+
+						return Task.CompletedTask;
+					}
 				};
 			});
 

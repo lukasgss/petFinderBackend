@@ -5,6 +5,7 @@ using Application.Common.Interfaces.Entities.UserMessages;
 using Application.Common.Interfaces.Entities.UserMessages.DTOs;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Providers;
+using Application.Common.Interfaces.RealTimeCommunication;
 using Domain.Entities;
 using Microsoft.Extensions.Logging;
 
@@ -18,18 +19,21 @@ public class UserMessageService : IUserMessageService
 	private readonly IUserMessageRepository _userMessageRepository;
 	private readonly IUserRepository _userRepository;
 	private readonly IValueProvider _valueProvider;
+	private readonly IRealTimeChatClient _realTimeChatClient;
 	private readonly ILogger<UserMessageService> _logger;
 
 	public UserMessageService(
 		IUserMessageRepository userMessageRepository,
 		IUserRepository userRepository,
 		IValueProvider valueProvider,
+		IRealTimeChatClient realTimeChatClient,
 		ILogger<UserMessageService> logger)
 	{
 		_userMessageRepository =
 			userMessageRepository ?? throw new ArgumentNullException(nameof(userMessageRepository));
 		_userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 		_valueProvider = valueProvider ?? throw new ArgumentNullException(nameof(valueProvider));
+		_realTimeChatClient = realTimeChatClient ?? throw new ArgumentNullException(nameof(realTimeChatClient));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
@@ -69,16 +73,18 @@ public class UserMessageService : IUserMessageService
 		return messages.ToUserMessageResponsePagedList();
 	}
 
-	public async Task<UserMessageResponse> SendAsync(SendUserMessageRequest messageRequest, Guid senderId)
+	public async Task<UserMessageResponse> SendAsync(Guid? senderId, Guid? receiverId, string messageContent)
 	{
-		User? receiver = await _userRepository.GetUserByIdAsync(messageRequest.ReceiverId);
+		ValidateUserIds(senderId, receiverId);
+
+		User? receiver = await _userRepository.GetUserByIdAsync(receiverId!.Value);
 		if (receiver is null)
 		{
-			_logger.LogInformation("Destinatário {ReceiverId} não existe", messageRequest.ReceiverId);
+			_logger.LogInformation("Destinatário {ReceiverId} não existe", receiverId);
 			throw new NotFoundException("Usuário destinatário não foi encontrado.");
 		}
 
-		User? sender = await _userRepository.GetUserByIdAsync(senderId);
+		User? sender = await _userRepository.GetUserByIdAsync(senderId!.Value);
 		if (sender is null)
 		{
 			_logger.LogInformation("Remetente {SenderId} não existe", senderId);
@@ -87,7 +93,7 @@ public class UserMessageService : IUserMessageService
 
 		UserMessage message = new()
 		{
-			Content = messageRequest.Content,
+			Content = messageContent,
 			TimeStampUtc = _valueProvider.UtcNow(),
 			HasBeenRead = false,
 			HasBeenEdited = false,
@@ -101,12 +107,12 @@ public class UserMessageService : IUserMessageService
 		return message.ToUserMessageResponse();
 	}
 
-	public async Task<UserMessageResponse> EditAsync(long messageId, EditUserMessageRequest editUserMessageRequest,
+	public async Task<UserMessageResponse> EditAsync(long messageId, EditUserMessageRequest editRequest,
 		Guid userId, long routeId)
 	{
-		if (routeId != editUserMessageRequest.Id)
+		if (routeId != editRequest.Id)
 		{
-			_logger.LogInformation("Id {RouteId} não coincide com {MessageId}", routeId, editUserMessageRequest.Id);
+			_logger.LogInformation("Id {RouteId} não coincide com {MessageId}", routeId, editRequest.Id);
 			throw new BadRequestException("Id da rota não coincide com o id especificado.");
 		}
 
@@ -128,7 +134,9 @@ public class UserMessageService : IUserMessageService
 			throw new ForbiddenException("Não é possível editar a mensagem, o tempo limite foi expirado.");
 		}
 
-		dbUserMessage.Content = editUserMessageRequest.Content;
+		await SendEditedMessageRealTime(userId, dbUserMessage.ReceiverId, messageId, editRequest.Content);
+
+		dbUserMessage.Content = editRequest.Content;
 		dbUserMessage.HasBeenEdited = true;
 		await _userMessageRepository.CommitAsync();
 
@@ -156,6 +164,8 @@ public class UserMessageService : IUserMessageService
 				"Não é possível excluir a mensagem, o tempo limite foi excedido.");
 		}
 
+		await DeleteMessageRealTime(userId, dbUserMessage.ReceiverId, messageId);
+
 		dbUserMessage.HasBeenDeleted = true;
 		await _userMessageRepository.CommitAsync();
 	}
@@ -163,5 +173,43 @@ public class UserMessageService : IUserMessageService
 	private async Task MarkAllMessagesAsReadAsync(Guid senderId, Guid receiverId)
 	{
 		await _userMessageRepository.ReadAllAsync(senderId, receiverId);
+	}
+
+	private void ValidateUserIds(Guid? senderId, Guid? receiverId)
+	{
+		if (senderId is null)
+		{
+			_logger.LogInformation("SenderId {SenderId} é nulo", senderId);
+			throw new BadRequestException("Id do remetente inválido.");
+		}
+
+		if (receiverId is null)
+		{
+			_logger.LogInformation("ReceiverId {ReceiverId} é nulo", receiverId);
+			throw new BadRequestException("Id do recebedor inválido.");
+		}
+	}
+
+	private async Task SendEditedMessageRealTime(Guid senderId, Guid receiverId, long messageId, string messageContent)
+	{
+		EditedMessage editMessage = new()
+		{
+			Id = messageId,
+			Content = messageContent,
+			SenderId = senderId,
+			ReceiverId = receiverId
+		};
+		await _realTimeChatClient.EditMessage(senderId: senderId, receiverId: receiverId, editMessage);
+	}
+
+	private async Task DeleteMessageRealTime(Guid senderId, Guid receiverId, long messageId)
+	{
+		DeletedMessage deletedMessage = new()
+		{
+			Id = messageId,
+			SenderId = senderId,
+			ReceiverId = receiverId
+		};
+		await _realTimeChatClient.DeleteMessage(senderId: senderId, receiverId: receiverId, deletedMessage);
 	}
 }

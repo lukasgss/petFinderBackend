@@ -77,7 +77,7 @@ public class UserService : IUserService
 	{
 		Guid userId = _valueProvider.NewGuid();
 
-		string userImageUrl = await _userImageSubmissionService.UploadUserImageAsync(userId, createUserRequest.Image);
+		string userImageUrl = await _userImageSubmissionService.UploadUserImageAsync(userId, null);
 
 		User userToCreate = new()
 		{
@@ -87,7 +87,7 @@ public class UserService : IUserService
 			PhoneNumber = createUserRequest.PhoneNumber,
 			Image = userImageUrl,
 			Email = createUserRequest.Email,
-			EmailConfirmed = false
+			EmailConfirmed = false,
 		};
 
 		User? userAlreadyExists = await _userRepository.GetUserByEmailAsync(createUserRequest.Email);

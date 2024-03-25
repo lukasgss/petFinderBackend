@@ -8,7 +8,6 @@ using Application.Common.Interfaces.General.Images;
 using Application.Services.General.Images;
 using Domain.Entities;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tests.EntityGenerators;
 using Tests.TestUtils.Constants;
@@ -21,7 +20,7 @@ public class UserImageSubmissionServiceTests
 	private readonly IUserImageSubmissionService _sut;
 
 	private static readonly User User = UserGenerator.GenerateUser();
-	private static readonly CreateUserRequest CreateUserRequest = UserGenerator.GenerateCreateUserRequest();
+	private static readonly EditUserRequest EditUserRequest = UserGenerator.GenerateEditUserRequest();
 
 	private static readonly AwsS3ImageResponse S3FailImageResponse =
 		AwsS3ImageGenerator.GenerateFailS3ImageResponse();
@@ -59,11 +58,11 @@ public class UserImageSubmissionServiceTests
 	public async Task User_Image_Upload_Returns_Uploaded_Image_Url()
 	{
 		_fileUploadClientMock
-			.UploadUserImageAsync(Arg.Any<MemoryStream>(), CreateUserRequest.Image,
+			.UploadUserImageAsync(Arg.Any<MemoryStream>(), EditUserRequest.Image,
 				Arg.Any<string>())
 			.Returns(S3SuccessImageResponse);
 
-		string uploadedUrl = await _sut.UploadUserImageAsync(User.Id, CreateUserRequest.Image);
+		string uploadedUrl = await _sut.UploadUserImageAsync(User.Id, EditUserRequest.Image);
 
 		Assert.Equal(S3SuccessImageResponse.PublicUrl, uploadedUrl);
 	}

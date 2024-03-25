@@ -50,7 +50,6 @@ public static class UserGenerator
 			Email = Constants.UserData.Email,
 			FullName = Constants.UserData.FullName,
 			PhoneNumber = Constants.UserData.PhoneNumber,
-			Image = Constants.UserData.ImageFile,
 			Password = Constants.UserData.Password,
 			ConfirmPassword = Constants.UserData.Password,
 		};

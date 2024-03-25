@@ -111,7 +111,7 @@ public class UserServiceTests
 	{
 		_valueProviderMock.NewGuid().Returns(User.Id);
 		_userRepositoryMock.GetUserByEmailAsync(CreateUserRequest.Email).Returns(User);
-		_userImageSubmissionServiceMock.UploadUserImageAsync(User.Id, CreateUserRequest.Image).Returns(User.Image);
+		_userImageSubmissionServiceMock.UploadUserImageAsync(User.Id, null).Returns(User.Image);
 
 		async Task Result() => await _sut.RegisterAsync(CreateUserRequest);
 
@@ -123,7 +123,7 @@ public class UserServiceTests
 	public async Task Register_Attempt_With_Any_Registration_Error_Throws_InternalServerErrorException()
 	{
 		_valueProviderMock.NewGuid().Returns(Constants.UserData.Id);
-		_userImageSubmissionServiceMock.UploadUserImageAsync(User.Id, CreateUserRequest.Image).Returns(User.Image);
+		_userImageSubmissionServiceMock.UploadUserImageAsync(User.Id, null).Returns(User.Image);
 		_userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
 		IdentityResult expectedIdentityResult = new FakeIdentityResult(succeeded: false);
 		_userRepositoryMock.RegisterUserAsync(Arg.Any<User>(), CreateUserRequest.Password)
@@ -243,7 +243,7 @@ public class UserServiceTests
 	{
 		// Arrange
 		_valueProviderMock.NewGuid().Returns(Constants.UserData.Id);
-		_userImageSubmissionServiceMock.UploadUserImageAsync(User.Id, CreateUserRequest.Image).Returns(User.Image);
+		_userImageSubmissionServiceMock.UploadUserImageAsync(User.Id, null).Returns(User.Image);
 		_userRepositoryMock.GetUserByEmailAsync(Constants.UserData.Email).ReturnsNull();
 
 		IdentityResult expectedIdentityResult = new FakeIdentityResult(succeeded: true);

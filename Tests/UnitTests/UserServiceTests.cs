@@ -46,6 +46,7 @@ public class UserServiceTests
 
 	private static readonly ExternalAuthPayload ExternalAuthPayload = new()
 	{
+		UserId = User.Id.ToString(),
 		Email = User.Email!,
 		Image = User.Image,
 		FullName = User.FullName
@@ -53,11 +54,6 @@ public class UserServiceTests
 
 	private static readonly ExternalAuthRequest
 		ExternalAuthRequest = new() { Provider = "Google", IdToken = "IdToken" };
-
-	private static readonly GooglePayload GooglePayload = new()
-	{
-		Email = User.Email!, Subject = "subject", Image = User.Image, FullName = User.FullName
-	};
 
 	public UserServiceTests()
 	{
@@ -149,10 +145,11 @@ public class UserServiceTests
 	[Fact]
 	public async Task Google_Login_With_Existing_Oauth_User_Returns_User_Data()
 	{
-		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).Returns(GooglePayload);
-		UserLoginInfo info = new(ExternalAuthRequest.Provider, GooglePayload.Subject, ExternalAuthRequest.Provider);
+		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).Returns(ExternalAuthPayload);
+		UserLoginInfo info = new(ExternalAuthRequest.Provider, ExternalAuthPayload.UserId,
+			ExternalAuthRequest.Provider);
 		_userRepositoryMock.FindByLoginAsync(info.LoginProvider, info.ProviderKey).Returns(User);
-		_userRepositoryMock.FindByEmailAsync(GooglePayload.Email).Returns(User);
+		_userRepositoryMock.FindByEmailAsync(ExternalAuthPayload.Email).Returns(User);
 		_tokenGeneratorMock.GenerateTokens(User.Id, User.FullName).Returns(Constants.UserData.Tokens);
 
 		UserResponse userResponse = await _sut.ExternalLoginAsync(ExternalAuthRequest);
@@ -163,10 +160,11 @@ public class UserServiceTests
 	[Fact]
 	public async Task Google_Login_With_Non_Existent_Oauth_User_Returns_User_Data()
 	{
-		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).Returns(GooglePayload);
-		UserLoginInfo info = new(ExternalAuthRequest.Provider, GooglePayload.Subject, ExternalAuthRequest.Provider);
+		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).Returns(ExternalAuthPayload);
+		UserLoginInfo info = new(ExternalAuthRequest.Provider, ExternalAuthPayload.UserId,
+			ExternalAuthRequest.Provider);
 		_userRepositoryMock.FindByLoginAsync(info.LoginProvider, info.ProviderKey).ReturnsNull();
-		_userRepositoryMock.FindByEmailAsync(GooglePayload.Email).ReturnsNull();
+		_userRepositoryMock.FindByEmailAsync(ExternalAuthPayload.Email).ReturnsNull();
 		_valueProviderMock.NewGuid().Returns(User.Id);
 		_tokenGeneratorMock.GenerateTokens(User.Id, User.FullName)
 			.Returns(Constants.UserData.Tokens);
@@ -180,10 +178,11 @@ public class UserServiceTests
 	[Fact]
 	public async Task Google_Login_With_Existing_User_Registered_Without_Oauth_Returns_User_Data()
 	{
-		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).Returns(GooglePayload);
-		UserLoginInfo info = new(ExternalAuthRequest.Provider, GooglePayload.Subject, ExternalAuthRequest.Provider);
+		_externalAuthHandlerMock.ValidateGoogleToken(ExternalAuthRequest).Returns(ExternalAuthPayload);
+		UserLoginInfo info = new(ExternalAuthRequest.Provider, ExternalAuthPayload.UserId,
+			ExternalAuthRequest.Provider);
 		_userRepositoryMock.FindByLoginAsync(info.LoginProvider, info.ProviderKey).ReturnsNull();
-		_userRepositoryMock.FindByEmailAsync(GooglePayload.Email).Returns(User);
+		_userRepositoryMock.FindByEmailAsync(ExternalAuthPayload.Email).Returns(User);
 		_tokenGeneratorMock.GenerateTokens(User.Id, User.FullName).Returns(Constants.UserData.Tokens);
 
 		UserResponse userResponse = await _sut.ExternalLoginAsync(ExternalAuthRequest);

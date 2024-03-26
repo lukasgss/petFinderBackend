@@ -2,8 +2,6 @@ using Application.Common.Exceptions;
 using Application.Common.Extensions.Mapping;
 using Application.Common.Interfaces.Authentication;
 using Application.Common.Interfaces.Authorization;
-using Application.Common.Interfaces.Authorization.Facebook;
-using Application.Common.Interfaces.Authorization.Google;
 using Application.Common.Interfaces.Converters;
 using Application.Common.Interfaces.Entities.Users;
 using Application.Common.Interfaces.Entities.Users.DTOs;
@@ -266,21 +264,15 @@ public class UserService : IUserService
 
 	private async Task<UserResponse> GoogleLoginAsync(ExternalAuthRequest externalAuth)
 	{
-		GooglePayload? payload = await _externalAuthHandler.ValidateGoogleToken(externalAuth);
+		ExternalAuthPayload? payload = await _externalAuthHandler.ValidateGoogleToken(externalAuth);
 		if (payload is null)
 		{
 			throw new BadRequestException("Não foi possível realizar o login com o Google.");
 		}
 
-		ExternalAuthPayload externalAuthPayload = new()
-		{
-			Email = payload.Email,
-			FullName = payload.FullName,
-			Image = payload.Image
-		};
-		UserLoginInfo info = new(GoogleProvider, payload.Subject, GoogleProvider);
+		UserLoginInfo info = new(GoogleProvider, payload.UserId, GoogleProvider);
 
-		User user = await RegisterUserFromExternalAuthProviderAsync(externalAuthPayload, info);
+		User user = await RegisterUserFromExternalAuthProviderAsync(payload, info);
 
 		TokensResponse tokens = _tokenGenerator.GenerateTokens(user.Id, user.FullName);
 
@@ -289,21 +281,15 @@ public class UserService : IUserService
 
 	private async Task<UserResponse> FacebookLoginAsync(ExternalAuthRequest externalAuth)
 	{
-		FacebookPayload? payload = await _externalAuthHandler.ValidateFacebookToken(externalAuth);
+		ExternalAuthPayload? payload = await _externalAuthHandler.ValidateFacebookToken(externalAuth);
 		if (payload is null)
 		{
 			throw new BadRequestException("Não foi possível realizar o login com o Facebook.");
 		}
 
-		ExternalAuthPayload externalAuthPayload = new()
-		{
-			Email = payload.Email,
-			FullName = payload.FullName,
-			Image = payload.Image
-		};
 		UserLoginInfo info = new(FacebookProvider, payload.UserId, FacebookProvider);
 
-		User user = await RegisterUserFromExternalAuthProviderAsync(externalAuthPayload, info);
+		User user = await RegisterUserFromExternalAuthProviderAsync(payload, info);
 
 		TokensResponse tokens = _tokenGenerator.GenerateTokens(user.Id, user.FullName);
 

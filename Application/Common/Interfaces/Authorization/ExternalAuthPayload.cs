@@ -2,7 +2,8 @@ namespace Application.Common.Interfaces.Authorization;
 
 public class ExternalAuthPayload
 {
-	public required string Email { get; set; }
-	public required string FullName { get; set; }
-	public required string Image { get; set; }
+	public required string UserId { get; init; }
+	public required string Email { get; init; }
+	public required string FullName { get; init; }
+	public required string Image { get; init; }
 }
